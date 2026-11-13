@@ -16,7 +16,18 @@
     "Codex prompt-input sees skill and rule; native custom-role dispatch not exercised",
     "OpenCode V2 debug agents lists both roles; no inference test",
     "Claude doctor exited successfully; skill/role execution not exercised",
-    "Linux CI not yet observed",
     "LSP client integration not tested"
-  ]
+  ],
+  "skillValidator": "passed using isolated uv PyYAML dependency",
+  "dependencyAudit": {
+    "vulnerabilities": 0,
+    "date": "2026-11-13"
+  },
+  "ci": {
+    "url": "https://github.com/lomeli-dev/agent-workflow/actions/runs/43522248704",
+    "sourceCommit": "327fb3715c92b5238884428d765824c609c26534",
+    "macos": "passed",
+    "ubuntu": "passed",
+    "includes": "Rulesync regeneration, 17 tests, package checks, deterministic generated output and packed-artifact smoke"
+  }
 }
