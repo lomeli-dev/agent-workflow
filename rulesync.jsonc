@@ -1,0 +1,6 @@
+{
+  "targets": ["claudecode", "codexcli", "opencode"],
+  "features": ["rules", "skills", "subagents", "commands"],
+  "global": false,
+  "delete": false
+}

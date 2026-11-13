@@ -1,0 +1,35 @@
+{
+  "scope": "Read-only native diagnostics; no model inference or private output archived",
+  "results": {
+    "codex": {
+      "exit": 0,
+      "awSkillMentioned": true,
+      "awWorkerMentioned": false,
+      "awReviewerMentioned": false,
+      "workflowRuleMentioned": true,
+      "hookReviewMentioned": false,
+      "outputArchived": false,
+      "bytes": 35807
+    },
+    "opencode": {
+      "exit": 0,
+      "awSkillMentioned": true,
+      "awWorkerMentioned": true,
+      "awReviewerMentioned": true,
+      "workflowRuleMentioned": false,
+      "hookReviewMentioned": false,
+      "outputArchived": false,
+      "bytes": 14765
+    },
+    "claude": {
+      "exit": 0,
+      "awSkillMentioned": false,
+      "awWorkerMentioned": false,
+      "awReviewerMentioned": false,
+      "workflowRuleMentioned": false,
+      "hookReviewMentioned": false,
+      "outputArchived": false,
+      "bytes": 713
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "date": "2026-11-13",
+  "host": "macOS local",
+  "isolatedTestsPassed": 17,
+  "packedArtifactSmoke": "passed",
+  "realGlobalInstall": true,
+  "repeatInstallChangedFiles": 0,
+  "fileVerification": "passed",
+  "realInstalledHookDisabledOutputEmpty": true,
+  "realInstalledSubagentHookEnabledOutput": true,
+  "hookProcessMedianMs": 23.15,
+  "hookMeasurementScope": "5 local subprocess invocations; no model call; not a coding-task speedup",
+  "privacy": "No prompts, credentials, global config backups or raw client diagnostics archived",
+  "limitations": [
+    "Native hook trust still client controlled",
+    "Codex prompt-input sees skill and rule; native custom-role dispatch not exercised",
+    "OpenCode V2 debug agents lists both roles; no inference test",
+    "Claude doctor exited successfully; skill/role execution not exercised",
+    "Linux CI not yet observed",
+    "LSP client integration not tested"
+  ]
+}
