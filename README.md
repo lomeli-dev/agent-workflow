@@ -54,6 +54,8 @@ agent-workflow setup --all --apply
 agent-workflow doctor --json
 ```
 
+**Playwright with Chromium is explicit-only:** `--all`, interactive `all` and the `web` profile exclude the browser-engine module. Install it separately with `agent-workflow setup --tools playwright --apply`. That command invokes `playwright install chromium`, which downloads the managed browser binaries. Playwright CLI/MCP remain separate choices; excluding the engine does not remove an existing installation or prevent a browser tool from requesting a runtime later.
+
 Without `--apply`, setup only previews. The interactive menu accepts numbers, names or `all`; empty input cancels. Profiles: `lsp`, `code`, `web`, `docs`, `delivery`. The 16-module catalog includes six language servers, ast-grep, Serena, CodeGraph, Playwright engine/CLI/MCP, Chrome DevTools MCP, Context7, GitHub CLI and Gitleaks. **No standalone linter, formatter or persistent-task service is included.** Language servers may themselves expose formatting capabilities; the package does not activate them or rewrite source files.
 
 Responding installations are reused and their actual versions reported. Missing tools use pinned packages in the managed user directory. Node/npm are required; Go, uv and a Rust toolchain are prerequisites for their corresponding modules. Missing prerequisites are reported without bootstrapping an entire development environment. No shell profile is edited and no dependency installs run at session startup.

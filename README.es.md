@@ -52,6 +52,14 @@ agent-workflow setup --all --apply
 agent-workflow doctor --json
 ```
 
+**Playwright con Chromium se instala por separado.** Ya no entra con `--all`, `todo` en el menú ni con el perfil `web`:
+
+```sh
+agent-workflow setup --tools playwright --apply
+```
+
+Ese comando ejecuta `playwright install chromium`: Playwright descarga los navegadores en la carpeta administrada. CLI y MCP siguen siendo opciones separadas; excluir el motor no borra lo ya instalado ni impide que una herramienta de navegador necesite un runtime al usarse.
+
 Sin `--apply` sólo muestra el plan. El menú acepta números, nombres o `all`/`todo`; una selección vacía cancela. Categorías: `lsp`, `code`, `web`, `docs`, `delivery`. Son 16 módulos: seis servidores de lenguaje, ast-grep, Serena, CodeGraph, Playwright motor/CLI/MCP, DevTools MCP, Context7, GitHub CLI y Gitleaks.
 
 **Quedan fuera los linters, formateadores independientes y servicios de tareas persistentes.** Algunos LSP ofrecen formato como capacidad propia, pero no lo activamos ni reformateamos archivos. Una tarea persistente sería un proceso que continúa aunque cierres la terminal, como con tmux: este instalador no configura eso.

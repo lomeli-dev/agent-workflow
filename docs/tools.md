@@ -6,9 +6,11 @@ The catalog is in `lib/catalog.mjs`. Setup accepts an explicit selection; startu
 | --- | --- | --- |
 | lsp | gopls, typescript, python, rust, bash, yaml | Definitions, references and language diagnostics |
 | code | ast-grep, serena, codegraph | Structural search, symbol operations and dependency/call analysis |
-| web | playwright, playwright-cli, playwright-mcp, devtools | Repeatable browser checks, exploration and browser diagnostics |
+| web | playwright-cli, playwright-mcp, devtools | Repeatable browser checks, exploration and browser diagnostics |
 | docs | context7 | Current public library documentation |
 | delivery | github, gitleaks | Repository workflows and explicit secret scanning |
+
+The `playwright` engine module is explicit-only, excluded from `--all`, interactive all and the web profile. `setup --tools playwright --apply` installs the engine and explicitly runs `playwright install chromium`. Existing browser files are retained. This only controls setup selection, not browser downloads requested later by other tools.
 
 Use Playwright tests for repeatable assertions, CLI for compact scripted browser work, MCP for interactive agent-driven exploration, and DevTools when console/network/performance investigation is needed. They are complementary options, not four mandatory passes. Native desktop apps require another control mechanism.
 

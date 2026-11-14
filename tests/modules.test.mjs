@@ -13,7 +13,7 @@ import {connect} from '../lib/connect.mjs';
 import {PACKAGE,json,uninstall} from '../lib/install.mjs';
 function fixture(t){const root=mkdtempSync(join(tmpdir(),'aw-module-test-'));t.after(()=>rmSync(root,{recursive:true,force:true}));return root;}
 test('selector handles all, numeric choices, names, duplicates and invalid input',()=>{
- assert.equal(parseSelection('todo').length,Object.keys(CATALOG).length);assert.deepEqual(parseSelection('1, serena,1'),['gopls','serena']);assert.deepEqual(parseSelection(''),[]);assert.throws(()=>parseSelection('999'),/Unknown/);assert.throws(()=>selectModules({all:true,tools:['serena']}),/Choose/);assert(!Object.keys(CATALOG).some(s=>/eslint|prettier|ruff|shellcheck|tmux/.test(s)));
+ assert.deepEqual(parseSelection('todo'),selectModules({all:true}));assert.deepEqual(parseSelection('1, serena,1'),['gopls','serena']);assert.deepEqual(parseSelection(''),[]);assert.throws(()=>parseSelection('999'),/Unknown/);assert.throws(()=>selectModules({all:true,tools:['serena']}),/Choose/);assert(!Object.keys(CATALOG).some(s=>/eslint|prettier|ruff|shellcheck|tmux/.test(s)));
 });
 test('native release selects platform-specific checksum-protected assets',()=>{
  assert.match(releaseAsset('github','darwin','arm64').asset,/macOS_arm64.zip$/);assert.match(releaseAsset('gitleaks','linux','x64').asset,/linux_x64.tar.gz$/);assert.throws(()=>releaseAsset('github','win32','x64'),/supports/);
@@ -41,4 +41,13 @@ test('uninstall refuses active project registrations',t=>{
  assert.throws(()=>uninstall({userRoot:home}),/Disconnect project/);
  connect({project:root,userRoot:home,remove:true});
  assert.equal(uninstall({userRoot:home}).reason,'not-installed');
+});
+
+test('Playwright browser engine is explicit only in all automatic selections',()=>{
+ assert(!selectModules({all:true}).includes('playwright'));
+ assert(!selectModules({profile:'web'}).includes('playwright'));
+ assert(!parseSelection('all').includes('playwright'));
+ assert.deepEqual(selectModules({tools:['playwright']}),['playwright']);
+ assert.deepEqual(parseSelection('playwright'),['playwright']);
+ assert(selectModules({profile:'web'}).includes('playwright-mcp'));
 });
