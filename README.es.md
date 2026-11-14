@@ -131,3 +131,5 @@ Se usa mediante CLI y skill; no añade herramientas MCP por defecto. `connect` s
 Guía completa: [instalación, actualización, uso y recuperación](docs/operaciones.es.md). [Auditoría y límites](docs/audit-2026-11-13.md).
 
 En carpetas sin Git, el opt-out busca también en los directorios antecesores hasta la raíz del sistema. Para `connect`, `disconnect` y `mcp-config` usa la raíz del repositorio; no se promociona una subcarpeta automáticamente. Si conectaste sólo algunos clientes, repite el mismo `--clients` al desconectar.
+
+[Prueba con agentes reales](docs/native-trial-2026-11-13.md): implementación, opt-out, roles, MCP y navegador, con sus resultados y límites.

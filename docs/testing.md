@@ -27,3 +27,7 @@ Vercel agent-browser 0.43.0 was installed without downloading a browser. `script
 ## 0.2.1 audit validation
 
 The five-reviewer audit added effect-based regressions for comments inside shared arrays, changed OpenCode config precedence, missing managed blocks, connection receipt drift, nested opt-out registration, invalid containers, inherited JavaScript property names, missing/malformed LSP servers and FIFO project configs. The current suite has 36 passing tests. CI now checks untracked generated files and the actual minimum Node 22.22.0. See [audit coverage and remaining limits](audit-2026-11-13.md).
+
+## Native-client behavioral acceptance
+
+See the [real-agent trial](native-trial-2026-11-13.md) and its [structured evidence](native-trial-2026-11-13.json). These optional, authenticated sessions are separate from CI and the deterministic package tests. The intentionally broken seed under examples/native-client-lab is copied to disposable projects for agent implementation; its initial failure is expected. Never run it against real user projects or treat a model report as the sole assertion.

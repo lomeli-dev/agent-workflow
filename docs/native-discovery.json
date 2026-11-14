@@ -1,5 +1,5 @@
 {
-  "scope": "Read-only native diagnostics; no model inference or private output archived",
+  "scope": "Historical initial read-only diagnostics; superseded for behavioral evidence by native-trial-2026-11-13.json; original results preserved",
   "results": {
     "codex": {
       "exit": 0,

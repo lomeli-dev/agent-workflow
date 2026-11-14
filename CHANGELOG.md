@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2
+
+- Real native-client behavioral trials: implementation, project opt-out, roles, MCP calls and browser interaction, with synthetic evidence only.
+- Stronger validation exit-status guidance and serialized shared-registry mutations.
+- Documented CodeGraph 0.21.0 `.mjs` coverage gap and remaining model-compliance limits.
+- Reproducible intentionally failing project seed; native trial reports distinguish observed behavior from guarantees.
+
 ## 0.2.1
 
 - Audit-driven preservation fixes for comments in hook/plugin arrays, removed rules, and changed OpenCode config paths.

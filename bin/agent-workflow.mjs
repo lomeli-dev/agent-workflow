@@ -14,7 +14,7 @@ import {spawnSync} from 'node:child_process';
 import {locations,PACKAGE} from '../lib/install.mjs';
 import {connect,connectionRoot} from '../lib/connect.mjs';
 
-const HELP=`Agent Workflow 0.2.1 — global by default, project opt-out
+const HELP=`Agent Workflow 0.2.2 — global by default, project opt-out
 
 agent-workflow install --global [--clients claude,codex,opencode] [--dry-run]
 agent-workflow sync --global [--clients claude,codex,opencode] [--dry-run]
@@ -42,7 +42,7 @@ Project opt-out disables workflow behavior, not global file discovery.
 `;
 try{
   const {values,positionals}=parseArgs({allowPositionals:true,options:{global:{type:'boolean'},clients:{type:'string'},'user-root':{type:'string'},project:{type:'string'},'dry-run':{type:'boolean'},json:{type:'boolean'},tool:{type:'string'},tools:{type:'string'},profile:{type:'string'},all:{type:'boolean'},list:{type:'boolean'},interactive:{type:'boolean'},apply:{type:'boolean'},help:{type:'boolean'},version:{type:'boolean'}}});
-  const cmd=positionals[0];if(values.version){console.log('0.2.1');process.exit(0);}if(values.help||!cmd){console.log(HELP);process.exit(0);}
+  const cmd=positionals[0];if(values.version){console.log('0.2.2');process.exit(0);}if(values.help||!cmd){console.log(HELP);process.exit(0);}
   if(positionals.length>1&&cmd!=='exec')throw Error('Unexpected positional arguments');
   const userRoot=values['user-root'],dryRun=values['dry-run']??false;let result;
   if(values.apply&&dryRun)throw Error('--apply and --dry-run cannot be combined');

@@ -1,6 +1,6 @@
 {
   "name": "@lomeli-dev/agent-workflow",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "type": "module",
   "description": "Portable agent workflows with Rulesync generation, reversible global installation and project opt-out",
@@ -20,7 +20,8 @@
     "README.md",
     "README.es.md",
     "rulesync.jsonc",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "examples/native-client-lab"
   ],
   "scripts": {
     "build": "node scripts/build.mjs",

@@ -7,3 +7,5 @@ One writer per shared file, one laboratory operator and one coordinator for shar
 Workers return results, changed files, commands and evidence, remaining risks, Decisions, Discoveries and candidate Lessons. They do not write shared memory or commit a shared checkout. A reviewer stays read-only; an author does not impersonate an independent review. Integration and acceptance remain with the coordinator.
 
 Prefer completion events. A heartbeat without evidence of worker activity is not progress. Inspect an expired signal before restarting; an uncertain write must not be replayed blindly.
+
+Tool registration/setup uses shared ownership receipts and locks. Serialize install/sync/setup/connect/disconnect/uninstall mutations before launching independent agents; separate project folders do not make the shared registry independent. Reconcile a lock refusal before retrying.

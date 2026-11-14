@@ -9,3 +9,5 @@ Use Context7 for public documentation when needed; do not send private source or
 Use `agent-workflow exec --tool NAME -- ...` for managed CLI tools. MCPs require explicit project connection and native client approval. Missing tools are not an instruction to install; report the gap or use an available equivalent. A version probe is not proof of integration.
 
 Never use Serena or CodeGraph memory features to create a second project-memory system. Only the authorized coordinator writes existing shared memoria-sesion state; workers return candidate decisions and lessons. No model, effort, permissions or compaction setting should be changed just to use these tools.
+
+Check index coverage before interpreting an empty CodeGraph lookup. In the tested CodeGraph 0.21.0 engine, .js and .py symbols were found but equivalent .mjs symbols were not indexed. Use a working language server or source inspection for unsupported files; do not rename production files just to feed the index, and do not claim that an empty graph proves absence.

@@ -1,0 +1,245 @@
+{
+  "date": "2026-11-13",
+  "baselineCommit": "fada98b",
+  "scope": "Native CLI trials on disposable synthetic projects; default configured models; no personal source or raw transcripts published",
+  "nativeClientRuns": 17,
+  "runs": [
+    {
+      "client": "claude",
+      "kind": "browser",
+      "seconds": 57.25,
+      "exit": 0,
+      "timedOut": false,
+      "reportExists": true
+    },
+    {
+      "client": "claude",
+      "kind": "disabled",
+      "exit": 0,
+      "seconds": 12.07,
+      "timedOut": false,
+      "allFixtureFilesUnchanged": true,
+      "changedFiles": []
+    },
+    {
+      "client": "claude",
+      "kind": "expected-failure",
+      "exit": 0,
+      "seconds": 10.83,
+      "timedOut": false
+    },
+    {
+      "client": "claude",
+      "exit": 0,
+      "seconds": 15.23,
+      "timedOut": false,
+      "sourceUnchanged": true
+    },
+    {
+      "client": "claude",
+      "kind": "review",
+      "exit": 0,
+      "seconds": 55.65,
+      "timedOut": false,
+      "allFixtureFilesUnchanged": true,
+      "changedFiles": [],
+      "mcpDisconnected": true
+    },
+    {
+      "client": "claude",
+      "seconds": 66.49,
+      "exit": 0,
+      "timedOut": false,
+      "testsPassed": true,
+      "changedFiles": [
+        "README.md",
+        "src/duration.mjs",
+        "src/summary.mjs"
+      ],
+      "protectedIntact": true,
+      "resultReport": true
+    },
+    {
+      "client": "codex",
+      "kind": "disabled",
+      "exit": 0,
+      "seconds": 16.97,
+      "timedOut": false,
+      "allFixtureFilesUnchanged": true,
+      "changedFiles": []
+    },
+    {
+      "client": "codex",
+      "exit": 0,
+      "seconds": 23.7,
+      "timedOut": false,
+      "sourceUnchanged": true
+    },
+    {
+      "client": "codex",
+      "kind": "review",
+      "exit": 0,
+      "seconds": 62.95,
+      "timedOut": false,
+      "allFixtureFilesUnchanged": true,
+      "changedFiles": [],
+      "mcpDisconnected": true
+    },
+    {
+      "client": "codex",
+      "kind": "review",
+      "exit": 0,
+      "seconds": 124.8,
+      "timedOut": false,
+      "allFixtureFilesUnchanged": true,
+      "changedFiles": [],
+      "mcpDisconnected": true
+    },
+    {
+      "client": "codex",
+      "kind": "custom-worker",
+      "exit": 0,
+      "seconds": 129.63,
+      "timedOut": false,
+      "testsPassed": true,
+      "protectedIntact": true,
+      "reportExists": true
+    },
+    {
+      "client": "codex",
+      "seconds": 88.13,
+      "exit": 0,
+      "timedOut": false,
+      "testsPassed": true,
+      "changedFiles": [
+        "README.md",
+        "src/duration.mjs",
+        "src/summary.mjs"
+      ],
+      "protectedIntact": true,
+      "resultReport": true
+    },
+    {
+      "client": "opencode",
+      "kind": "disabled",
+      "exit": 0,
+      "seconds": 11.37,
+      "timedOut": false,
+      "allFixtureFilesUnchanged": true,
+      "changedFiles": []
+    },
+    {
+      "client": "opencode",
+      "kind": "expected-failure",
+      "exit": 0,
+      "seconds": 10.02,
+      "timedOut": false
+    },
+    {
+      "client": "opencode",
+      "exit": 0,
+      "seconds": 8.07,
+      "timedOut": false,
+      "sourceUnchanged": true
+    },
+    {
+      "client": "opencode",
+      "kind": "review",
+      "exit": 0,
+      "seconds": 52.04,
+      "timedOut": false,
+      "allFixtureFilesUnchanged": true,
+      "changedFiles": [],
+      "mcpDisconnected": true
+    },
+    {
+      "client": "opencode",
+      "seconds": 36.36,
+      "exit": 0,
+      "timedOut": false,
+      "testsPassed": true,
+      "changedFiles": [
+        "README.md",
+        "src/duration.mjs",
+        "src/summary.mjs"
+      ],
+      "protectedIntact": true,
+      "resultReport": true
+    }
+  ],
+  "observations": {
+    "enabledImplementationsPassed": 3,
+    "optOutPassed": 3,
+    "protectedFixtureFilesIntact": true,
+    "nativeMcpJsLookupPassed": [
+      "codex",
+      "claude",
+      "opencode"
+    ],
+    "codegraphCoverage": {
+      "package": "0.21.0",
+      "jsSymbolFound": true,
+      "pySymbolFound": true,
+      "mjsSymbolFound": false
+    },
+    "codexCustomReviewer": {
+      "spawnRecorded": true,
+      "agentType": "aw-reviewer",
+      "workerFinalObserved": true,
+      "ephemeralFirstAttemptFailed": true,
+      "persistentRetryPassed": true
+    },
+    "claudeBrowser": {
+      "nativeAgentUsedDefaultBrowser": true,
+      "buttonEffectObserved": true,
+      "ownSessionClosed": true,
+      "downloadedBrowser": false
+    },
+    "validationFailure": {
+      "expectedExit": 7,
+      "claude": {
+        "failureReported": true,
+        "directCommand": true
+      },
+      "opencode": {
+        "failureReported": true,
+        "originalShellExitPropagated": false,
+        "statusIncludedInOutput": true
+      }
+    },
+    "configMutations": "Registered/disconnected only synthetic-project MCPs; global workflow guidance strengthened and regenerated; no global model/auth/permission settings changed",
+    "codexCustomWorker": {
+      "spawnedRoles": [
+        "aw-worker"
+      ],
+      "workerFinalObserved": true,
+      "testsPassed": true,
+      "protectedFilesIntact": true,
+      "parentChangedFiles": [
+        "README.md",
+        "README.md",
+        "RESULT.md"
+      ]
+    },
+    "directToolSmoke": {
+      "gitleaks": {
+        "syntheticDetectionExit": 1,
+        "cleanExit": 0,
+        "passed": true
+      },
+      "astGrep": {
+        "exit": 0,
+        "matchObserved": true,
+        "passed": true
+      }
+    }
+  },
+  "limitations": [
+    "A single scenario per case is not a guarantee of future model compliance",
+    "OpenCode still masks shell exit with echo although its final failure report was correct",
+    "MCP hook trust and permission decisions remain native to each client",
+    "Custom Codex subagent could not load parent context from the first ephemeral session",
+    "Unrelated global Codex MCP startup warnings/timeouts were observed and not modified",
+    "No compaction or long-running reconnect/recovery behavior was exercised"
+  ]
+}

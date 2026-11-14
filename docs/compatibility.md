@@ -16,7 +16,7 @@ No per-tool interception is installed. No model/effort, permission, authenticati
 
 File generation, config parsing, hook invocation and native model-driven behavior are separate evidence levels. `verify` checks owned bytes/registrations only. No assertion that all IDEs execute these instructions identically or that a live model became faster. Diagnostics and tests must not read private prompts or credentials.
 
-Observed locally: Codex's prompt-input diagnostic included the global rule and workflow skill; it did not expose the custom-role catalog in that output, so native role dispatch is not claimed. OpenCode V2's standalone agent diagnostic listed both roles. Claude's read-only doctor exited successfully, but did not establish skill/role execution. Direct installed-hook subprocess tests exercised enable/disable; they do not grant native client hook trust.
+Initial read-only diagnostics (historical): Codex's prompt-input diagnostic included the global rule and workflow skill; it did not expose the custom-role catalog in that output, so native role dispatch is not claimed. OpenCode V2's standalone agent diagnostic listed both roles. Claude's read-only doctor exited successfully, but did not establish skill/role execution. Direct installed-hook subprocess tests exercised enable/disable; they do not grant native client hook trust.
 
 Primary sources checked 13 November 2026:
 
@@ -27,3 +27,5 @@ Primary sources checked 13 November 2026:
 - [OpenCode instructions](https://opencode.ai/docs/instructions/), [agents](https://opencode.ai/docs/agents/), [server plugins](https://opencode.ai/docs/build/plugins/server): global files, inherited models and V2 startup plugin context.
 
 The package is installed through its CLI rather than pretending one native plugin manifest works in every client. Its OpenCode V2 component is a native plugin; Claude/Codex use native files and hooks. Future plugin-marketplace packaging is a separate delivery, not an already published integration.
+
+Later [native-client trials](native-trial-2026-11-13.md) exercised real inference and tool calls in all three clients. They establish specific behavior, not universal rule compliance: OpenCode reported a deliberately failed validation correctly while still masking the shell exit with echo.
