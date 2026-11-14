@@ -6,15 +6,20 @@ jobs:
   check:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            node: '22.22.0'
+          - os: macos-latest
+            node: '22'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm run check
       - run: git diff --exit-code -- generated
+      - run: test -z "$(git status --porcelain --untracked-files=all -- generated)"
       - run: node scripts/package-smoke.mjs

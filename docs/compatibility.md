@@ -1,6 +1,6 @@
 # Compatibility, sources and evidence limits
 
-Initial scope: macOS/Linux, Node 22+, Claude Code, Codex CLI and OpenCode V2. No claim of Windows or all IDE support. Rulesync 43.8.0 is pinned; version updates require regeneration and adapter tests.
+Initial scope: macOS/Linux, Node 22.22.0+, Claude Code, Codex CLI and OpenCode V2. No claim of Windows or all IDE support. Rulesync 43.8.0 is pinned; version updates require regeneration and adapter tests.
 
 | Capability | Claude Code | Codex CLI | OpenCode V2 |
 | --- | --- | --- | --- |

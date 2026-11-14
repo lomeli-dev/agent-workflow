@@ -8,7 +8,7 @@ No es un orquestador que trabaje solo. Incluye reglas breves, la skill `aw-workf
 
 ## Instalación global
 
-Requiere Node.js 22 o superior y npm, además de acceso Git al repositorio privado. No pegar tokens en comandos o archivos.
+Requiere Node.js 22.22.0 o superior y npm, además de acceso Git al repositorio privado. No pegar tokens en comandos o archivos.
 
 ```sh
 git clone https://github.com/lomeli-dev/agent-workflow.git
@@ -83,7 +83,22 @@ Instalar no demuestra que un cliente haya cargado el MCP ni configura automátic
 
 ## Actualizar y retirar
 
-Después de revisar/obtener una nueva versión, repetir `npm ci --ignore-scripts`, `npm run check`, la instalación npm y `agent-workflow sync --global`. Para retirar:
+Primero actualiza el código, conservando tus cambios locales. Revisa antes de incorporar:
+
+```sh
+git fetch origin --tags
+git log --oneline HEAD..origin/main
+git diff HEAD..origin/main
+git merge --ff-only origin/main
+npm ci --ignore-scripts
+npm run check
+npm install --global . --ignore-scripts
+agent-workflow sync --global --dry-run
+agent-workflow sync --global
+agent-workflow verify
+```
+
+Si las ramas divergen, se detiene; no uses reset para descartar trabajo. Para retirar:
 
 ```sh
 agent-workflow uninstall --global --dry-run
@@ -103,7 +118,7 @@ Los roles heredan modelo/esfuerzo del cliente. No se alteran límites de compact
 
 `web` instala sólo `agent-browser 0.43.0`; `--all` también lo incluye. Playwright, Playwright CLI/MCP y DevTools quedan como alternativas de selección explícita. Lo que ya está instalado se conserva.
 
-La guía sincronizada dirige a los agentes a usar Chrome/Chromium existente, en una sesión separada sin ventana, y a cerrarla al terminar. Primero leen la guía de la versión instalada:
+**Es una instrucción para el agente; el comando genérico `exec` sólo reenvía argumentos y no impone aislamiento.** La guía sincronizada dirige a los agentes a usar Chrome/Chromium existente, en una sesión separada sin ventana, y a cerrarla al terminar. Primero leen la guía de la versión instalada:
 
 ```sh
 agent-workflow exec --tool agent-browser -- skills get core
@@ -112,3 +127,7 @@ agent-workflow exec --tool agent-browser -- skills get core
 Si falta un navegador, se informa; no se descarga automáticamente. La descarga opcional se hace con `agent-workflow exec --tool agent-browser -- install`. No se usa tu perfil personal ni se conecta a tu navegador abierto por defecto.
 
 Se usa mediante CLI y skill; no añade herramientas MCP por defecto. `connect` sin selección conecta Serena, CodeGraph y Context7; las alternativas MCP de navegador se piden por nombre.
+
+Guía completa: [instalación, actualización, uso y recuperación](docs/operaciones.es.md). [Auditoría y límites](docs/audit-2026-11-13.md).
+
+En carpetas sin Git, el opt-out busca también en los directorios antecesores hasta la raíz del sistema. Para `connect`, `disconnect` y `mcp-config` usa la raíz del repositorio; no se promociona una subcarpeta automáticamente. Si conectaste sólo algunos clientes, repite el mismo `--clients` al desconectar.

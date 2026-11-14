@@ -2,13 +2,13 @@
 
 Global workflow guidance for Claude Code, Codex CLI and OpenCode V2, with project opt-out, Rulesync generation and a reversible installer.
 
-[Español](README.es.md) · [Architecture](docs/architecture.md) · [Compatibility and limits](docs/compatibility.md) · [Testing](docs/testing.md)
+[Español](README.es.md) · [Architecture](docs/architecture.md) · [Compatibility and limits](docs/compatibility.md) · [Testing](docs/testing.md) · [Complete operations guide](docs/operations.md) · [Audit](docs/audit-2026-11-13.md)
 
 This is a workflow package, not an autonomous orchestrator or a promise of faster completion. It provides a short applicability rule, the `aw-workflow` skill, optional `aw-worker`/`aw-reviewer` roles, a start command where supported, startup/compaction reminders and dependency diagnostics. Existing project instructions and user-selected models remain in charge.
 
 ## Install from the private repository
 
-Requires Node.js 22+ and npm. Authenticate Git access to the private repository first; never paste tokens into these commands or project files.
+Requires Node.js 22.22.0+ and npm. Authenticate Git access to the private repository first; never paste tokens into these commands or project files.
 
 ```sh
 git clone https://github.com/lomeli-dev/agent-workflow.git
@@ -41,7 +41,7 @@ These commands write a small `.agent-workflow.json` at the detected repository r
 {"schemaVersion":1,"enabled":false}
 ```
 
-You can commit that file as a team choice or keep it local. The nearest config up to the repository root wins; malformed config disables this workflow rather than guessing. Restart/reload a session that cached earlier policy state. Global rules/skills can remain discoverable: opt-out gates our workflow behavior, not the IDE's global discovery or unrelated integrations. No changes to the rest of the project's rules are made.
+You can commit that file as a team choice or keep it local. Inside Git, the nearest config up to the repository root wins. Outside Git, ancestors are searched up to the filesystem root; malformed config disables this workflow rather than guessing. Restart/reload a session that cached earlier policy state. Global rules/skills can remain discoverable: opt-out gates our workflow behavior, not the IDE's global discovery or unrelated integrations. No changes to the rest of the project's rules are made.
 
 ## Select and prepare tools
 
@@ -52,7 +52,7 @@ agent-workflow setup --profile web --apply
 agent-workflow exec --tool agent-browser -- skills get core
 ```
 
-The workflow skill routes browser tasks to agent-browser with an existing Chrome/Chromium executable and a separate headless session. Run its installed-version guide first. If no compatible browser exists, report the requirement; downloading one remains explicit via `agent-workflow exec --tool agent-browser -- install`. Do not use personal profiles or attach to the user's open browser by default. Close the task's named session afterwards.
+**This is agent guidance, not enforced by the generic `exec` passthrough.** The workflow skill routes browser tasks to agent-browser with an existing Chrome/Chromium executable and a separate headless session. Run its installed-version guide first. If no compatible browser exists, report the requirement; downloading one remains explicit via `agent-workflow exec --tool agent-browser -- install`. Do not use personal profiles or attach to the user's open browser by default. Close the task's named session afterwards.
 
 
 ```sh
@@ -79,14 +79,19 @@ agent-workflow disconnect --project /path/to/project
 agent-workflow exec --tool ast-grep -- --version
 ```
 
-Installation is global; MCP registration is explicit and project-scoped. Default MCP connections are Serena, CodeGraph and Context7. Agent-browser is used through the CLI/skill, so it adds no default MCP tool inventory. Supported optional MCP names: `serena`, `codegraph`, `playwright-mcp`, `devtools`, `context7`. `--clients claude,codex,opencode` selects native config targets (all three by default). Restart/reload and approve project tools in each client. Existing entries and comments are preserved; name collisions or edits to owned entries refuse rather than overwrite. Disconnect project registrations before uninstalling the package.
+Installation is global; MCP registration is explicit and project-scoped. Pass the repository root: nested paths are rejected to prevent silently bypassing their opt-out. Use the same `--clients` set when disconnecting a subset connection. Default MCP connections are Serena, CodeGraph and Context7. Agent-browser is used through the CLI/skill, so it adds no default MCP tool inventory. Supported optional MCP names: `serena`, `codegraph`, `playwright-mcp`, `devtools`, `context7`. `--clients claude,codex,opencode` selects native config targets (all three by default). Restart/reload and approve project tools in each client. Existing entries and comments are preserved; name collisions or edits to owned entries refuse rather than overwrite. Disconnect project registrations before uninstalling the package.
 
 `setup` alone does not register MCPs or enable native client LSP plugins. See [tool selection and evidence](docs/tools.md) for routing, prerequisites and integration limits.
 
 ## Upgrade, verify, remove
 
 ```sh
-# Review a new release before updating your checkout/install.
+# Fetch and inspect the intended revision; keep local work before switching.
+git fetch origin --tags
+git log --oneline HEAD..origin/main
+git diff HEAD..origin/main
+# After review, fast-forward only; divergence is a stop, not a reset.
+git merge --ff-only origin/main
 npm ci --ignore-scripts
 npm run check
 npm install --global . --ignore-scripts

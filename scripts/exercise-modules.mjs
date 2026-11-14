@@ -24,7 +24,7 @@ try{
    if(id==='playwright-mcp')verified=verified&&text.includes('AW_BROWSER_OK');
    if(id==='devtools')verified=verified&&text.includes(url);
    if(id==='context7')verified=verified&&text.includes('/');
-   results.push({id,operation:request.name,verified,responseExcerpt:text.slice(0,1800)});
+   results.push({id,operation:request.name,verified,evidence:'Synthetic/public fixture assertion; response contents omitted'});
   }catch(e){results.push({id,verified:false,error:e.message});}finally{await c.close();}
  }
  console.log(JSON.stringify(results,null,2));if(results.some(r=>!r.verified))process.exitCode=1;

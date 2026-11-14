@@ -16,13 +16,14 @@ const server=createServer((req,res)=>{res.setHeader('content-type','text/html');
 await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
 async function call(args){const r=await run(bin,['--config',config,'--session',session,'--executable-path',chrome,...args],{cwd:root,env,timeout:30000});if(r.code!==0)throw Error(r.err||r.out);return r.out;}
 try{
+ const version=(await call(['--version'])).trim();
  await call(['open',`http://127.0.0.1:${server.address().port}`]);
  const snapshot=await call(['snapshot','-i']);
  if(!snapshot.includes('Run fixture'))throw Error('Fixture button not found');
  await call(['find','role','button','click','--name','Run fixture']);
  const after=await call(['snapshot','-i']);if(!after.includes('AW_CLICK_OK'))throw Error('Click effect missing');
  await call(['screenshot',shot]);if(readFileSync(shot).subarray(0,8).toString('hex')!=='89504e470d0a1a0a')throw Error('Screenshot missing PNG signature');
- console.log(JSON.stringify({tool:'agent-browser',version:'0.43.0',existingBrowser:true,downloadedBrowser:false,headless:true,navigation:true,snapshot:true,click:true,screenshot:true}));
+ console.log(JSON.stringify({tool:'agent-browser',version,existingBrowser:true,downloadedBrowser:false,headless:true,navigation:true,snapshot:true,click:true,screenshot:true}));
 }finally{
  try{await call(['close']);}finally{server.closeAllConnections();await new Promise(ok=>server.close(ok));rmSync(root,{recursive:true,force:true});}
 }
