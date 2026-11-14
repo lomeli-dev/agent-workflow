@@ -9,7 +9,7 @@ import {doctor} from '../lib/doctor.mjs';
 import {CATALOG,PROFILES} from '../lib/catalog.mjs';
 import {setupModules,findBin,toolEnvironment} from '../lib/modules.mjs';
 import {selectInteractive} from '../lib/selector.mjs';
-import {serveMcp,MCP_TOOLS} from '../lib/mcp-launch.mjs';
+import {serveMcp,MCP_TOOLS,DEFAULT_MCP_TOOLS} from '../lib/mcp-launch.mjs';
 import {spawnSync} from 'node:child_process';
 import {locations,PACKAGE} from '../lib/install.mjs';
 import {connect} from '../lib/connect.mjs';
@@ -25,7 +25,7 @@ agent-workflow disable --project PATH [--dry-run]
 agent-workflow enable --project PATH [--dry-run]
 agent-workflow setup --interactive
 agent-workflow setup --list
-agent-workflow setup --tools serena,codegraph,playwright-cli [--apply]
+agent-workflow setup --tools serena,codegraph,agent-browser [--apply]
 agent-workflow setup --profile lsp|code|web|docs|delivery [--apply]
 agent-workflow setup --all [--apply]
 agent-workflow exec --tool MODULE -- [tool arguments]
@@ -65,9 +65,9 @@ try{
     const p=spawnSync(path,positionals.slice(1),{env:toolEnvironment(loc),cwd:values.project??process.cwd(),stdio:'inherit'});process.exit(p.status??1);
   }
   else if(cmd==='mcp'){await serveMcp({tool:values.tool,project:values.project,userRoot});process.exit(process.exitCode??0);}
-  else if(cmd==='connect'||cmd==='disconnect')result=connect({project:values.project,userRoot,dryRun,remove:cmd==='disconnect',tools:values.tools?values.tools.split(','):MCP_TOOLS,clients:values.clients?values.clients.split(','):CLIENTS});
+  else if(cmd==='connect'||cmd==='disconnect')result=connect({project:values.project,userRoot,dryRun,remove:cmd==='disconnect',tools:values.tools?values.tools.split(','):DEFAULT_MCP_TOOLS,clients:values.clients?values.clients.split(','):CLIENTS});
   else if(cmd==='mcp-config'){
-    if(!values.project)throw Error('Specify --project');const project=projectRoot(values.project),ids=values.tools?values.tools.split(','):MCP_TOOLS;
+    if(!values.project)throw Error('Specify --project');const project=projectRoot(values.project),ids=values.tools?values.tools.split(','):DEFAULT_MCP_TOOLS;
     const entries={};for(const id of ids){if(!MCP_TOOLS.includes(id))throw Error('Not an MCP module: '+id);entries['aw-'+id]={command:process.execPath,args:[join(PACKAGE,'bin/agent-workflow.mjs'),'mcp','--tool',id,'--project',project,...(userRoot?['--user-root',resolve(userRoot)]:[])]};}
     result={project,claude:{mcpServers:entries},codex:{mcp_servers:entries},opencode:{mcp:{servers:Object.fromEntries(Object.entries(entries).map(([id,c])=>[id,{type:'local',command:[c.command,...c.args]}]))}},note:'Configuration preview only; merge with your existing client config. MCP startup is gated by project opt-out. No credentials included.'};
   }

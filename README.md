@@ -45,6 +45,16 @@ You can commit that file as a team choice or keep it local. The nearest config u
 
 ## Select and prepare tools
 
+**The default browser tool is Vercel agent-browser 0.43.0.** `setup --profile web --apply` installs only this CLI, without downloading Chrome. `--all` includes agent-browser; Playwright engine/CLI/MCP and DevTools are explicit alternatives. Existing installations are retained.
+
+```sh
+agent-workflow setup --profile web --apply
+agent-workflow exec --tool agent-browser -- skills get core
+```
+
+The workflow skill routes browser tasks to agent-browser with an existing Chrome/Chromium executable and a separate headless session. Run its installed-version guide first. If no compatible browser exists, report the requirement; downloading one remains explicit via `agent-workflow exec --tool agent-browser -- install`. Do not use personal profiles or attach to the user's open browser by default. Close the task's named session afterwards.
+
+
 ```sh
 agent-workflow setup --list
 agent-workflow setup --interactive --apply
@@ -56,7 +66,7 @@ agent-workflow doctor --json
 
 **Playwright with Chromium is explicit-only:** `--all`, interactive `all` and the `web` profile exclude the browser-engine module. Install it separately with `agent-workflow setup --tools playwright --apply`. That command invokes `playwright install chromium`, which downloads the managed browser binaries. Playwright CLI/MCP remain separate choices; excluding the engine does not remove an existing installation or prevent a browser tool from requesting a runtime later.
 
-Without `--apply`, setup only previews. The interactive menu accepts numbers, names or `all`; empty input cancels. Profiles: `lsp`, `code`, `web`, `docs`, `delivery`. The 16-module catalog includes six language servers, ast-grep, Serena, CodeGraph, Playwright engine/CLI/MCP, Chrome DevTools MCP, Context7, GitHub CLI and Gitleaks. **No standalone linter, formatter or persistent-task service is included.** Language servers may themselves expose formatting capabilities; the package does not activate them or rewrite source files.
+Without `--apply`, setup only previews. The interactive menu accepts numbers, names or `all`; empty input cancels. Profiles: `lsp`, `code`, `web`, `docs`, `delivery`. The 17-module catalog includes six language servers, ast-grep, Serena, CodeGraph, Vercel agent-browser, Playwright engine/CLI/MCP, Chrome DevTools MCP, Context7, GitHub CLI and Gitleaks. **No standalone linter, formatter or persistent-task service is included.** Language servers may themselves expose formatting capabilities; the package does not activate them or rewrite source files.
 
 Responding installations are reused and their actual versions reported. Missing tools use pinned packages in the managed user directory. Node/npm are required; Go, uv and a Rust toolchain are prerequisites for their corresponding modules. Missing prerequisites are reported without bootstrapping an entire development environment. No shell profile is edited and no dependency installs run at session startup.
 
@@ -69,7 +79,7 @@ agent-workflow disconnect --project /path/to/project
 agent-workflow exec --tool ast-grep -- --version
 ```
 
-Installation is global; MCP registration is explicit and project-scoped. Supported MCP names: `serena`, `codegraph`, `playwright-mcp`, `devtools`, `context7`. `--clients claude,codex,opencode` selects native config targets (all three by default). Restart/reload and approve project tools in each client. Existing entries and comments are preserved; name collisions or edits to owned entries refuse rather than overwrite. Disconnect project registrations before uninstalling the package.
+Installation is global; MCP registration is explicit and project-scoped. Default MCP connections are Serena, CodeGraph and Context7. Agent-browser is used through the CLI/skill, so it adds no default MCP tool inventory. Supported optional MCP names: `serena`, `codegraph`, `playwright-mcp`, `devtools`, `context7`. `--clients claude,codex,opencode` selects native config targets (all three by default). Restart/reload and approve project tools in each client. Existing entries and comments are preserved; name collisions or edits to owned entries refuse rather than overwrite. Disconnect project registrations before uninstalling the package.
 
 `setup` alone does not register MCPs or enable native client LSP plugins. See [tool selection and evidence](docs/tools.md) for routing, prerequisites and integration limits.
 

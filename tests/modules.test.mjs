@@ -8,7 +8,7 @@ import {parse as toml} from 'smol-toml';
 import {CATALOG,selectModules} from '../lib/catalog.mjs';
 import {parseSelection} from '../lib/selector.mjs';
 import {releaseAsset} from '../lib/modules.mjs';
-import {disabledReply} from '../lib/mcp-launch.mjs';
+import {disabledReply,DEFAULT_MCP_TOOLS} from '../lib/mcp-launch.mjs';
 import {connect} from '../lib/connect.mjs';
 import {PACKAGE,json,uninstall} from '../lib/install.mjs';
 function fixture(t){const root=mkdtempSync(join(tmpdir(),'aw-module-test-'));t.after(()=>rmSync(root,{recursive:true,force:true}));return root;}
@@ -49,5 +49,12 @@ test('Playwright browser engine is explicit only in all automatic selections',()
  assert(!parseSelection('all').includes('playwright'));
  assert.deepEqual(selectModules({tools:['playwright']}),['playwright']);
  assert.deepEqual(parseSelection('playwright'),['playwright']);
- assert(selectModules({profile:'web'}).includes('playwright-mcp'));
+ assert.deepEqual(selectModules({profile:'web'}),['agent-browser']);
+ for(const id of ['playwright-cli','playwright-mcp','devtools'])assert(!selectModules({all:true}).includes(id));
+ assert(selectModules({all:true}).includes('agent-browser'));
+ assert.equal(CATALOG['agent-browser'].browser,undefined);
+});
+
+test('default MCP connections do not load optional browser alternatives',()=>{
+ assert.deepEqual(DEFAULT_MCP_TOOLS,['serena','codegraph','context7']);
 });

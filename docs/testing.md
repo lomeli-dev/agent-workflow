@@ -19,3 +19,7 @@ For performance, compare equivalent coding tasks before/after and record verifie
 23 automated tests passed, including selection, project MCP preservation/collisions, opt-out server behavior and uninstall guards. The packed npm artifact lifecycle passed. The interactive terminal selector was exercised with a single choice in preview mode. The global update verified successfully and a repeated sync changed zero files.
 
 [Module validation](module-validation.json) records real installation/reuse, six LSP initialization responses and five functional MCP checks. These optional live scripts are separate from the offline/default suite: `scripts/probe-lsp.mjs`, `scripts/probe-modules.mjs` and `scripts/exercise-modules.mjs`. They do not prove loading or all permissions in a running IDE.
+
+## Default browser acceptance
+
+Vercel agent-browser 0.43.0 was installed without downloading a browser. `scripts/probe-agent-browser.mjs` exercised a disposable local HTTP page using an existing Chrome binary, a unique headless session and no personal profile: navigation, interactive snapshot, button click and a PNG screenshot succeeded; the session closed afterwards. This checks browser operation through the CLI, not invocation by each IDE. The browser-profile selection tests ensure optional alternatives are absent from automatic installation.

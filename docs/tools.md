@@ -6,11 +6,13 @@ The catalog is in `lib/catalog.mjs`. Setup accepts an explicit selection; startu
 | --- | --- | --- |
 | lsp | gopls, typescript, python, rust, bash, yaml | Definitions, references and language diagnostics |
 | code | ast-grep, serena, codegraph | Structural search, symbol operations and dependency/call analysis |
-| web | playwright-cli, playwright-mcp, devtools | Repeatable browser checks, exploration and browser diagnostics |
+| web | agent-browser | Default browser exploration with existing Chrome/Chromium |
 | docs | context7 | Current public library documentation |
 | delivery | github, gitleaks | Repository workflows and explicit secret scanning |
 
 The `playwright` engine module is explicit-only, excluded from `--all`, interactive all and the web profile. `setup --tools playwright --apply` installs the engine and explicitly runs `playwright install chromium`. Existing browser files are retained. This only controls setup selection, not browser downloads requested later by other tools.
+
+Vercel agent-browser 0.43.0 is the default for browser exploration. Its install adds the native CLI but never runs `agent-browser install`. The web profile contains only agent-browser; all Playwright variants and DevTools require explicit selection. The updated workflow guide is generated for all three clients and loads usage from the installed CLI. Default MCP connections omit browser alternatives.
 
 Use Playwright tests for repeatable assertions, CLI for compact scripted browser work, MCP for interactive agent-driven exploration, and DevTools when console/network/performance investigation is needed. They are complementary options, not four mandatory passes. Native desktop apps require another control mechanism.
 

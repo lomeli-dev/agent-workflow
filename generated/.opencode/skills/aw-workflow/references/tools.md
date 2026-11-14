@@ -2,7 +2,7 @@
 
 Prefer existing project commands and the smallest tool that answers the question. Use rg for text, a language server or Serena for symbols, ast-grep for structural patterns, and CodeGraph when relationships across files matter. Do not index a repository merely because a tool is installed.
 
-For browser work, choose repeatable Playwright tests, compact CLI operations, interactive MCP exploration or DevTools diagnostics according to the task. Do not run all four by default. Browser tools do not validate a native desktop application.
+For browser exploration, default to Vercel agent-browser using an existing Chrome/Chromium binary with an isolated headless session. Read `agent-workflow exec --tool agent-browser -- skills get core` for the installed-version guide before use. Use a unique named session, refresh snapshots after navigation, and close that session at completion. Do not attach to a personal browser, reuse personal profiles, enable headed mode or download a browser without task authorization. If no browser binary exists, report that requirement instead of running install automatically. Playwright tests and DevTools remain explicit alternatives for tasks that require them. Browser tools do not validate a native desktop application.
 
 Use Context7 for public documentation when needed; do not send private source or credentials as a query. GitHub CLI and Gitleaks are available for authorized repository operations and focused secret checks. Do not add linter/formatter steps or persistent-task services through this package.
 

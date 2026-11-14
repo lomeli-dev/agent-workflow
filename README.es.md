@@ -42,6 +42,8 @@ La desactivación evita aplicar nuestro flujo y nuestros recordatorios. **No gar
 ## Herramientas opcionales
 
 ```sh
+# Navegador predeterminado (sin descargar Chrome):
+agent-workflow setup --profile web --apply
 # Menú para elegir uno, varios o todos:
 agent-workflow setup --interactive --apply
 # Lista, selección directa y categorías:
@@ -60,7 +62,7 @@ agent-workflow setup --tools playwright --apply
 
 Ese comando ejecuta `playwright install chromium`: Playwright descarga los navegadores en la carpeta administrada. CLI y MCP siguen siendo opciones separadas; excluir el motor no borra lo ya instalado ni impide que una herramienta de navegador necesite un runtime al usarse.
 
-Sin `--apply` sólo muestra el plan. El menú acepta números, nombres o `all`/`todo`; una selección vacía cancela. Categorías: `lsp`, `code`, `web`, `docs`, `delivery`. Son 16 módulos: seis servidores de lenguaje, ast-grep, Serena, CodeGraph, Playwright motor/CLI/MCP, DevTools MCP, Context7, GitHub CLI y Gitleaks.
+Sin `--apply` sólo muestra el plan. El menú acepta números, nombres o `all`/`todo`; una selección vacía cancela. Categorías: `lsp`, `code`, `web`, `docs`, `delivery`. Son 17 módulos: seis servidores de lenguaje, ast-grep, Serena, CodeGraph, agent-browser de Vercel, Playwright motor/CLI/MCP, DevTools MCP, Context7, GitHub CLI y Gitleaks.
 
 **Quedan fuera los linters, formateadores independientes y servicios de tareas persistentes.** Algunos LSP ofrecen formato como capacidad propia, pero no lo activamos ni reformateamos archivos. Una tarea persistente sería un proceso que continúa aunque cierres la terminal, como con tmux: este instalador no configura eso.
 
@@ -96,3 +98,17 @@ No borra configuraciones ajenas. Si editaste un archivo del paquete o su definic
 La fuente es `.rulesync`. `npm run build` genera para cada cliente. Los tests usan raíces de usuario temporales; no prueban borrando tus configuraciones reales. Hay un modo `--user-root` para repetir instalación/verificación/desinstalación aisladas sin modificar HOME.
 
 Los roles heredan modelo/esfuerzo del cliente. No se alteran límites de compactación o permisos. Sólo el coordinador escribe la memoria existente cuando corresponda; los workers devuelven resultados, decisiones, descubrimientos y lecciones candidatas. No se promete ahorro porcentual sin mediciones de tareas comparables.
+
+## Navegador predeterminado: Vercel agent-browser
+
+`web` instala sólo `agent-browser 0.43.0`; `--all` también lo incluye. Playwright, Playwright CLI/MCP y DevTools quedan como alternativas de selección explícita. Lo que ya está instalado se conserva.
+
+La guía sincronizada dirige a los agentes a usar Chrome/Chromium existente, en una sesión separada sin ventana, y a cerrarla al terminar. Primero leen la guía de la versión instalada:
+
+```sh
+agent-workflow exec --tool agent-browser -- skills get core
+```
+
+Si falta un navegador, se informa; no se descarga automáticamente. La descarga opcional se hace con `agent-workflow exec --tool agent-browser -- install`. No se usa tu perfil personal ni se conecta a tu navegador abierto por defecto.
+
+Se usa mediante CLI y skill; no añade herramientas MCP por defecto. `connect` sin selección conecta Serena, CodeGraph y Context7; las alternativas MCP de navegador se piden por nombre.
