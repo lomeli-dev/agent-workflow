@@ -42,14 +42,34 @@ La desactivación evita aplicar nuestro flujo y nuestros recordatorios. **No gar
 ## Herramientas opcionales
 
 ```sh
+# Menú para elegir uno, varios o todos:
+agent-workflow setup --interactive --apply
+# Lista, selección directa y categorías:
+agent-workflow setup --list
+agent-workflow setup --tools serena,codegraph --apply
+agent-workflow setup --profile web --apply
+agent-workflow setup --all --apply
 agent-workflow doctor --json
-agent-workflow setup --tool gopls
-agent-workflow setup --tool gopls --apply
 ```
 
-`doctor` comprueba ejecutables/versiones en este equipo. `setup` reutiliza lo que ya responde y, si falta, presenta el plan; sólo instala con `--apply`. Opciones: `gopls`, `typescript`, `python` (Pyright) y `ast-grep`. Se usan versiones fijadas y una ubicación propia; no se cambia el perfil de shell. No se instala nada al abrir un proyecto.
+Sin `--apply` sólo muestra el plan. El menú acepta números, nombres o `all`/`todo`; una selección vacía cancela. Categorías: `lsp`, `code`, `web`, `docs`, `delivery`. Son 16 módulos: seis servidores de lenguaje, ast-grep, Serena, CodeGraph, Playwright motor/CLI/MCP, DevTools MCP, Context7, GitHub CLI y Gitleaks.
 
-**Un LSP instalado no significa que el agente lo use.** Falta configurar la integración nativa del cliente y probar definición, referencias y diagnóstico. No se instala Serena ni un servidor MCP por defecto.
+**Quedan fuera los linters, formateadores independientes y servicios de tareas persistentes.** Algunos LSP ofrecen formato como capacidad propia, pero no lo activamos ni reformateamos archivos. Una tarea persistente sería un proceso que continúa aunque cierres la terminal, como con tmux: este instalador no configura eso.
+
+Se reutiliza lo que ya responde, mostrando su versión real. Lo que falta se instala con versiones fijadas en una carpeta administrada del usuario. Se necesitan Node/npm; para sus módulos correspondientes, Go, uv y un toolchain Rust. Si falta un requisito, se informa sin instalar silenciosamente todo un entorno. No se cambia el perfil de shell.
+
+Los ejecutables son globales; conectas los MCP que necesitas **por proyecto**:
+
+```sh
+agent-workflow connect --project /ruta/al/proyecto --tools serena,codegraph --dry-run
+agent-workflow connect --project /ruta/al/proyecto --tools serena,codegraph
+agent-workflow disconnect --project /ruta/al/proyecto
+agent-workflow exec --tool ast-grep -- --version
+```
+
+MCP disponibles: `serena`, `codegraph`, `playwright-mcp`, `devtools`, `context7`. Los tres clientes son el destino predeterminado; `--clients claude,codex` lo limita. Después recarga el cliente y acepta sus herramientas. Se conservan entradas ajenas y comentarios. Desconecta los proyectos antes de desinstalar.
+
+Instalar no demuestra que un cliente haya cargado el MCP ni configura automáticamente su integración LSP. Consulta [herramientas y evidencia](docs/tools.md).
 
 ## Actualizar y retirar
 

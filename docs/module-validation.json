@@ -1,0 +1,181 @@
+{
+  "date": "2026-11-13",
+  "packageVersion": "0.2.0",
+  "platform": "macOS arm64",
+  "installation": [
+    {
+      "id": "gopls",
+      "state": "reused",
+      "check": "version",
+      "version": "golang.org/x/tools/gopls v0.23.0"
+    },
+    {
+      "id": "typescript",
+      "state": "installed",
+      "check": "version",
+      "version": "5.3.0"
+    },
+    {
+      "id": "python",
+      "state": "installed",
+      "check": "version",
+      "version": "pyright 1.1.414"
+    },
+    {
+      "id": "rust",
+      "state": "reused",
+      "check": "version",
+      "version": "rust-analyzer 1.97.1 (8bab26f4 2026-07-14)"
+    },
+    {
+      "id": "bash",
+      "state": "installed",
+      "check": "version",
+      "version": "5.8.1"
+    },
+    {
+      "id": "yaml",
+      "state": "installed",
+      "check": "executable-only; functional LSP handshake pending",
+      "version": null
+    },
+    {
+      "id": "ast-grep",
+      "state": "installed",
+      "check": "version",
+      "version": "ast-grep 0.51.2"
+    },
+    {
+      "id": "serena",
+      "state": "installed",
+      "check": "help",
+      "version": "Usage: serena [OPTIONS] COMMAND [ARGS]..."
+    },
+    {
+      "id": "codegraph",
+      "state": "installed",
+      "check": "help",
+      "version": "CodeGraph Language Server with MCP support"
+    },
+    {
+      "id": "playwright",
+      "state": "installed",
+      "check": "version",
+      "version": "Version 1.65.1"
+    },
+    {
+      "id": "playwright-cli",
+      "state": "installed",
+      "check": "version",
+      "version": "0.1.24"
+    },
+    {
+      "id": "playwright-mcp",
+      "state": "installed",
+      "check": "version",
+      "version": "Version 0.0.85"
+    },
+    {
+      "id": "devtools",
+      "state": "installed",
+      "check": "version",
+      "version": "1.13.0"
+    },
+    {
+      "id": "context7",
+      "state": "installed",
+      "check": "help",
+      "version": "Usage: context7-mcp [options]"
+    },
+    {
+      "id": "github",
+      "state": "reused",
+      "check": "version",
+      "version": "gh version 2.96.0 (2026-07-02)"
+    },
+    {
+      "id": "gitleaks",
+      "state": "installed",
+      "check": "version",
+      "version": "8.30.1"
+    }
+  ],
+  "mcpFunctional": [
+    {
+      "id": "serena",
+      "operation": "find_symbol",
+      "verified": true
+    },
+    {
+      "id": "codegraph",
+      "operation": "codegraph_find_by_signature",
+      "verified": true
+    },
+    {
+      "id": "playwright-mcp",
+      "operation": "browser_navigate + browser_evaluate",
+      "verified": true
+    },
+    {
+      "id": "devtools",
+      "operation": "new_page",
+      "verified": true
+    },
+    {
+      "id": "context7",
+      "operation": "resolve-library-id",
+      "verified": true
+    }
+  ],
+  "lspInitialization": [
+    {
+      "id": "gopls",
+      "verified": true,
+      "check": "LSP initialize",
+      "server": "gopls",
+      "error": null
+    },
+    {
+      "id": "typescript",
+      "verified": true,
+      "check": "LSP initialize",
+      "server": null,
+      "error": null
+    },
+    {
+      "id": "python",
+      "verified": true,
+      "check": "LSP initialize",
+      "server": null,
+      "error": null
+    },
+    {
+      "id": "rust",
+      "verified": true,
+      "check": "LSP initialize",
+      "server": "rust-analyzer",
+      "error": null
+    },
+    {
+      "id": "bash",
+      "verified": true,
+      "check": "LSP initialize",
+      "server": null,
+      "error": null
+    },
+    {
+      "id": "yaml",
+      "verified": true,
+      "check": "LSP initialize",
+      "server": "yaml-language-server",
+      "error": null
+    }
+  ],
+  "limits": [
+    "Native client configurations tested in disposable fixtures; no real project MCP registration performed",
+    "Language-server initialization is not full editor integration",
+    "Serena memory tools remain discoverable despite no-memories mode; no memory tools used",
+    "TypeScript missing companion detected by live initialize and corrected with managed TypeScript 5.9.3",
+    "No standalone linter, formatter or persistent-task service installed"
+  ]
+}

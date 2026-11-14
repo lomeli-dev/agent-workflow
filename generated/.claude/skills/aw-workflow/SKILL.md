@@ -19,3 +19,5 @@ For delegated work, read [parallel ownership](references/parallel.md). For test 
 At milestones, the coordinator updates the existing board/memory, if present and authorized. Before compaction or handoff, record candidate revision, completed checks, unresolved effects, assignments and live resources. Compaction is a client capability, not something a Markdown summary performs.
 
 Finish when acceptance is demonstrated. Report outcome, tests, limitations and resources retained. Do not publish/deploy beyond user authorization or claim a performance gain without measurements.
+
+When optional tools are available, follow [tool routing](references/tools.md). Installation is never a prerequisite for every task.

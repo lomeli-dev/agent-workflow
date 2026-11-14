@@ -43,15 +43,33 @@ These commands write a small `.agent-workflow.json` at the detected repository r
 
 You can commit that file as a team choice or keep it local. The nearest config up to the repository root wins; malformed config disables this workflow rather than guessing. Restart/reload a session that cached earlier policy state. Global rules/skills can remain discoverable: opt-out gates our workflow behavior, not the IDE's global discovery or unrelated integrations. No changes to the rest of the project's rules are made.
 
-## Check and prepare tools
+## Select and prepare tools
 
 ```sh
+agent-workflow setup --list
+agent-workflow setup --interactive --apply
+agent-workflow setup --tools serena,codegraph --apply
+agent-workflow setup --profile web --apply
+agent-workflow setup --all --apply
 agent-workflow doctor --json
-agent-workflow setup --tool typescript
-agent-workflow setup --tool typescript --apply
 ```
 
-`doctor` checks local executables and version responses, not account access or LSP integration. `setup` reuses a responding executable; missing tools require `--apply`. Supported optional preparations: `gopls`, `typescript`, `python` (Pyright), `ast-grep`. Downloads are version-pinned and scoped to this package's managed tools directory. No shell profile is edited. Native LSP wiring and definition/reference/diagnostic tests remain a separate client-specific step; installation alone does not enable a client plugin.
+Without `--apply`, setup only previews. The interactive menu accepts numbers, names or `all`; empty input cancels. Profiles: `lsp`, `code`, `web`, `docs`, `delivery`. The 16-module catalog includes six language servers, ast-grep, Serena, CodeGraph, Playwright engine/CLI/MCP, Chrome DevTools MCP, Context7, GitHub CLI and Gitleaks. **No standalone linter, formatter or persistent-task service is included.** Language servers may themselves expose formatting capabilities; the package does not activate them or rewrite source files.
+
+Responding installations are reused and their actual versions reported. Missing tools use pinned packages in the managed user directory. Node/npm are required; Go, uv and a Rust toolchain are prerequisites for their corresponding modules. Missing prerequisites are reported without bootstrapping an entire development environment. No shell profile is edited and no dependency installs run at session startup.
+
+### Connect selected MCPs to a project
+
+```sh
+agent-workflow connect --project /path/to/project --tools serena,codegraph --dry-run
+agent-workflow connect --project /path/to/project --tools serena,codegraph
+agent-workflow disconnect --project /path/to/project
+agent-workflow exec --tool ast-grep -- --version
+```
+
+Installation is global; MCP registration is explicit and project-scoped. Supported MCP names: `serena`, `codegraph`, `playwright-mcp`, `devtools`, `context7`. `--clients claude,codex,opencode` selects native config targets (all three by default). Restart/reload and approve project tools in each client. Existing entries and comments are preserved; name collisions or edits to owned entries refuse rather than overwrite. Disconnect project registrations before uninstalling the package.
+
+`setup` alone does not register MCPs or enable native client LSP plugins. See [tool selection and evidence](docs/tools.md) for routing, prerequisites and integration limits.
 
 ## Upgrade, verify, remove
 
@@ -81,4 +99,4 @@ node bin/agent-workflow.mjs verify --user-root /path/to/isolated-user
 node bin/agent-workflow.mjs uninstall --global --user-root /path/to/isolated-user
 ```
 
-No model or effort is forced, no MCP server is added, and no automatic project-memory writer is started. The coordinator uses an existing memory-sesion installation if the project and user call for it. Workers return candidate lessons to that coordinator.
+No model or effort is forced, no MCP server is added by the global workflow install, and no automatic project-memory writer is started. The coordinator uses an existing memory-sesion installation if the project and user call for it. Workers return candidate lessons to that coordinator.

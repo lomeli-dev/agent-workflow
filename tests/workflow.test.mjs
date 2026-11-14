@@ -100,9 +100,9 @@ test('OpenCode plugin opt-out is checked and has no startup installs',async t=>{
  put(root,'.agent-workflow.json',JSON.stringify({schemaVersion:1,enabled:false}));await plugin.setup(ctx);assert.equal(values.length,1);
 });
 
-test('setup never runs unsupported or arbitrary package commands',t=>{
- const root=fixture(t);assert.throws(()=>setup({userRoot:root,tool:'$(bad)'}),/Supported setup tools/);
- const result=setup({userRoot:root,tool:'ast-grep'});assert(['reuse','install-proposed'].includes(result.action));assert(!existsSync(join(locations(root).store,'tools')));
+test('setup never runs unsupported or arbitrary package commands',async t=>{
+ const root=fixture(t);await assert.rejects(setup({userRoot:root,tool:'$(bad)'}),/Unknown module/);
+ const result=await setup({userRoot:root,tool:'ast-grep'});assert.equal(result.apply,false);assert.equal(result.modules[0].id,'ast-grep');assert(!existsSync(join(locations(root).store,'tools')));
 });
 
 test('malformed managed blocks are never silently rewritten',()=>{
