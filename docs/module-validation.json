@@ -36,7 +36,7 @@
     {
       "id": "yaml",
       "state": "installed",
-      "check": "executable-only; functional LSP handshake pending",
+      "check": "executable-only; this probe does not test the LSP protocol",
       "version": null
     },
     {
