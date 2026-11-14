@@ -1,0 +1,13 @@
+{
+  "client": "codex",
+  "kind": "custom-worker",
+  "exit": 0,
+  "seconds": 104.02,
+  "timedOut": false,
+  "testsPassed": true,
+  "protectedIntact": true,
+  "reportExists": true,
+  "explicit_aw_worker_spawn_events": 1,
+  "evidence": "Own persistent rollout checked for actual spawn_agent role; raw rollout remains private",
+  "scope": "one directed trial, not four rounds"
+}

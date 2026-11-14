@@ -1,0 +1,68 @@
+[
+  {
+    "repeat": 2,
+    "steps": [
+      {
+        "action": "install",
+        "exit": 0
+      },
+      {
+        "action": "sync",
+        "exit": 0
+      },
+      {
+        "action": "verify",
+        "exit": 0
+      },
+      {
+        "action": "uninstall",
+        "exit": 0
+      }
+    ],
+    "config_restored": true
+  },
+  {
+    "repeat": 3,
+    "steps": [
+      {
+        "action": "install",
+        "exit": 0
+      },
+      {
+        "action": "sync",
+        "exit": 0
+      },
+      {
+        "action": "verify",
+        "exit": 0
+      },
+      {
+        "action": "uninstall",
+        "exit": 0
+      }
+    ],
+    "config_restored": true
+  },
+  {
+    "repeat": 4,
+    "steps": [
+      {
+        "action": "install",
+        "exit": 0
+      },
+      {
+        "action": "sync",
+        "exit": 0
+      },
+      {
+        "action": "verify",
+        "exit": 0
+      },
+      {
+        "action": "uninstall",
+        "exit": 0
+      }
+    ],
+    "config_restored": true
+  }
+]

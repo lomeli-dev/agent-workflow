@@ -1,0 +1,86 @@
+[
+  {
+    "round": 1,
+    "case": "T06",
+    "native_session_models": [
+      "opencode-go/mimo-v2.6-flash"
+    ]
+  },
+  {
+    "round": 1,
+    "case": "T07",
+    "native_session_models": [
+      "opencode-go/glm-5.3-flash"
+    ]
+  },
+  {
+    "round": 1,
+    "case": "T10",
+    "native_session_models": [
+      "opencode-go/glm-5.3-flash"
+    ]
+  },
+  {
+    "round": 2,
+    "case": "T06",
+    "native_session_models": [
+      "opencode-go/mimo-v2.6-flash"
+    ]
+  },
+  {
+    "round": 2,
+    "case": "T07",
+    "native_session_models": [
+      "opencode-go/glm-5.3-flash"
+    ]
+  },
+  {
+    "round": 2,
+    "case": "T10",
+    "native_session_models": [
+      "opencode-go/glm-5.3-flash"
+    ]
+  },
+  {
+    "round": 3,
+    "case": "T06",
+    "native_session_models": [
+      "opencode-go/mimo-v2.6-flash"
+    ]
+  },
+  {
+    "round": 3,
+    "case": "T07",
+    "native_session_models": [
+      "opencode-go/glm-5.3-flash"
+    ]
+  },
+  {
+    "round": 3,
+    "case": "T10",
+    "native_session_models": [
+      "opencode-go/glm-5.3-flash"
+    ]
+  },
+  {
+    "round": 4,
+    "case": "T06",
+    "native_session_models": [
+      "opencode-go/mimo-v2.6-flash"
+    ]
+  },
+  {
+    "round": 4,
+    "case": "T07",
+    "native_session_models": [
+      "opencode-go/glm-5.3-flash"
+    ]
+  },
+  {
+    "round": 4,
+    "case": "T10",
+    "native_session_models": [
+      "opencode-go/glm-5.3-flash"
+    ]
+  }
+]

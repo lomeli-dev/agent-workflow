@@ -1,0 +1,67 @@
+{
+  "client": "codex",
+  "requested_model": "gpt-6-luna",
+  "command_events": [
+    {
+      "exit_code": null,
+      "status": "in_progress",
+      "marker": false,
+      "command": "/bin/zsh -lc \"pwd && rg --files -g 'AGENTS.md' -g '.agent-workflow.json' -g 'package.json' -g 'npm-shrinkwrap.json' -g 'package-lock.json' -g 'yarn.lock' -g 'pnpm-lock.yaml'\""
+    },
+    {
+      "exit_code": 0,
+      "status": "completed",
+      "marker": false,
+      "command": "/bin/zsh -lc \"pwd && rg --files -g 'AGENTS.md' -g '.agent-workflow.json' -g 'package.json' -g 'npm-shrinkwrap.json' -g 'package-lock.json' -g 'yarn.lock' -g 'pnpm-lock.yaml'\""
+    },
+    {
+      "exit_code": null,
+      "status": "in_progress",
+      "marker": false,
+      "command": "/bin/zsh -lc 'cat package.json'"
+    },
+    {
+      "exit_code": null,
+      "status": "in_progress",
+      "marker": false,
+      "command": "/bin/zsh -lc 'cat AGENTS.md'"
+    },
+    {
+      "exit_code": 0,
+      "status": "completed",
+      "marker": false,
+      "command": "/bin/zsh -lc 'cat package.json'"
+    },
+    {
+      "exit_code": 0,
+      "status": "completed",
+      "marker": false,
+      "command": "/bin/zsh -lc 'cat AGENTS.md'"
+    },
+    {
+      "exit_code": null,
+      "status": "in_progress",
+      "marker": false,
+      "command": "/bin/zsh -lc 'agent-workflow status --json'"
+    },
+    {
+      "exit_code": 0,
+      "status": "completed",
+      "marker": false,
+      "command": "/bin/zsh -lc 'agent-workflow status --json'"
+    },
+    {
+      "exit_code": null,
+      "status": "in_progress",
+      "marker": false,
+      "command": "/bin/zsh -lc 'npm test'"
+    },
+    {
+      "exit_code": 7,
+      "status": "failed",
+      "marker": true,
+      "command": "/bin/zsh -lc 'npm test'"
+    }
+  ],
+  "scope": "one directed failure trial"
+}

@@ -1,0 +1,23 @@
+{
+  "base_commit": "55015bde9c85050b1198c55ff203be7bcf52c474",
+  "version": "0.2.3",
+  "preflight": "native minimal response OK",
+  "substitutions_authorized_by_user": {
+    "Opus 4.8": "claude-opus-5-5",
+    "Opus 5": "claude-opus-5-5",
+    "Sonnet 5": "claude-sonnet-5-5"
+  },
+  "codex": [
+    "gpt-6.1-terra",
+    "gpt-6-luna"
+  ],
+  "opencode": [
+    "opencode-go/mimo-v2.6-flash",
+    "opencode-go/glm-5.3-flash"
+  ],
+  "limitations": [
+    "Codex/OpenCode model selected explicitly; response model metadata needs independent extraction",
+    "Global verify covers files and registrations only",
+    "Common fixture is equivalent across cases, secondary checks tracked separately"
+  ]
+}

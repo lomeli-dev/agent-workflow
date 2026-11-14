@@ -1,0 +1,18 @@
+{
+  "root": "isolated temporary user",
+  "steps": [
+    {
+      "action": "install",
+      "exit": 0
+    },
+    {
+      "action": "verify",
+      "exit": 0
+    },
+    {
+      "action": "uninstall",
+      "exit": 0
+    }
+  ],
+  "original_config_restored": true
+}

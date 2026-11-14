@@ -1,0 +1,23 @@
+{
+  "enabled": {
+    "enabled": true,
+    "exit": 0,
+    "seconds": 6.88,
+    "timedOut": false,
+    "testRan": true,
+    "maskingCommandRan": false
+  },
+  "disabled": {
+    "enabled": false,
+    "exit": 0,
+    "seconds": 10.51,
+    "timedOut": false,
+    "testRan": true,
+    "maskingCommandRan": true
+  },
+  "scope": "Native OpenCode with explicit glm-5.3-flash; one directed check, not four full rounds",
+  "guard_mentions": {
+    "enabled": 2,
+    "disabled": 0
+  }
+}

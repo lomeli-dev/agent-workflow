@@ -1,0 +1,26 @@
+[
+  {
+    "repeat": 1,
+    "model_from_owned_turn_context": [
+      "gpt-6.1-terra"
+    ]
+  },
+  {
+    "repeat": 2,
+    "model_from_owned_turn_context": [
+      "gpt-6.1-terra"
+    ]
+  },
+  {
+    "repeat": 3,
+    "model_from_owned_turn_context": [
+      "gpt-6.1-terra"
+    ]
+  },
+  {
+    "repeat": 4,
+    "model_from_owned_turn_context": [
+      "gpt-6.1-terra"
+    ]
+  }
+]

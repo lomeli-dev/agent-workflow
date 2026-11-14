@@ -1,0 +1,177 @@
+{
+  "client": "Codex CLI",
+  "requested_model": "gpt-6-luna",
+  "turns": [
+    {
+      "number": 1,
+      "prompt_bytes": 6422,
+      "seconds": 5.59,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input_tokens": 28606,
+          "cached_input_tokens": 0,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5,
+          "reasoning_output_tokens": 0
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "prompt_bytes": 6362,
+      "seconds": 6.43,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input_tokens": 61268,
+          "cached_input_tokens": 28416,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 63,
+          "reasoning_output_tokens": 51
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "prompt_bytes": 6362,
+      "seconds": 5.52,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input_tokens": 97926,
+          "cached_input_tokens": 60928,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 68,
+          "reasoning_output_tokens": 51
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "prompt_bytes": 6362,
+      "seconds": 5.39,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input_tokens": 138526,
+          "cached_input_tokens": 97408,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 73,
+          "reasoning_output_tokens": 51
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "prompt_bytes": 6362,
+      "seconds": 5.48,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input_tokens": 187252,
+          "cached_input_tokens": 137856,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 96,
+          "reasoning_output_tokens": 67
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "prompt_bytes": 6362,
+      "seconds": 5.34,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input_tokens": 239955,
+          "cached_input_tokens": 186368,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 101,
+          "reasoning_output_tokens": 67
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "prompt_bytes": 6362,
+      "seconds": 5.35,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input_tokens": 296572,
+          "cached_input_tokens": 238848,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 117,
+          "reasoning_output_tokens": 76
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "prompt_bytes": 6362,
+      "seconds": 5.5,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input_tokens": 357130,
+          "cached_input_tokens": 295296,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 122,
+          "reasoning_output_tokens": 76
+        }
+      ]
+    }
+  ],
+  "native_compaction_tested": false,
+  "marker_recovered": true,
+  "protected_intact": true,
+  "test_exit_observed": 7,
+  "test_reported": true,
+  "final_exit": 0,
+  "final_timeout": false,
+  "final_tools": [
+    {
+      "command": "/bin/zsh -lc 'agent-workflow status --json'",
+      "status": "completed",
+      "exit": 0,
+      "failure_marker": false
+    },
+    {
+      "command": "/bin/zsh -lc 'npm test'",
+      "status": "failed",
+      "exit": 7,
+      "failure_marker": true
+    }
+  ],
+  "final_usage": [
+    {
+      "input_tokens": 556992,
+      "cached_input_tokens": 488320,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 891,
+      "reasoning_output_tokens": 485
+    }
+  ],
+  "report_validation": "Rechecked native final message; initial regular expression missed \u201cexited with status **7**\u201d.",
+  "owned_rollout_models": [
+    "gpt-6-luna"
+  ],
+  "owned_rollout_compaction_events": {}
+}

@@ -1,0 +1,11 @@
+{
+  "exit": 0,
+  "seconds": 18.93,
+  "timedOut": false,
+  "sourceUnchanged": true,
+  "disconnected": true,
+  "tool_seen": true,
+  "parser_seen": true,
+  "graph_field_seen": true,
+  "scope": "one native directed check; inspect raw private log for exact result"
+}

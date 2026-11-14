@@ -1,0 +1,9 @@
+{
+  "requested_role": "aw-reviewer",
+  "selected_by_cli": true,
+  "model": "claude-opus-5-5",
+  "reports_subtraction": true,
+  "result_error": false,
+  "source_intact": true,
+  "scope": "one directed review; role prompt loading needs independent verification"
+}

@@ -1,0 +1,15 @@
+{
+  "fixtureOnlyKeepTokens": 0,
+  "initialExit": 0,
+  "compactAccepted": true,
+  "compactCompleted": true,
+  "resumeExit": 0,
+  "markerRecovered": true,
+  "checkpointPreserved": true,
+  "resumeTools": [],
+  "messageShape": [
+    "data",
+    "cursor"
+  ],
+  "scope": "one short OpenCode native compaction trial; not long-session stress"
+}

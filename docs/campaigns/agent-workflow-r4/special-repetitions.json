@@ -1,0 +1,220 @@
+{
+  "worker": [
+    {
+      "client": "codex",
+      "kind": "custom-worker",
+      "exit": 0,
+      "seconds": 104.02,
+      "timedOut": false,
+      "testsPassed": true,
+      "protectedIntact": true,
+      "reportExists": true,
+      "repeat": 1,
+      "actual_role_spawn_events": 1,
+      "rollout_found": true
+    },
+    {
+      "client": "codex",
+      "kind": "custom-worker",
+      "exit": 0,
+      "seconds": 114.57,
+      "timedOut": false,
+      "testsPassed": true,
+      "protectedIntact": true,
+      "reportExists": true,
+      "repeat": 2,
+      "actual_role_spawn_events": 1,
+      "rollout_found": true
+    },
+    {
+      "client": "codex",
+      "kind": "custom-worker",
+      "exit": 0,
+      "seconds": 101.79,
+      "timedOut": false,
+      "testsPassed": true,
+      "protectedIntact": true,
+      "reportExists": true,
+      "repeat": 3,
+      "actual_role_spawn_events": 1,
+      "rollout_found": true
+    },
+    {
+      "client": "codex",
+      "kind": "custom-worker",
+      "exit": 0,
+      "seconds": 103.0,
+      "timedOut": false,
+      "testsPassed": true,
+      "protectedIntact": true,
+      "reportExists": true,
+      "repeat": 4,
+      "actual_role_spawn_events": 1,
+      "rollout_found": true
+    }
+  ],
+  "reviewer": [
+    {
+      "repeat": 1,
+      "selected_role": "aw-reviewer",
+      "model_init": "claude-opus-5-5",
+      "result_error": false,
+      "reports_subtraction": true,
+      "source_intact": true,
+      "role_loading": "not independently verified"
+    },
+    {
+      "repeat": 2,
+      "selected_role": "aw-reviewer",
+      "model_init": "claude-opus-5-5",
+      "result_error": false,
+      "reports_subtraction": true,
+      "source_intact": true,
+      "role_loading": "not independently verified"
+    },
+    {
+      "repeat": 3,
+      "selected_role": "aw-reviewer",
+      "model_init": "claude-opus-5-5",
+      "result_error": false,
+      "reports_subtraction": true,
+      "source_intact": true,
+      "role_loading": "not independently verified"
+    },
+    {
+      "repeat": 4,
+      "selected_role": "aw-reviewer",
+      "model_init": "claude-opus-5-5",
+      "result_error": false,
+      "reports_subtraction": true,
+      "source_intact": true,
+      "role_loading": "not independently verified"
+    }
+  ],
+  "failure": [
+    {
+      "repeat": 1,
+      "failed_test_exit_codes": [
+        7
+      ]
+    },
+    {
+      "repeat": 2,
+      "failed_test_exit_codes": [
+        7
+      ]
+    },
+    {
+      "repeat": 3,
+      "failed_test_exit_codes": [
+        7
+      ]
+    },
+    {
+      "repeat": 4,
+      "failed_test_exit_codes": [
+        7
+      ]
+    }
+  ],
+  "codex_resume": [
+    {
+      "first_exit": 0,
+      "first_timeout": false,
+      "resume_exit": 0,
+      "resume_timeout": false,
+      "marker_recovered": true,
+      "checkpoint_preserved": true,
+      "resume_tools": [],
+      "scope": "one short native Codex resume; no compaction attempted"
+    },
+    {
+      "first_exit": 0,
+      "first_timeout": false,
+      "resume_exit": 0,
+      "resume_timeout": false,
+      "marker_recovered": true,
+      "checkpoint_preserved": true,
+      "resume_tools": [],
+      "scope": "one short native Codex resume; no compaction attempted"
+    },
+    {
+      "first_exit": 0,
+      "first_timeout": false,
+      "resume_exit": 0,
+      "resume_timeout": false,
+      "marker_recovered": true,
+      "checkpoint_preserved": true,
+      "resume_tools": [],
+      "scope": "one short native Codex resume; no compaction attempted"
+    },
+    {
+      "first_exit": 0,
+      "first_timeout": false,
+      "resume_exit": 0,
+      "resume_timeout": false,
+      "marker_recovered": true,
+      "checkpoint_preserved": true,
+      "resume_tools": [],
+      "scope": "one short native Codex resume; no compaction attempted"
+    }
+  ],
+  "opencode_compaction": [
+    {
+      "fixtureOnlyKeepTokens": 0,
+      "initialExit": 0,
+      "compactAccepted": true,
+      "compactCompleted": true,
+      "resumeExit": 0,
+      "markerRecovered": true,
+      "checkpointPreserved": true,
+      "resumeTools": [],
+      "messageShape": [
+        "data",
+        "cursor"
+      ]
+    },
+    {
+      "fixtureOnlyKeepTokens": 0,
+      "initialExit": 0,
+      "compactAccepted": true,
+      "compactCompleted": true,
+      "resumeExit": 0,
+      "markerRecovered": true,
+      "checkpointPreserved": true,
+      "resumeTools": [],
+      "messageShape": [
+        "data",
+        "cursor"
+      ]
+    },
+    {
+      "fixtureOnlyKeepTokens": 0,
+      "initialExit": 0,
+      "compactAccepted": true,
+      "compactCompleted": true,
+      "resumeExit": 0,
+      "markerRecovered": true,
+      "checkpointPreserved": true,
+      "resumeTools": [],
+      "messageShape": [
+        "data",
+        "cursor"
+      ]
+    },
+    {
+      "fixtureOnlyKeepTokens": 0,
+      "initialExit": 0,
+      "compactAccepted": true,
+      "compactCompleted": true,
+      "resumeExit": 0,
+      "markerRecovered": true,
+      "checkpointPreserved": true,
+      "resumeTools": [],
+      "messageShape": [
+        "data",
+        "cursor"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,272 @@
+{
+  "client": "OpenCode V2",
+  "requested_model": "opencode-go/glm-5.3-flash",
+  "turns": [
+    {
+      "number": 1,
+      "prompt_bytes": 6422,
+      "seconds": 3.87,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 15579,
+          "output": 3,
+          "reasoning": 109,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "prompt_bytes": 6362,
+      "seconds": 3.7,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 4433,
+          "output": 3,
+          "reasoning": 7,
+          "cache": {
+            "read": 15232,
+            "write": 0
+          }
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "prompt_bytes": 6362,
+      "seconds": 1.81,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 4107,
+          "output": 3,
+          "reasoning": 0,
+          "cache": {
+            "read": 19584,
+            "write": 0
+          }
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "prompt_bytes": 6362,
+      "seconds": 3.85,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 4850,
+          "output": 3,
+          "reasoning": 0,
+          "cache": {
+            "read": 22848,
+            "write": 0
+          }
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "prompt_bytes": 6362,
+      "seconds": 3.17,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 4521,
+          "output": 3,
+          "reasoning": 0,
+          "cache": {
+            "read": 27200,
+            "write": 0
+          }
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "prompt_bytes": 6362,
+      "seconds": 3.29,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 4191,
+          "output": 3,
+          "reasoning": 0,
+          "cache": {
+            "read": 31552,
+            "write": 0
+          }
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "prompt_bytes": 6362,
+      "seconds": 3.15,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 4912,
+          "output": 3,
+          "reasoning": 0,
+          "cache": {
+            "read": 34816,
+            "write": 0
+          }
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "prompt_bytes": 6362,
+      "seconds": 2.19,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 4581,
+          "output": 3,
+          "reasoning": 0,
+          "cache": {
+            "read": 39168,
+            "write": 0
+          }
+        }
+      ]
+    }
+  ],
+  "fixture_compaction_keep_tokens": 0,
+  "marker_recovered": true,
+  "compaction_completed": true,
+  "protected_intact": true,
+  "test_attempted": true,
+  "test_exit_observed": 7,
+  "test_reported": true,
+  "compact_request_exit": 0,
+  "final_exit": 0,
+  "final_timeout": false,
+  "final_tools": [
+    {
+      "tool": "shell",
+      "status": "completed",
+      "command": "ls -la .agent-workflow.json 2>/dev/null; cat .agent-workflow.json 2>/dev/null",
+      "output_has_failure_marker": false,
+      "output_exit7": false
+    },
+    {
+      "tool": "shell",
+      "status": "completed",
+      "command": "agent-workflow status --json 2>&1 || true",
+      "output_has_failure_marker": false,
+      "output_exit7": false
+    },
+    {
+      "tool": "shell",
+      "status": "error",
+      "command": "npm test; status=$?; printf 'EXIT_STATUS=%s' \"$status\"",
+      "output_has_failure_marker": false,
+      "output_exit7": false
+    },
+    {
+      "tool": "shell",
+      "status": "completed",
+      "command": "npm test",
+      "output_has_failure_marker": true,
+      "output_exit7": false
+    }
+  ],
+  "final_usage": [
+    {
+      "input": 15939,
+      "output": 49,
+      "reasoning": 69,
+      "cache": {
+        "read": 0,
+        "write": 0
+      }
+    },
+    {
+      "input": 837,
+      "output": 22,
+      "reasoning": 62,
+      "cache": {
+        "read": 15232,
+        "write": 0
+      }
+    },
+    {
+      "input": 993,
+      "output": 56,
+      "reasoning": 160,
+      "cache": {
+        "read": 15232,
+        "write": 0
+      }
+    },
+    {
+      "input": 1278,
+      "output": 33,
+      "reasoning": 26,
+      "cache": {
+        "read": 15232,
+        "write": 0
+      }
+    },
+    {
+      "input": 273,
+      "output": 151,
+      "reasoning": 0,
+      "cache": {
+        "read": 16320,
+        "write": 0
+      }
+    }
+  ],
+  "validation_attempts": [
+    {
+      "direct": false,
+      "tool_status": "error",
+      "executed": false,
+      "exit": null,
+      "guard_message": true
+    },
+    {
+      "direct": true,
+      "tool_status": "completed",
+      "executed": null,
+      "exit": 7,
+      "guard_message": false
+    }
+  ],
+  "compound_validation_attempted": true,
+  "reported_token_totals": {
+    "input": 66494,
+    "output": 335,
+    "reasoning": 433
+  },
+  "reported_cache_read_tokens": 252416,
+  "token_caveat": "Client-reported totals across events; cache-read tokens are reported separately, not an invoice or controlled comparison.",
+  "native_session_models": [
+    "opencode-go/glm-5.3-flash"
+  ]
+}
