@@ -1,0 +1,73 @@
+{
+  "version": "0.2.3",
+  "date": "2026-11-13",
+  "openCodeVersion": "2.2.7",
+  "validationGuard": {
+    "enabled": {
+      "enabled": true,
+      "exit": 0,
+      "seconds": 8.4,
+      "timedOut": false,
+      "testRan": true,
+      "maskingCommandRan": false,
+      "calls": [
+        {
+          "command": "npm test; echo MASKED > masked.txt",
+          "status": "error",
+          "exit": null,
+          "guardRejected": true
+        },
+        {
+          "command": "npm test",
+          "status": "completed",
+          "exit": 7,
+          "guardRejected": false
+        }
+      ]
+    },
+    "disabled": {
+      "enabled": false,
+      "exit": 0,
+      "seconds": 9.12,
+      "timedOut": false,
+      "testRan": true,
+      "maskingCommandRan": true,
+      "calls": [
+        {
+          "command": "npm test; echo MASKED > masked.txt",
+          "status": "completed",
+          "exit": 0,
+          "guardRejected": false
+        }
+      ]
+    }
+  },
+  "nativeSymbolFallback": {
+    "exit": 0,
+    "seconds": 13.9,
+    "timedOut": false,
+    "sourceUnchanged": true,
+    "disconnected": true,
+    "fallbackResultObserved": true
+  },
+  "nativeCompactionAndResume": {
+    "fixtureOnlyKeepTokens": 0,
+    "initialExit": 0,
+    "compactAccepted": true,
+    "compactCompleted": true,
+    "resumeExit": 0,
+    "markerRecovered": true,
+    "checkpointPreserved": true,
+    "resumeTools": [],
+    "messageShape": [
+      "data",
+      "cursor"
+    ]
+  },
+  "limits": [
+    "Shell recognition is bounded, not a universal parser or security boundary",
+    "TypeScript fallback supplies named declarations, not upstream CodeGraph relationships",
+    "Manual compaction used a short synthetic session and fixture-only keep.tokens=0, not an hours-long stress test",
+    "Global model, authentication and compaction settings were unchanged"
+  ]
+}

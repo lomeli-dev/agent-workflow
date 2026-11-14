@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.3
+
+- Native OpenCode V2 shell hook rejects recognizable compound validations before execution, with per-call project opt-out.
+- CodeGraph integration exposes a separate TypeScript-parser symbol tool for original JS/TS module files and warns on empty native graph results; setup resolves the parser prerequisite.
+- Native verification of guarded failure status, `.mjs` symbol lookup, and manual compaction/resume with a preserved synthetic checkpoint.
+- Added bounds/opt-out/AST tests and documented the limits of shell recognition and symbol-only fallback.
+
 ## 0.2.2
 
 - Real native-client behavioral trials: implementation, project opt-out, roles, MCP calls and browser interaction, with synthetic evidence only.

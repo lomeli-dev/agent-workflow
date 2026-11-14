@@ -31,3 +31,7 @@ The five-reviewer audit added effect-based regressions for comments inside share
 ## Native-client behavioral acceptance
 
 See the [real-agent trial](native-trial-2026-11-13.md) and its [structured evidence](native-trial-2026-11-13.json). These optional, authenticated sessions are separate from CI and the deterministic package tests. The intentionally broken seed under examples/native-client-lab is copied to disposable projects for agent implementation; its initial failure is expected. Never run it against real user projects or treat a model report as the sole assertion.
+
+## 0.2.3 repairs
+
+42 deterministic tests cover the native validation guard, per-call opt-out, original-file AST symbol fallback, bounds and dependency selection. [Repair evidence](repairs-2026-11-13.md) separately records real OpenCode guard execution, MCP fallback and completed manual compaction/resume. Local `.runtime` debugging artifacts are excluded from package checks and Git.

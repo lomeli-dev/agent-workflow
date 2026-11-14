@@ -25,6 +25,7 @@ The tools are optional. Preview with `setup --list`, `setup --interactive`, `set
 | `disable --project PATH`, `enable --project PATH` | Write the small project switch; `--dry-run` previews |
 | `setup --list` | Show the full catalog and profiles |
 | `setup --interactive`, `--tool NAME`, `--tools A,B`, `--profile NAME`, `--all` | Preview selection; add `--apply` to install |
+| `symbols --project ROOT --file module.mjs [--name NAME]` | Find named declarations in an original JS/TS file via TypeScript; no graph relationships |
 | `exec --tool NAME -- ARGS` | Run an installed tool with managed PATH; raw argument passthrough |
 | `mcp-config --project ROOT` | Print native configuration suggestions only; writes nothing |
 | `connect --project ROOT` | Register selected project MCPs; `--dry-run` previews |
@@ -67,3 +68,9 @@ Private state under the user's `.local/share/agent-workflow/` contains installat
 - **Private snapshot corruption:** preserve configuration and receipt for manual recovery. Do not regenerate unknown originals or call them verified.
 
 For validation history and current coverage, read [testing](testing.md) and the [five-reviewer audit](audit-2026-11-13.md). No measured end-to-end agent speedup or universal IDE execution is claimed.
+
+## Validation guard and module coverage
+
+OpenCode V2 registers a `shell.create.before` hook. When the effective project gate is enabled, recognized test/build commands combined with pipes, separators or conditionals are rejected before execution. Run the check directly and use the tool cwd field. Ordinary reads and direct validations are unchanged. Recognition is deliberately bounded; it is not a general shell parser, permission filter or guarantee for arbitrary scripts/substitutions. Unsupported plugin APIs retain guidance only and report `validationGuard: false` in plugin storage.
+
+The CodeGraph adapter adds `agent_workflow_symbols` and coverage guidance. It reads only the explicit original project-relative JS/TS file (maximum 1 MiB), refuses path escapes and syntax errors, and returns named declarations with original locations. It never executes project modules. TypeScript is a setup prerequisite of CodeGraph. Results identify `source: typescript-parser` and `graphRelationships: false`; this does not patch the upstream relationship graph.

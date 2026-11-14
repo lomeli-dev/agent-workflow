@@ -133,3 +133,5 @@ Guía completa: [instalación, actualización, uso y recuperación](docs/operaci
 En carpetas sin Git, el opt-out busca también en los directorios antecesores hasta la raíz del sistema. Para `connect`, `disconnect` y `mcp-config` usa la raíz del repositorio; no se promociona una subcarpeta automáticamente. Si conectaste sólo algunos clientes, repite el mismo `--clients` al desconectar.
 
 [Prueba con agentes reales](docs/native-trial-2026-11-13.md): implementación, opt-out, roles, MCP y navegador, con sus resultados y límites.
+
+La versión 0.2.3 añade un bloqueo nativo de validaciones compuestas en OpenCode y una búsqueda alternativa de símbolos JS/TS. [Correcciones comprobadas](docs/repairs-2026-11-13.md). Al elegir CodeGraph se comprueba o instala también TypeScript como requisito; esto no añade navegadores.

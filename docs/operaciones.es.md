@@ -32,6 +32,7 @@ Sin `--apply` sólo se presenta el plan, aunque puede ejecutar probes de versió
 | `disable --project RUTA` / `enable --project RUTA` | Cambiar el interruptor del proyecto; admite `--dry-run` |
 | `setup --list` | Mostrar catálogo y perfiles |
 | `setup --interactive`, `--tool`, `--tools`, `--profile`, `--all` | Elegir herramientas; agregar `--apply` para instalar |
+| `symbols --project RAIZ --file modulo.mjs [--name NOMBRE]` | Buscar declaraciones con el parser TypeScript y rutas originales, sin relaciones de grafo |
 | `exec --tool NOMBRE -- ARGUMENTOS` | Ejecutar la herramienta instalada con el PATH administrado |
 | `mcp-config --project RAIZ` | Mostrar sugerencias de configuración sin escribir archivos |
 | `connect --project RAIZ` | Registrar MCP del proyecto; `--dry-run` previsualiza |
@@ -89,3 +90,9 @@ Para retirar: desconecta todos los proyectos, ejecuta `uninstall --global --dry-
 El directorio del usuario `.local/share/agent-workflow/` contiene originales de configuración, registros de conexiones, locks, recibos y herramientas. No lo subas al repo: puede contener ajustes privados. Los nuevos respaldos llevan checksum de consistencia; no protege contra alguien que pueda modificar también ese registro privado. Los recibos antiguos sin checksum siguen admitiéndose para retirarlos.
 
 Los modelos, effort, permisos y compactación del cliente no se cambian. La memoria compartida sigue teniendo un único coordinador. Consulta la [auditoría](audit-2026-11-13.md) y las [pruebas](testing.md) para distinguir lo comprobado de lo pendiente.
+
+## Protección de validación y archivos de módulos
+
+En OpenCode V2 el plugin intercepta el shell antes de ejecutar. Con el workflow activo rechaza validaciones reconocidas que incluyan pipes, separadores o condicionales; ejecuta el test solo y usa el directorio del propio tool. El opt-out se vuelve a consultar en cada llamada. Es un guard limitado, no un parser universal ni un sandbox de permisos.
+
+El MCP de CodeGraph incorpora `agent_workflow_symbols` para un archivo JS/TS explícito, incluyendo `.mjs`, `.cjs`, `.mts` y `.cts`. Usa TypeScript como requisito, devuelve nombres y posiciones originales y no ejecuta el módulo. Rechaza rutas fuera del proyecto, errores sintácticos y archivos mayores a 1 MiB. El resultado identifica su fuente y no afirma tener relaciones de grafo. El motor original de CodeGraph sigue teniendo su límite de extensiones.

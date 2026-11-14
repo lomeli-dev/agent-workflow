@@ -5,7 +5,7 @@ import {spawnSync} from 'node:child_process';
 import {parse as toml} from 'smol-toml';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');let files=0,links=0;
 function walk(dir){for(const e of readdirSync(dir,{withFileTypes:true})){
- if(['node_modules','.git'].includes(e.name))continue;const p=join(dir,e.name);if(e.isDirectory()){walk(p);continue;}if(!e.isFile())continue;files++;
+ if(['node_modules','.git','.runtime'].includes(e.name))continue;const p=join(dir,e.name);if(e.isDirectory()){walk(p);continue;}if(!e.isFile())continue;files++;
  if(p.endsWith('.mjs')){const r=spawnSync(process.execPath,['--check',p],{encoding:'utf8'});if(r.status)throw Error(r.stderr);}
  if(p.endsWith('.toml'))toml(readFileSync(p,'utf8'));
  if(p.endsWith('.md'))for(const m of readFileSync(p,'utf8').matchAll(/\]\(([^)]+)\)/g)){

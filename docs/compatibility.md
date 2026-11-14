@@ -8,11 +8,11 @@ Initial scope: macOS/Linux, Node 22.22.0+, Claude Code, Codex CLI and OpenCode V
 | Skill | Native skills/aw-workflow | User .agents/skills/aw-workflow | Global skills/aw-workflow |
 | Optional roles | Native agents/aw-* | Rulesync-generated agents/aw-*.toml | Native agents/aw-* |
 | Start command | aw-start | Invoke aw-workflow; no fake project slash command | aw-start |
-| Reminder hook | SessionStart, SubagentStart, PreCompact | Same event definitions; native trust required | Plugin startup gate/diagnostic only; rules supply instructions |
-| Project disable | Gate at hook invocation + behavioral instructions | Gate at hook invocation + behavioral instructions | Plugin setup gate + behavioral instructions; reload after changing config |
+| Reminder hook | SessionStart, SubagentStart, PreCompact | Same event definitions; native trust required | Plugin diagnostic plus project-gated compound-validation shell guard |
+| Project disable | Gate at hook invocation + behavioral instructions | Gate at hook invocation + behavioral instructions | Per-shell-call gate for validation guard + startup gate for MCP; reload long-lived MCPs after changing config |
 | LSP | Separate native integration required | Separate available client/tool integration required | Separate native integration required |
 
-No per-tool interception is installed. No model/effort, permission, authentication, compaction or unrelated plugin setting is changed. Reviewer read-only instructions are not a permission sandbox. Global files may remain in discovery when project-disabled; a zero-load guarantee is not claimed. Long-running clients can retain previously loaded policy until reload.
+OpenCode V2 has a bounded pre-execution shell guard for recognized compound test/build commands. Other clients retain advisory instructions; this is not a general permission sandbox. No model/effort, permission, authentication, compaction or unrelated plugin setting is changed. Reviewer read-only instructions are not a permission sandbox. Global files may remain in discovery when project-disabled; a zero-load guarantee is not claimed. Long-running clients can retain previously loaded policy until reload.
 
 File generation, config parsing, hook invocation and native model-driven behavior are separate evidence levels. `verify` checks owned bytes/registrations only. No assertion that all IDEs execute these instructions identically or that a live model became faster. Diagnostics and tests must not read private prompts or credentials.
 
@@ -29,3 +29,5 @@ Primary sources checked 13 November 2026:
 The package is installed through its CLI rather than pretending one native plugin manifest works in every client. Its OpenCode V2 component is a native plugin; Claude/Codex use native files and hooks. Future plugin-marketplace packaging is a separate delivery, not an already published integration.
 
 Later [native-client trials](native-trial-2026-11-13.md) exercised real inference and tool calls in all three clients. They establish specific behavior, not universal rule compliance: OpenCode reported a deliberately failed validation correctly while still masking the shell exit with echo.
+
+The [0.2.3 repair verification](repairs-2026-11-13.md) supersedes the observed OpenCode validation masking case: the compound form was blocked before execution and the direct retry retained exit 7. It also records an actual native compaction/resume trial in OpenCode 2.2.7.

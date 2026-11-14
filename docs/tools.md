@@ -41,3 +41,5 @@ The live probe scripts are development checks, not startup actions. `exercise-mo
 Browser session naming, existing-binary selection and headless use are instructions in the workflow guide. Generic `exec` does not inject those options or validate browser availability. The live probe supplies its own explicit settings. Installation/version checks are not a browser-runtime check.
 
 In later native-client trials, CodeGraph 0.21.0 located equivalent symbols in .js/.py but did not index the .mjs fixture. Empty results must be interpreted with coverage checks; a generic reindex is not demonstrated to fix unsupported extensions. Native CLI/MCP evidence and remaining limits are in the [behavioral trial](native-trial-2026-11-13.md).
+
+Version 0.2.3 provides a separate original-file TypeScript AST fallback through `symbols` and the `agent_workflow_symbols` MCP tool. CodeGraph setup resolves TypeScript as a prerequisite. Native graph empties carry a coverage warning. This repairs missing symbol lookup for explicit module files, not upstream graph relationships. The new live trial is in [verified repairs](repairs-2026-11-13.md).

@@ -11,3 +11,5 @@ Run required validation directly and inspect its actual exit status. A pipeline 
 Keep compatible caches. In Go, -count=1 disables test-result caching; use it when fresh execution is required, not as a speed default. Model/effort and compaction settings are client-specific: inherit the user's settings unless authorized verified profiles exist.
 
 Use `agent-workflow doctor --json` to inspect tools. `setup` is explicit, optional and scoped to a named dependency; startup hooks never install. Tool presence is not functional client integration. Measure elapsed time to accepted results and rework, not just call counts.
+
+OpenCode V2 installs a project-gated shell hook that rejects recognized test/build commands combined with pipes, separators or conditionals before execution. If it returns AW_VALIDATION_COMPOUND, run the validation directly using the tool cwd rather than hiding it inside another shell. This is a bounded workflow guard, not a complete shell parser or sandbox.

@@ -12,9 +12,10 @@ import {selectInteractive} from '../lib/selector.mjs';
 import {serveMcp,MCP_TOOLS,DEFAULT_MCP_TOOLS} from '../lib/mcp-launch.mjs';
 import {spawnSync} from 'node:child_process';
 import {locations,PACKAGE} from '../lib/install.mjs';
+import {findSymbols} from '../lib/symbols.mjs';
 import {connect,connectionRoot} from '../lib/connect.mjs';
 
-const HELP=`Agent Workflow 0.2.2 — global by default, project opt-out
+const HELP=`Agent Workflow 0.2.3 — global by default, project opt-out
 
 agent-workflow install --global [--clients claude,codex,opencode] [--dry-run]
 agent-workflow sync --global [--clients claude,codex,opencode] [--dry-run]
@@ -29,6 +30,7 @@ agent-workflow setup --tools serena,codegraph,agent-browser [--apply]
 agent-workflow setup --profile lsp|code|web|docs|delivery [--apply]
 agent-workflow setup --all [--apply]
 agent-workflow exec --tool MODULE -- [tool arguments]
+agent-workflow symbols --project PATH --file relative/module.mjs [--name SYMBOL]
 agent-workflow mcp-config --project PATH [--tools serena,codegraph]
 agent-workflow connect --project PATH [--tools serena,codegraph] [--clients claude,codex,opencode] [--dry-run]
 agent-workflow disconnect --project PATH [--clients claude,codex,opencode] [--dry-run]
@@ -41,8 +43,8 @@ the client; this tool does not bypass it. No startup dependency installs.
 Project opt-out disables workflow behavior, not global file discovery.
 `;
 try{
-  const {values,positionals}=parseArgs({allowPositionals:true,options:{global:{type:'boolean'},clients:{type:'string'},'user-root':{type:'string'},project:{type:'string'},'dry-run':{type:'boolean'},json:{type:'boolean'},tool:{type:'string'},tools:{type:'string'},profile:{type:'string'},all:{type:'boolean'},list:{type:'boolean'},interactive:{type:'boolean'},apply:{type:'boolean'},help:{type:'boolean'},version:{type:'boolean'}}});
-  const cmd=positionals[0];if(values.version){console.log('0.2.2');process.exit(0);}if(values.help||!cmd){console.log(HELP);process.exit(0);}
+  const {values,positionals}=parseArgs({allowPositionals:true,options:{global:{type:'boolean'},clients:{type:'string'},'user-root':{type:'string'},project:{type:'string'},'dry-run':{type:'boolean'},json:{type:'boolean'},tool:{type:'string'},file:{type:'string'},name:{type:'string'},tools:{type:'string'},profile:{type:'string'},all:{type:'boolean'},list:{type:'boolean'},interactive:{type:'boolean'},apply:{type:'boolean'},help:{type:'boolean'},version:{type:'boolean'}}});
+  const cmd=positionals[0];if(values.version){console.log('0.2.3');process.exit(0);}if(values.help||!cmd){console.log(HELP);process.exit(0);}
   if(positionals.length>1&&cmd!=='exec')throw Error('Unexpected positional arguments');
   const userRoot=values['user-root'],dryRun=values['dry-run']??false;let result;
   if(values.apply&&dryRun)throw Error('--apply and --dry-run cannot be combined');
@@ -60,6 +62,7 @@ try{
       if(result.ok===false)process.exitCode=1;
     }
   }
+  else if(cmd==='symbols')result=findSymbols({project:values.project,file:values.file,name:values.name,userRoot});
   else if(cmd==='exec'){
     const spec=Object.hasOwn(CATALOG,values.tool)?CATALOG[values.tool]:null;if(!spec)throw Error('Unknown module');const loc=locations(userRoot),path=findBin(spec.bin,loc);if(!path)throw Error('Module not installed');
     const p=spawnSync(path,positionals.slice(1),{env:toolEnvironment(loc),cwd:values.project??process.cwd(),stdio:'inherit'});process.exit(p.status??1);
