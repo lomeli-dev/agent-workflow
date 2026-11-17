@@ -45,6 +45,31 @@ You can commit that file as a team choice or keep it local. Inside Git, the near
 
 ## Select and prepare tools
 
+### Optional lean Claude session
+
+If a task does not need your usual MCP servers, start an explicitly isolated
+Claude session without changing your normal configuration:
+
+```sh
+agent-workflow claude-lean --
+agent-workflow claude-lean -- --print "Explain this project"
+agent-workflow claude-lean --mcp-file /path/to/selected-mcp.json --
+```
+
+Without `--mcp-file`, **no configured MCP servers are available in that
+session**. With it, only servers in the explicitly selected Claude MCP JSON
+file are loaded; manage its credentials separately. Agent Workflow does not
+edit the file, user settings, models, approvals or other sessions. Claude Code
+must be installed and authenticated. Forward Claude options after `--`;
+specify the MCP file before it. Restart normally with `claude` to restore the
+usual server set. Tool search and other client capabilities remain subject to
+Claude's own behavior and permissions.
+
+An exploratory three-sample hello-world comparison on one Mac found a lower
+median initial context with an empty MCP list, but the set of tools changed
+and caching/startup varied. This is not a guarantee of lower bills or equal
+capability. See [context study](docs/context-study.md).
+
 **The default browser tool is Vercel agent-browser 0.43.0.** `setup --profile web --apply` installs only this CLI, without downloading Chrome. `--all` includes agent-browser; Playwright engine/CLI/MCP and DevTools are explicit alternatives. Existing installations are retained.
 
 ```sh

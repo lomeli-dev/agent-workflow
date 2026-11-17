@@ -1,0 +1,387 @@
+{
+  "method": "Same disposable fixture and hello; three samples per mode, startup/cache varying, not a controlled cost benchmark.",
+  "codex_deferred": [
+    {
+      "repeat": 1,
+      "mode": "normal",
+      "exit": 0,
+      "seconds": 9.69,
+      "usage": {
+        "input_tokens": 23473,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "reply_ok": true,
+      "tool_calls": 0
+    },
+    {
+      "repeat": 1,
+      "mode": "deferred",
+      "exit": 0,
+      "seconds": 8.0,
+      "usage": {
+        "input_tokens": 24797,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 31,
+        "reasoning_output_tokens": 24
+      },
+      "reply_ok": true,
+      "tool_calls": 0
+    },
+    {
+      "repeat": 2,
+      "mode": "deferred",
+      "exit": 0,
+      "seconds": 7.85,
+      "usage": {
+        "input_tokens": 24797,
+        "cached_input_tokens": 7168,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "reply_ok": true,
+      "tool_calls": 0
+    },
+    {
+      "repeat": 2,
+      "mode": "normal",
+      "exit": 0,
+      "seconds": 7.7,
+      "usage": {
+        "input_tokens": 24797,
+        "cached_input_tokens": 7168,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "reply_ok": true,
+      "tool_calls": 0
+    },
+    {
+      "repeat": 3,
+      "mode": "normal",
+      "exit": 0,
+      "seconds": 12.46,
+      "usage": {
+        "input_tokens": 24797,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "reply_ok": true,
+      "tool_calls": 0
+    },
+    {
+      "repeat": 3,
+      "mode": "deferred",
+      "exit": 0,
+      "seconds": 7.62,
+      "usage": {
+        "input_tokens": 23473,
+        "cached_input_tokens": 7168,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "reply_ok": true,
+      "tool_calls": 0
+    }
+  ],
+  "codex_disabled": [
+    {
+      "repeat": 1,
+      "mode": "normal",
+      "exit": 0,
+      "seconds": 9.34,
+      "usage": {
+        "input_tokens": 23473,
+        "cached_input_tokens": 7168,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "reply_ok": true,
+      "tool_calls": 0
+    },
+    {
+      "repeat": 1,
+      "mode": "disabled",
+      "exit": 0,
+      "seconds": 8.23,
+      "usage": {
+        "input_tokens": 24797,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "reply_ok": true,
+      "tool_calls": 0
+    },
+    {
+      "repeat": 2,
+      "mode": "disabled",
+      "exit": 0,
+      "seconds": 8.23,
+      "usage": {
+        "input_tokens": 23473,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "reply_ok": true,
+      "tool_calls": 0
+    },
+    {
+      "repeat": 2,
+      "mode": "normal",
+      "exit": 0,
+      "seconds": 8.2,
+      "usage": {
+        "input_tokens": 24797,
+        "cached_input_tokens": 7168,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 18,
+        "reasoning_output_tokens": 11
+      },
+      "reply_ok": true,
+      "tool_calls": 0
+    },
+    {
+      "repeat": 3,
+      "mode": "normal",
+      "exit": 0,
+      "seconds": 7.42,
+      "usage": {
+        "input_tokens": 24797,
+        "cached_input_tokens": 13184,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "reply_ok": true,
+      "tool_calls": 0
+    },
+    {
+      "repeat": 3,
+      "mode": "disabled",
+      "exit": 0,
+      "seconds": 11.19,
+      "usage": {
+        "input_tokens": 24797,
+        "cached_input_tokens": 24576,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 16,
+        "reasoning_output_tokens": 9
+      },
+      "reply_ok": true,
+      "tool_calls": 0
+    }
+  ],
+  "claude_original": [
+    {
+      "repeat": 1,
+      "mode": "default",
+      "exit": 0,
+      "seconds": 3.98,
+      "model": "claude-sonnet-5-5",
+      "mcp_entries": 18,
+      "announced_tools": 86,
+      "input": 2,
+      "cache_create": 20676,
+      "cache_read": 11682,
+      "output": 4,
+      "result_error": false,
+      "reply_ok": true
+    },
+    {
+      "repeat": 1,
+      "mode": "search5",
+      "exit": 0,
+      "seconds": 4.24,
+      "model": "claude-sonnet-5-5",
+      "mcp_entries": 18,
+      "announced_tools": 305,
+      "input": 2,
+      "cache_create": 43735,
+      "cache_read": 0,
+      "output": 4,
+      "result_error": false,
+      "reply_ok": true
+    },
+    {
+      "repeat": 1,
+      "mode": "empty",
+      "exit": 1,
+      "seconds": 0.09,
+      "model": null,
+      "mcp_entries": 0,
+      "announced_tools": 0,
+      "input": null,
+      "cache_create": null,
+      "cache_read": null,
+      "output": null,
+      "result_error": null,
+      "reply_ok": false
+    },
+    {
+      "repeat": 2,
+      "mode": "empty",
+      "exit": 1,
+      "seconds": 0.09,
+      "model": null,
+      "mcp_entries": 0,
+      "announced_tools": 0,
+      "input": null,
+      "cache_create": null,
+      "cache_read": null,
+      "output": null,
+      "result_error": null,
+      "reply_ok": false
+    },
+    {
+      "repeat": 2,
+      "mode": "search5",
+      "exit": 0,
+      "seconds": 3.97,
+      "model": "claude-sonnet-5-5",
+      "mcp_entries": 18,
+      "announced_tools": 287,
+      "input": 2,
+      "cache_create": 21430,
+      "cache_read": 21985,
+      "output": 4,
+      "result_error": false,
+      "reply_ok": true
+    },
+    {
+      "repeat": 2,
+      "mode": "default",
+      "exit": 0,
+      "seconds": 3.83,
+      "model": "claude-sonnet-5-5",
+      "mcp_entries": 18,
+      "announced_tools": 251,
+      "input": 2,
+      "cache_create": 20497,
+      "cache_read": 21985,
+      "output": 4,
+      "result_error": false,
+      "reply_ok": true
+    },
+    {
+      "repeat": 3,
+      "mode": "default",
+      "exit": 0,
+      "seconds": 3.73,
+      "model": "claude-sonnet-5-5",
+      "mcp_entries": 18,
+      "announced_tools": 287,
+      "input": 2,
+      "cache_create": 21447,
+      "cache_read": 21985,
+      "output": 4,
+      "result_error": false,
+      "reply_ok": true
+    },
+    {
+      "repeat": 3,
+      "mode": "search5",
+      "exit": 0,
+      "seconds": 3.92,
+      "model": "claude-sonnet-5-5",
+      "mcp_entries": 18,
+      "announced_tools": 305,
+      "input": 2,
+      "cache_create": 21970,
+      "cache_read": 21985,
+      "output": 4,
+      "result_error": false,
+      "reply_ok": true
+    },
+    {
+      "repeat": 3,
+      "mode": "empty",
+      "exit": 1,
+      "seconds": 0.1,
+      "model": null,
+      "mcp_entries": 0,
+      "announced_tools": 0,
+      "input": null,
+      "cache_create": null,
+      "cache_read": null,
+      "output": null,
+      "result_error": null,
+      "reply_ok": false
+    }
+  ],
+  "claude_empty_retest": [
+    {
+      "repeat": 1,
+      "mode": "empty",
+      "exit": 0,
+      "seconds": 1.83,
+      "model": "claude-sonnet-5-5",
+      "mcp_entries": 0,
+      "announced_tools": 25,
+      "input": 2,
+      "cache_create": 11509,
+      "cache_read": 15794,
+      "output": 4,
+      "result_error": false,
+      "reply_ok": true
+    },
+    {
+      "repeat": 2,
+      "mode": "empty",
+      "exit": 0,
+      "seconds": 1.9,
+      "model": "claude-sonnet-5-5",
+      "mcp_entries": 0,
+      "announced_tools": 25,
+      "input": 2,
+      "cache_create": 0,
+      "cache_read": 27303,
+      "output": 4,
+      "result_error": false,
+      "reply_ok": true
+    },
+    {
+      "repeat": 3,
+      "mode": "empty",
+      "exit": 0,
+      "seconds": 1.79,
+      "model": "claude-sonnet-5-5",
+      "mcp_entries": 0,
+      "announced_tools": 25,
+      "input": 2,
+      "cache_create": 0,
+      "cache_read": 27303,
+      "output": 4,
+      "result_error": false,
+      "reply_ok": true
+    }
+  ],
+  "native_checks": {
+    "empty_mcp_response": "OK; native init reported 0 servers",
+    "selected_mcp": "native Claude called context_canary ping and returned marker",
+    "coding_task": "native Claude edited synthetic Python fixture, reported workflow enabled and passed independent unittest; protected files unchanged"
+  },
+  "harness_notes": [
+    "Three initial empty-MCP attempts failed because a variadic CLI flag consumed the prompt; corrected invocation was retried.",
+    "A first canary setup attempt used the wrong working directory and did not launch the model.",
+    "A first coding-task launch was rejected by zsh glob expansion before the model started; quoting fixed it."
+  ],
+  "limitations": [
+    "MCP-empty removes all MCP capabilities for that invocation.",
+    "Selected MCP results depend on user-provided config and credentials.",
+    "Token telemetry is not a bill; one fixture is not proof of savings across workflows.",
+    "Codex runs may differ in initial server catalogs, startup, cache and underlying system context."
+  ]
+}
