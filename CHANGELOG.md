@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+- Add opt-in `claude-lean` sessions with an empty or explicitly selected MCP configuration, without changing normal client settings.
+- Document cross-client trials, context measurements, and Spanish testing and context guides; keep measured limits explicit.
+- Add focused tests for argument forwarding, MCP selection, error handling and child exit status.
+
 ## 0.2.3
 
 - Native OpenCode V2 shell hook rejects recognizable compound validations before execution, with per-call project opt-out.
