@@ -2,7 +2,7 @@
 
 Paquete global de reglas y procedimientos para Claude Code, Codex CLI y OpenCode V2, con desactivación por proyecto, generación Rulesync y retirada reversible.
 
-[English](README.md) · [Arquitectura](docs/architecture.md) · [Compatibilidad y límites](docs/compatibility.md) · [Pruebas](docs/testing.md)
+[English](README.md) · [Arquitectura](docs/architecture.md) · [Compatibilidad y límites](docs/compatibility.md) · [Pruebas](docs/pruebas.es.md)
 
 No es un orquestador que trabaje solo. Incluye reglas breves, la skill `aw-workflow`, los roles opcionales `aw-worker` y `aw-reviewer`, un comando de inicio donde el cliente lo admite, recordatorios de inicio/compactación y diagnóstico de herramientas. Respeta las reglas del proyecto y los modelos elegidos por el usuario.
 
@@ -41,7 +41,7 @@ MCP antes; para recuperar tus servidores habituales abre `claude` normalmente.
 En una exploración de tres saludos en una Mac bajó la mediana del contexto al
 usar una lista MCP vacía, pero también cambiaron las herramientas disponibles
 y hubo variaciones de caché y arranque. No es una garantía de ahorro económico
-ni de capacidades equivalentes. [Estudio y límites](docs/context-study.md).
+ni de capacidades equivalentes. [Estudio y límites](docs/estudio-contexto.es.md).
 
 Rulesync está fijado a 43.8.0 y genera primero en una carpeta temporal. El instalador añade sólo sus archivos, bloques y entradas identificadas; conserva los demás ajustes, hooks y skills. Si encuentra una colisión, un enlace simbólico de destino o un archivo propio editado, se detiene en vez de sobrescribirlo.
 
