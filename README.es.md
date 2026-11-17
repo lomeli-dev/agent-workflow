@@ -23,6 +23,26 @@ agent-workflow verify
 
 La instalación npm registra el CLI; `install --global` añade las piezas a los clientes. Por defecto instala los tres. `--clients claude,codex` permite elegir. No necesita sudo ni cambia permisos/modelos de tus agentes.
 
+### Sesión opcional de Claude con menos contexto MCP
+
+```sh
+agent-workflow claude-lean --
+agent-workflow claude-lean -- --print "Explica este proyecto"
+agent-workflow claude-lean --mcp-file /ruta/a/mcp-seleccionados.json --
+```
+
+Sin `--mcp-file`, **esa sesión no dispone de servidores MCP configurados**.
+Con el archivo, sólo carga los servidores indicados en ese JSON de MCP de
+Claude; conserva las credenciales fuera del archivo. No modifica tu
+configuración habitual, modelos, permisos ni otras sesiones. Requiere Claude
+Code instalado y autenticado. Pon sus opciones después de `--` y el archivo
+MCP antes; para recuperar tus servidores habituales abre `claude` normalmente.
+
+En una exploración de tres saludos en una Mac bajó la mediana del contexto al
+usar una lista MCP vacía, pero también cambiaron las herramientas disponibles
+y hubo variaciones de caché y arranque. No es una garantía de ahorro económico
+ni de capacidades equivalentes. [Estudio y límites](docs/context-study.md).
+
 Rulesync está fijado a 43.8.0 y genera primero en una carpeta temporal. El instalador añade sólo sus archivos, bloques y entradas identificadas; conserva los demás ajustes, hooks y skills. Si encuentra una colisión, un enlace simbólico de destino o un archivo propio editado, se detiene en vez de sobrescribirlo.
 
 **El cliente puede pedir aprobación de hooks o reinicio.** No se salta esa aprobación. `verify` comprueba los archivos, no demuestra que una sesión abierta ya los haya cargado.
