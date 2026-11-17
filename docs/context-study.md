@@ -1,5 +1,7 @@
 # Context size study and optional Claude lean mode
 
+[Español](estudio-contexto.es.md)
+
 ## What was measured
 
 On one macOS account, a disposable Git fixture received the same minimal greeting three times per mode. These are exploratory client-reported context measurements, not a billing calculation or a benchmark of real tasks. No user config or credentials were changed. Raw client logs are local and private; [sanitized measurements](context-study-results.json) preserve each attempt and the harness errors.
@@ -41,7 +43,7 @@ For noninteractive usage, pass Claude options after the separator:
 agent-workflow claude-lean -- --print "Explain this project"
 ```
 
-**Undo:** exit that session and start `claude` normally. To remove this unreleased feature from a local checkout, return to the previous installed version or revert the code change; it adds no hooks, background service or persistent client configuration.
+**Undo:** exit that session and start `claude` normally. To remove this feature from a local checkout, return to the previous installed version or revert the code change; it adds no hooks, background service or persistent client configuration.
 
 ## Native validation
 

@@ -1,5 +1,7 @@
 # Testing and acceptance
 
+[Español](pruebas.es.md)
+
 Run `npm run check`. All installer tests use fresh temporary user roots; the test suite never substitutes HOME or calls the real global installer.
 
 Historical initial local results are in [validation.json](validation.json) and [native discovery](native-discovery.json). These record evidence boundaries rather than claiming model-driven execution in every client. `node scripts/package-smoke.mjs` additionally installs the actual packed npm artifact in a temporary prefix and tests its lifecycle.
@@ -26,7 +28,7 @@ Vercel agent-browser 0.43.0 was installed without downloading a browser. `script
 
 ## 0.2.1 audit validation
 
-The five-reviewer audit added effect-based regressions for comments inside shared arrays, changed OpenCode config precedence, missing managed blocks, connection receipt drift, nested opt-out registration, invalid containers, inherited JavaScript property names, missing/malformed LSP servers and FIFO project configs. The current suite has 36 passing tests. CI now checks untracked generated files and the actual minimum Node 22.22.0. See [audit coverage and remaining limits](audit-2026-11-13.md).
+The five-reviewer audit added effect-based regressions for comments inside shared arrays, changed OpenCode config precedence, missing managed blocks, connection receipt drift, nested opt-out registration, invalid containers, inherited JavaScript property names, missing/malformed LSP servers and FIFO project configs. At that point the suite had 36 passing tests. CI now checks untracked generated files and the actual minimum Node 22.22.0. See [audit coverage and remaining limits](audit-2026-11-13.md).
 
 ## Native-client behavioral acceptance
 
