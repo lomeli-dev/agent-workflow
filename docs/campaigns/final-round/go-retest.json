@@ -1,0 +1,13 @@
+[
+  {
+    "case": "go",
+    "client": "codex",
+    "requested_model": "gpt-6-luna",
+    "process_exit": 0,
+    "timeout": false,
+    "seconds": 85.3,
+    "independent_test_exit": 0,
+    "protected_intact": true,
+    "report_present": true
+  }
+]

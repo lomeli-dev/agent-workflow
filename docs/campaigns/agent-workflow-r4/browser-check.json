@@ -1,0 +1,16 @@
+{
+  "client": "claude",
+  "kind": "browser",
+  "seconds": 19.23,
+  "exit": 0,
+  "timedOut": false,
+  "reportExists": true,
+  "raw_contains_count_one": true,
+  "raw_contains_browser": true,
+  "raw_contains_close": true,
+  "scope": "one directed trial; string presence alone is not independent proof of cleanup",
+  "outcome": "not_verified_permission_denied",
+  "actual_click": false,
+  "session_started": false,
+  "explanation": "Count: 1 appeared in request text inside denied tool result, not a page snapshot."
+}

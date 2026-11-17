@@ -1,0 +1,231 @@
+{
+  "client": "OpenCode V2",
+  "requested_model": "opencode-go/glm-5.3-flash",
+  "turns": [
+    {
+      "number": 1,
+      "prompt_bytes": 6422,
+      "seconds": 4.96,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 14548,
+          "output": 3,
+          "reasoning": 75,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "prompt_bytes": 6362,
+      "seconds": 2.38,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 5719,
+          "output": 3,
+          "reasoning": 4,
+          "cache": {
+            "read": 14144,
+            "write": 0
+          }
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "prompt_bytes": 6362,
+      "seconds": 2.83,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 4302,
+          "output": 3,
+          "reasoning": 4,
+          "cache": {
+            "read": 19584,
+            "write": 0
+          }
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "prompt_bytes": 6362,
+      "seconds": 2.12,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 5049,
+          "output": 3,
+          "reasoning": 4,
+          "cache": {
+            "read": 22848,
+            "write": 0
+          }
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "prompt_bytes": 6362,
+      "seconds": 3.08,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 4724,
+          "output": 3,
+          "reasoning": 4,
+          "cache": {
+            "read": 27200,
+            "write": 0
+          }
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "prompt_bytes": 6362,
+      "seconds": 2.22,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 4398,
+          "output": 3,
+          "reasoning": 4,
+          "cache": {
+            "read": 31552,
+            "write": 0
+          }
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "prompt_bytes": 6362,
+      "seconds": 1.95,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 4035,
+          "output": 3,
+          "reasoning": 0,
+          "cache": {
+            "read": 35904,
+            "write": 0
+          }
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "prompt_bytes": 6362,
+      "seconds": 2.17,
+      "exit": 0,
+      "timeout": false,
+      "tools": [],
+      "usage": [
+        {
+          "input": 4792,
+          "output": 3,
+          "reasoning": 0,
+          "cache": {
+            "read": 39168,
+            "write": 0
+          }
+        }
+      ]
+    }
+  ],
+  "fixture_compaction_keep_tokens": 0,
+  "marker_recovered": true,
+  "compaction_completed": true,
+  "protected_intact": true,
+  "test_attempted": true,
+  "test_exit_observed": 7,
+  "test_reported": true,
+  "compound_validation": false,
+  "compact_request_exit": 0,
+  "final_exit": 0,
+  "final_timeout": false,
+  "final_tools": [
+    {
+      "tool": "glob",
+      "status": "completed",
+      "command": "",
+      "output_has_failure_marker": false,
+      "output_exit7": false
+    },
+    {
+      "tool": "shell",
+      "status": "completed",
+      "command": "agent-workflow status --json",
+      "output_has_failure_marker": false,
+      "output_exit7": false
+    },
+    {
+      "tool": "shell",
+      "status": "completed",
+      "command": "npm test",
+      "output_has_failure_marker": true,
+      "output_exit7": false
+    }
+  ],
+  "final_usage": [
+    {
+      "input": 15935,
+      "output": 53,
+      "reasoning": 47,
+      "cache": {
+        "read": 0,
+        "write": 0
+      }
+    },
+    {
+      "input": 927,
+      "output": 41,
+      "reasoning": 23,
+      "cache": {
+        "read": 15232,
+        "write": 0
+      }
+    },
+    {
+      "input": 1015,
+      "output": 139,
+      "reasoning": 0,
+      "cache": {
+        "read": 15232,
+        "write": 0
+      }
+    }
+  ],
+  "native_session_models": [
+    "opencode-go/glm-5.3-flash"
+  ],
+  "reported_token_totals": {
+    "input": 65444,
+    "output": 257,
+    "reasoning": 165
+  },
+  "reported_cache_read_tokens": 220864,
+  "token_caveat": "Client-reported usage; a single control run is not evidence of savings or actual cost."
+}

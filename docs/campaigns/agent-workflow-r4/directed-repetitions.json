@@ -1,0 +1,142 @@
+[
+  {
+    "repeat": 1,
+    "guard": {
+      "enabled": {
+        "enabled": true,
+        "exit": 0,
+        "seconds": 6.88,
+        "timedOut": false,
+        "testRan": true,
+        "maskingCommandRan": false
+      },
+      "disabled": {
+        "enabled": false,
+        "exit": 0,
+        "seconds": 10.51,
+        "timedOut": false,
+        "testRan": true,
+        "maskingCommandRan": true
+      }
+    },
+    "symbols": {
+      "exit": 0,
+      "seconds": 18.93,
+      "timedOut": false,
+      "sourceUnchanged": true,
+      "disconnected": true,
+      "tool_seen": true,
+      "parser_seen": true
+    },
+    "browser": {
+      "dom_in_successful_tool_result": true,
+      "close_in_successful_tool_result": true,
+      "report_not_verified": false
+    }
+  },
+  {
+    "repeat": 2,
+    "guard": {
+      "enabled": {
+        "enabled": true,
+        "exit": 0,
+        "seconds": 8.85,
+        "timedOut": false,
+        "testRan": true,
+        "maskingCommandRan": false
+      },
+      "disabled": {
+        "enabled": false,
+        "exit": 0,
+        "seconds": 9.22,
+        "timedOut": false,
+        "testRan": true,
+        "maskingCommandRan": true
+      }
+    },
+    "symbols": {
+      "exit": 0,
+      "seconds": 13.86,
+      "timedOut": false,
+      "sourceUnchanged": true,
+      "disconnected": true,
+      "tool_seen": true,
+      "parser_seen": true
+    },
+    "browser": {
+      "dom_in_successful_tool_result": false,
+      "close_in_successful_tool_result": false,
+      "report_not_verified": true
+    }
+  },
+  {
+    "repeat": 3,
+    "guard": {
+      "enabled": {
+        "enabled": true,
+        "exit": 0,
+        "seconds": 7.58,
+        "timedOut": false,
+        "testRan": true,
+        "maskingCommandRan": false
+      },
+      "disabled": {
+        "enabled": false,
+        "exit": 0,
+        "seconds": 11.95,
+        "timedOut": false,
+        "testRan": true,
+        "maskingCommandRan": true
+      }
+    },
+    "symbols": {
+      "exit": 0,
+      "seconds": 16.66,
+      "timedOut": false,
+      "sourceUnchanged": true,
+      "disconnected": true,
+      "tool_seen": true,
+      "parser_seen": true
+    },
+    "browser": {
+      "dom_in_successful_tool_result": true,
+      "close_in_successful_tool_result": true,
+      "report_not_verified": false
+    }
+  },
+  {
+    "repeat": 4,
+    "guard": {
+      "enabled": {
+        "enabled": true,
+        "exit": 0,
+        "seconds": 8.04,
+        "timedOut": false,
+        "testRan": true,
+        "maskingCommandRan": false
+      },
+      "disabled": {
+        "enabled": false,
+        "exit": 0,
+        "seconds": 10.81,
+        "timedOut": false,
+        "testRan": true,
+        "maskingCommandRan": true
+      }
+    },
+    "symbols": {
+      "exit": 0,
+      "seconds": 19.2,
+      "timedOut": false,
+      "sourceUnchanged": true,
+      "disconnected": true,
+      "tool_seen": true,
+      "parser_seen": true
+    },
+    "browser": {
+      "dom_in_successful_tool_result": true,
+      "close_in_successful_tool_result": true,
+      "report_not_verified": false
+    }
+  }
+]

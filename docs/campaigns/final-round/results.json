@@ -1,0 +1,35 @@
+[
+  {
+    "case": "go",
+    "client": "codex",
+    "requested_model": "gpt-6-luna",
+    "process_exit": 0,
+    "timeout": false,
+    "seconds": 46.8,
+    "independent_test_exit": 0,
+    "protected_intact": true,
+    "report_present": true
+  },
+  {
+    "case": "python",
+    "client": "claude",
+    "requested_model": "claude-sonnet-5-5",
+    "process_exit": 0,
+    "timeout": false,
+    "seconds": 14.0,
+    "independent_test_exit": 0,
+    "protected_intact": true,
+    "report_present": true
+  },
+  {
+    "case": "js",
+    "client": "opencode",
+    "requested_model": "opencode-go/glm-5.3-flash",
+    "process_exit": 0,
+    "timeout": false,
+    "seconds": 19.4,
+    "independent_test_exit": 0,
+    "protected_intact": true,
+    "report_present": true
+  }
+]

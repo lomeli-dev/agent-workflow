@@ -1,0 +1,10 @@
+{
+  "first_exit": 0,
+  "first_timeout": false,
+  "resume_exit": 0,
+  "resume_timeout": false,
+  "marker_recovered": true,
+  "checkpoint_preserved": true,
+  "resume_tools": [],
+  "scope": "one short native Codex resume; no compaction attempted"
+}

@@ -1,0 +1,50 @@
+{
+  "codex-default": {
+    "usage": {
+      "input_tokens": 24130,
+      "cached_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 5,
+      "reasoning_output_tokens": 0
+    },
+    "response_ok": true,
+    "model_requested": "gpt-6-luna"
+  },
+  "codex-no-user-config": {
+    "usage": {
+      "input_tokens": 19040,
+      "cached_input_tokens": 7168,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 5,
+      "reasoning_output_tokens": 0
+    },
+    "response_ok": true,
+    "model_requested": "gpt-6-luna"
+  },
+  "claude-default": {
+    "model": "claude-sonnet-5-5",
+    "announced_tools": 139,
+    "mcp_server_entries": 18,
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 16779,
+    "cache_read_input_tokens": 15702,
+    "output_tokens": 4,
+    "result_error": false
+  },
+  "claude-strict": {
+    "model": "claude-sonnet-5-5",
+    "announced_tools": 25,
+    "mcp_server_entries": 0,
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 15617,
+    "cache_read_input_tokens": 11595,
+    "output_tokens": 4,
+    "result_error": false
+  },
+  "limitations": [
+    "Single synthetic greeting per configuration; not a benchmark or cost calculation.",
+    "Codex ignore-user-config changes multiple user settings; delta cannot be attributed solely to MCP.",
+    "Claude strict MCP suppresses configured MCP servers, affecting availability and potentially other context; advertised counts do not establish tool calls.",
+    "Cached tokens are not a measure of cash billed; clients report usage differently."
+  ]
+}

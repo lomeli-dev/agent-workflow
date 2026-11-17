@@ -1,0 +1,32 @@
+{
+  "round": 4,
+  "candidate": "55015bde9c85050b1198c55ff203be7bcf52c474",
+  "fingerprint": "083aa83317fa44f3064f357f7dec8458543c31d81df94a5bb570fc411ba7141b",
+  "cases": [
+    {
+      "case": "T01",
+      "client": "claude",
+      "requested_model": "claude-opus-5-5",
+      "observed_model": "claude-opus-5-5",
+      "model_evidence": "native init",
+      "candidate": "55015bde9c85050b1198c55ff203be7bcf52c474",
+      "candidate_fingerprint": "083aa83317fa44f3064f357f7dec8458543c31d81df94a5bb570fc411ba7141b",
+      "domain": "Reservas",
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 47.4,
+      "independent_tests_exit": 0,
+      "protected_intact": true,
+      "report_present": true,
+      "changed_files": [
+        "README.md",
+        "src/duration.mjs",
+        "src/summary.mjs"
+      ],
+      "native_error_events": [],
+      "guard_event_mentions": 0,
+      "secondary_status": "not yet verified",
+      "status": "base_pass"
+    }
+  ]
+}
