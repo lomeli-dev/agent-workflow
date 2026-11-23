@@ -136,6 +136,9 @@ test('uninstall after a sync that rewrote the block still restores untouched fil
 });
 
 test('client selection stays explicit and invalid clients do not install',t=>{
- const root=fixture(t);assert.throws(()=>install({userRoot:root,clients:['unknown']}),/Use claude/);
- install({userRoot:root,clients:['codex']});assert(!existsSync(join(root,'.claude')));assert.throws(()=>install({userRoot:root,clients:['codex','claude']}),/Client set changed/);
+ const root=fixture(t);assert.throws(()=>install({userRoot:root,clients:['unknown']}),/Use --clients/);assert.throws(()=>install({userRoot:root,clients:['codex','codex']}),/without duplicates/);
+ install({userRoot:root,clients:['codex']});assert(!existsSync(join(root,'.claude')));
+ // A sync may add clients; dropping one still requires uninstall first.
+ install({userRoot:root,clients:['codex','claude']});assert(existsSync(join(root,'.claude/CLAUDE.md')));assert.equal(verify({userRoot:root}).ok,true);
+ assert.throws(()=>install({userRoot:root,clients:['claude']}),/Client set changed/);
 });

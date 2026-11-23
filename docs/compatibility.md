@@ -1,6 +1,6 @@
 # Compatibility, sources and evidence limits
 
-Initial scope: macOS/Linux, Node 22.22.0+, Claude Code, Codex CLI and OpenCode V2. No claim of Windows or all IDE support. Rulesync 43.8.0 is pinned; version updates require regeneration and adapter tests.
+Scope: macOS/Linux, Node 22.22.0+. Core clients (default): Claude Code, Codex CLI and OpenCode V2. Extra clients (0.4.0, explicit `--clients ...` or `--clients all`): Qwen Code, Kimi Code, Antigravity CLI (agy), Command Code, Pi and MiMo Code. ZCode and Cursor Agent CLI were left out by the owner's decision. No claim of Windows or all IDE support. Rulesync 43.8.0 is pinned; version updates require regeneration and adapter tests.
 
 | Capability | Claude Code | Codex CLI | OpenCode V2 |
 | --- | --- | --- | --- |
@@ -12,7 +12,45 @@ Initial scope: macOS/Linux, Node 22.22.0+, Claude Code, Codex CLI and OpenCode V
 | Project disable | Gate at hook invocation + behavioral instructions | Gate at hook invocation + behavioral instructions | Per-shell-call gate for validation guard + startup gate for MCP; reload long-lived MCPs after changing config |
 | LSP | Separate native integration required | Separate available client/tool integration required | Separate native integration required |
 
-OpenCode V2 has a bounded pre-execution shell guard for recognized compound test/build commands. Other clients retain advisory instructions; this is not a general permission sandbox. No model/effort, permission, authentication, compaction or unrelated plugin setting is changed. Reviewer read-only instructions are not a permission sandbox. Global files may remain in discovery when project-disabled; a zero-load guarantee is not claimed. Long-running clients can retain previously loaded policy until reload.
+## Extra clients (0.4.0)
+
+Paths are for the default layout; `QWEN_HOME`, `KIMI_CODE_HOME` and `PI_CODING_AGENT_DIR` are honored like `CODEX_HOME`. The skill is installed once in `~/.agents/skills/aw-workflow`, which Codex, Qwen, Kimi, Command Code, Pi and MiMo all read; only Antigravity gets its own copy (it does not read that folder). Agents and commands are Rulesync 43.8.0 outputs, generated in project layout inside staging (never with `rulesync --global`, which writes into the real home and ignores `--output-roots`) and mapped to each client's user folder.
+
+| Client (version checked) | Global rule (managed block) | Skill | Agents aw-worker / aw-reviewer | aw-start | Session hook |
+| --- | --- | --- | --- | --- | --- |
+| Qwen Code 0.28.4 | `~/.qwen/QWEN.md` | shared | `~/.qwen/agents/` | `~/.qwen/commands/aw-start.md` | `~/.qwen/settings.json`: SessionStart, SubagentStart, PreCompact (Claude shape, `hookSpecificOutput.additionalContext`; PreCompact text becomes compaction instructions) |
+| Kimi Code 2.7.3 | `~/.kimi-code/AGENTS.md` | shared | `~/.kimi-code/agents/` | skill `~/.kimi-code/skills/aw-start` | **none**: Kimi fires SessionStart but discards its output; only UserPromptSubmit output reaches the model, which would repeat the reminder on every prompt |
+| Antigravity CLI (agy) 1.5.15 | `~/.gemini/GEMINI.md` | `~/.gemini/config/skills/aw-workflow` | `~/.gemini/config/agents/` | skill `~/.gemini/config/skills/aw-start` | `~/.gemini/config/hooks.json`, named group `agent-workflow`, SessionStart → `injectSteps[].systemMessage` |
+| Command Code 1.89.3 | `~/.commandcode/AGENTS.md` | shared | `~/.commandcode/agents/` | `~/.commandcode/commands/aw-start.md` | `~/.commandcode/settings.json` SessionStart (its only session event); may ask to trust hooks per project |
+| Pi 1.6.0 | `~/.pi/agent/AGENTS.md` | shared | none (Pi has no subagents) | `~/.pi/agent/prompts/aw-start.md` | extension `~/.pi/agent/extensions/agent-workflow.js`: hidden message before the first run of each session |
+| MiMo Code 0.1.16 | see below | shared | `~/.config/mimocode/agents/` (reviewer: `permission.edit: deny`) | `~/.config/mimocode/commands/aw-start.md` | plugin `~/.config/mimocode/plugins/agent-workflow.js` (`experimental.chat.system.transform`) |
+
+MiMo loads only the first existing file of `$MIMOCODE_CONFIG_DIR/AGENTS.md`, `~/.config/mimocode/AGENTS.md` and `~/.claude/CLAUDE.md`. Creating its own `AGENTS.md` would silently stop it from reading Claude's file, so the block goes to `~/.config/mimocode/AGENTS.md` only when that file already exists or there is no `~/.claude/CLAUDE.md`; otherwise MiMo receives the rule through `CLAUDE.md` (install the `claude` client too). `install`/`verify` print a notice with the current situation. MiMo and Command Code also read `~/.claude/skills`, so with `claude` installed they may list `aw-workflow` from two folders (same content).
+
+Hooks of extra clients call `<store>/bin/node <store>/runtime/hook.mjs --client NAME`; the runtime adapts input (`workspacePaths` for agy) and output per client. Claude and Codex keep their previous command, so upgrading does not change their hook text. Reviewer read-only enforcement exists only for Claude, Codex, OpenCode and MiMo; elsewhere it is an instruction.
+
+### Evidence (23 November 2026)
+
+Every client: generated files, `--user-root` tests (install → verify → edits outside owned parts → sync → uninstall keeps them) and hook output tests. Real-client runs used an isolated install and never touched the real configuration (checksums of the real config files were compared before and after).
+
+| Client | Native discovery without a model | Real headless session |
+| --- | --- | --- |
+| agy | `agy agents` lists aw-reviewer, aw-worker | **Verified.** `agy --gemini_dir=<isolated>/.gemini -p ...` (real sign-in, isolated config): quoted the `GEMINI.md` block (`user_global`) and the SessionStart hook text, listed the aw-start/aw-workflow skills; ran `npm test` directly and reported exit 7; after `disable --project` the hook text was gone (0 occurrences) while the rule stayed |
+| MiMo | `mimo agent list` lists both subagents; `mimo debug skill` lists aw-workflow; `mimo debug config` loads the plugin without error | **Verified** with `MIMOCODE_CONFIG_DIR=<isolated>`: returned a canary placed in the isolated `AGENTS.md` that holds the block and quoted the plugin's gate sentence; ran `npm test > log 2>&1; echo "exit=$?"` (an allowed form) and reported 7; after `disable` the gate sentence was NONE. A first, open question was answered with "only the skill"; model self-reports are not reliable on their own |
+| Pi | — | **Hook verified** with `pi -p -e <isolated>/extensions/agent-workflow.js`: quoted the injected message (`customType: agent-workflow`); none after `disable`. The global `~/.pi/agent/AGENTS.md` needs the real agent dir (sign-in lives there): run by the owner after the global sync |
+| Command Code | `commandcode skills list` lists aw-workflow | pending global sync: settings and sign-in share `~/.commandcode` |
+| Qwen | none offline | pending global sync: `QWEN_HOME` also moves the sign-in |
+| Kimi | `kimi doctor`: config valid | pending global sync: `KIMI_CODE_HOME` also moves the sign-in |
+
+**Antigravity headless hang.** On this Mac `agy -p` waited until its print timeout because `context7_api` and `huggingface` stay "still connecting" (agy log `mcp_manager.go:1014`) although both have `"disabled": true` in `~/.gemini/config/mcp_config.json`; other disabled servers do not block. That is an agy 1.5.15 behavior, and `--settings` accepts no MCP key. Workaround without touching the global config: the hidden `--gemini_dir` flag points agy at another `.gemini` folder while the keyring sign-in stays valid (a temporary `HOME` loses it). For daily use the owner can remove those two entries from `~/.gemini/config/mcp_config.json` instead of keeping them disabled; Agent Workflow does not change it.
+
+Not added: ZCode and Cursor Agent (owner's decision). Factory Droid (`~/.factory`), GitHub Copilot CLI (`~/.copilot`) and DeepSeek Harness (`~/.dsh`) have config folders but no binary on this Mac; Rulesync maps them to `~/.factory/{AGENTS.md,skills,droids,commands}`, `~/.copilot/{copilot-instructions.md,skills,agents}` and `~/.dsh/{AGENTS.md,skills}`, so they can be added once a binary allows verification. Zed keeps its global rules in the Rules Library database (`~/.config/zed/prompts/prompts-library-db.0.mdb`, LMDB) and Warp keeps rules in the app/cloud: neither has a file this installer can own safely. The Claude Code and Codex VS Code extensions use `~/.claude` and `~/.codex`, already covered.
+
+## Codex hook approval
+
+Codex stores approval per hook in `~/.codex/config.toml` as `hooks.state."<hooks.json>:<event>:<group>:<handler>"` with `enabled = true`. A sync that changes a hook command (0.3.1 moved to the shim) leaves the old approval without `enabled`, and Codex silently skips the hook until it is reviewed. `verify` and `doctor` now return `warnings` (`codex-hook-untrusted`, `codex-hook-not-enabled`) for Agent Workflow hooks; they do not change `ok`. Fix: open Codex interactively, run `/hooks`, review and trust them. The installer never writes trust or uses `--dangerously-bypass-hook-trust`. A stale approval that still says `enabled = true` is not detected (the trusted hash is not recomputed).
+
+OpenCode V2 has a bounded pre-execution shell guard for recognized compound test/build commands, including `node <test file>` and commands identical to a single-command `test`/`check`/`build` script of the working directory's `package.json`. Other clients retain advisory instructions; this is not a general permission sandbox. No model/effort, permission, authentication, compaction or unrelated plugin setting is changed. Reviewer read-only instructions are not a permission sandbox. Global files may remain in discovery when project-disabled; a zero-load guarantee is not claimed. Long-running clients can retain previously loaded policy until reload.
 
 File generation, config parsing, hook invocation and native model-driven behavior are separate evidence levels. `verify` checks owned bytes/registrations only. No assertion that all IDEs execute these instructions identically or that a live model became faster. Diagnostics and tests must not read private prompts or credentials.
 

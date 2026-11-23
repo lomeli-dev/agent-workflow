@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0
+
+- **Six opt-in clients.** `--clients all` (or a list) adds Qwen Code, Kimi Code, Antigravity CLI (`agy`), Command Code, Pi and MiMo Code to the default claude, codex and opencode. Each gets a managed rule block in its global instruction file, the shared `~/.agents/skills/aw-workflow` skill (agy gets its own copy in `~/.gemini/config/skills`), the Rulesync-generated `aw-worker`/`aw-reviewer` and `aw-start` where the client has them, and a session hook in its native shape: Claude-shaped JSON for Qwen (SessionStart, SubagentStart, PreCompact) and Command Code, `injectSteps` for agy, a Pi extension and a MiMo plugin. Kimi gets no hook (it discards SessionStart output). Same contract as before: manifest, drift checks, `verify` with `outdated`, and `uninstall` that removes only owned parts. Real headless sessions confirmed agy and MiMo (rule, hook text and opt-out) and the Pi extension; the rest is file/config evidence until the global sync. See the compatibility document.
+- **MiMo keeps reading `CLAUDE.md`.** MiMo loads only the first of `~/.config/mimocode/AGENTS.md` and `~/.claude/CLAUDE.md`, so the installer writes its own `AGENTS.md` only when it already exists or there is no `CLAUDE.md`.
+- **`sync` can add clients** to an existing installation; dropping one still requires `uninstall` first. `--clients` rejects unknown names and duplicates.
+- **Codex hook approval.** `verify`/`doctor` add `warnings` (`codex-hook-untrusted`, `codex-hook-not-enabled`) when Codex has not approved the Agent Workflow hooks, read from `~/.codex/config.toml` without changing it. After a sync that changes hooks, re-approve them with `/hooks`.
+- **OpenCode guard** also recognizes `node <test file>` and commands identical to a single-command `test`/`check`/`build` script of the working directory's `package.json` (read, never executed); `node test.js; echo "exit=$?"` is now blocked.
+- **Fix:** `uninstall` failed with "Invalid JSON" when an owned hook was the last element of a compact JSON array after a user entry (a jsonc-parser 3.3.1 removal bug); removal now falls back to cutting the node and its separator.
+- Rulesync generation stays in project mode inside staging; `rulesync generate --global` is documented as unsafe (it writes to the real home and ignores `--output-roots`).
+
 ## 0.3.1
 
 - **Uninstall keeps your edits.** After a `sync`, `uninstall` restored the snapshot taken at the first install and wiped later edits to `CLAUDE.md`, `AGENTS.md`, `settings.json`, `hooks.json` and `opencode.jsonc` (deleting files that did not exist before). It now removes only the owned block, hooks and plugin entry; the snapshot is reused only when the file is otherwise untouched.

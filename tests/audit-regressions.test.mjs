@@ -78,3 +78,9 @@ test('special project config fails closed without blocking hooks',async t=>{
  const {status}=await import('../lib/gate.mjs');assert.equal(status(root).enabled,false);
  const hook=spawnSync(process.execPath,[join(PACKAGE,'lib/hook.mjs')],{input:JSON.stringify({cwd:root,hook_event_name:'SessionStart'}),encoding:'utf8',timeout:2000});assert.equal(hook.status,0);assert.equal(hook.stdout,'');
 });
+
+test('uninstall removes a trailing owned hook from compact JSON without corrupting it',t=>{
+ const home=fixture(t);install({userRoot:home});const p=join(home,'.claude/settings.json');
+ const v=json(read(p));v.hooks.SessionStart.unshift({hooks:[{type:'command',command:'mine'}]});writeFileSync(p,JSON.stringify(v));
+ uninstall({userRoot:home});assert.deepEqual(json(read(p)),{hooks:{SessionStart:[{hooks:[{type:'command',command:'mine'}]}]}});
+});

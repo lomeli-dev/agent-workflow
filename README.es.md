@@ -1,6 +1,6 @@
 # Agent Workflow
 
-Paquete global de reglas y procedimientos para Claude Code, Codex CLI y OpenCode V2, con desactivación por proyecto, generación Rulesync y retirada reversible.
+Paquete global de reglas y procedimientos para Claude Code, Codex CLI y OpenCode V2 (por defecto), y a petición para Qwen Code, Kimi Code, Antigravity CLI, Command Code, Pi y MiMo Code, con desactivación por proyecto, generación Rulesync y retirada reversible.
 
 [English](README.md) · [Arquitectura](docs/architecture.md) · [Compatibilidad y límites](docs/compatibility.md) · [Pruebas](docs/pruebas.es.md)
 
@@ -21,7 +21,19 @@ agent-workflow install --global
 agent-workflow verify
 ```
 
-La instalación npm registra el CLI; `install --global` añade las piezas a los clientes. Por defecto instala los tres. `--clients claude,codex` permite elegir. No necesita sudo ni cambia permisos/modelos de tus agentes.
+La instalación npm registra el CLI; `install --global` añade las piezas a los clientes. Por defecto instala claude, codex y opencode. `--clients claude,codex` permite elegir. No necesita sudo ni cambia permisos/modelos de tus agentes.
+
+### Más clientes
+
+```sh
+agent-workflow sync --global --clients all --dry-run
+agent-workflow sync --global --clients all
+agent-workflow verify
+```
+
+`all` suma `qwen`, `kimi`, `agy`, `commandcode`, `pi` y `mimo` a los tres de siempre; una lista con comas elige algunos. Un `sync` puede añadir clientes a una instalación existente; quitar uno exige `uninstall` antes. Cada cliente recibe lo que soporta de forma nativa: bloque de reglas, el skill compartido `~/.agents/skills/aw-workflow` (agy lleva su propia copia), roles, `aw-start` y un hook de sesión. Kimi no lleva hook (descarta la salida de SessionStart). Antigravity se verificó con una sesión headless real; en operaciones está cómo correrlo sin el cuelgue de MCP. La tabla por cliente, la precedencia de `CLAUDE.md` en MiMo y lo verificado en cada cliente están en [compatibilidad](docs/compatibility.md#extra-clients-040) y en [operaciones](docs/operaciones.es.md#clientes-adicionales).
+
+Tras un `sync` que cambie los hooks, Codex no los ejecuta hasta que los vuelvas a aprobar con `/hooks`; `verify` avisa con `codex-hook-untrusted` o `codex-hook-not-enabled`. No se salta la confianza.
 
 ### Sesión opcional de Claude con menos contexto MCP
 
@@ -153,6 +165,8 @@ Guía completa: [instalación, actualización, uso y recuperación](docs/operaci
 En carpetas sin Git, el opt-out busca también en los directorios antecesores hasta la raíz del sistema. Para `connect`, `disconnect` y `mcp-config` usa la raíz del repositorio; no se promociona una subcarpeta automáticamente. Si conectaste sólo algunos clientes, repite el mismo `--clients` al desconectar.
 
 [Prueba con agentes reales](docs/native-trial-2026-11-13.md): implementación, opt-out, roles, MCP y navegador, con sus resultados y límites.
+
+La versión 0.4.0 añade seis clientes opcionales, avisa de hooks de Codex sin aprobar, amplía el guard de OpenCode a `node <archivo de test>` y al script de test del proyecto, y corrige un fallo de `uninstall` con JSON compacto; ver el [changelog](CHANGELOG.md).
 
 La versión 0.3.1 hace que `uninstall` conserve lo editado después de un `sync`, ejecuta los hooks con un shim de Node estable, avisa en `verify` de una instalación desactualizada, contempla los worktrees (`disconnect --prune`) y alinea el guard de OpenCode con la regla; ver el [changelog](CHANGELOG.md).
 

@@ -1,8 +1,8 @@
 # Architecture and ownership
 
 1. `.rulesync` is the canonical portable content: applicability rule, skill and references, optional roles and command.
-2. `scripts/build.mjs` invokes the pinned Rulesync in a fresh staging directory. It emits `generated/` and a SHA-256 manifest. No real global directories are touched.
-3. `lib/install.mjs` maps generated artifacts to native user scopes. Rules are marked blocks; hooks and plugin arrays are merged using JSONC-preserving edits; other package files have exclusive ownership.
+2. `scripts/build.mjs` invokes the pinned Rulesync in project mode in a fresh staging directory. It emits `generated/` and a SHA-256 manifest. No real global directories are touched. Never run `rulesync generate --global`: in 43.8.0 it writes to the real home and ignores `--output-roots`.
+3. `lib/install.mjs` maps generated artifacts to native user scopes through one table per client (rule file, artifact folders, hook file and shape, generated plugin/extension files). Rules are marked blocks; hooks and plugin arrays are merged using JSONC-preserving edits; other package files have exclusive ownership.
 4. `installation.json` under the account's `.local/share/agent-workflow` records original contents and installed hashes. Its folder and file are private. It can contain sensitive pre-existing settings; it is never a distributable artifact.
 5. A lock serializes our install operations. Preflight checks all paths before writes; each write checks for intervening changes. Partial failures roll back writes still matching our output. This is not an OS-wide lock against arbitrary external writers.
 6. `lib/gate.mjs` reads only bounded project configuration. Hooks use it without project code execution, network, model calls or transcript access. Invalid config disables this package's workflow.
