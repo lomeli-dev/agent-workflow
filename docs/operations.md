@@ -30,6 +30,7 @@ The tools are optional. Preview with `setup --list`, `setup --interactive`, `set
 | `mcp-config --project ROOT` | Print native configuration suggestions only; writes nothing |
 | `connect --project ROOT` | Register selected project MCPs; `--dry-run` previews |
 | `disconnect --project ROOT` | Remove owned project registrations; use the same `--clients` set used to connect |
+| `disconnect --prune` | Forget receipts whose project no longer exists (for example a deleted worktree); `--dry-run` previews |
 | `mcp --tool NAME --project PATH` | Internal stdio launcher used by generated registrations |
 | `uninstall --global` | Remove workflow integration, restore owned changes; tools are retained |
 | `--user-root PATH` | Redirect managed destinations to an existing test-user directory; not a full OS sandbox |
@@ -41,6 +42,13 @@ Do not combine `--all` with other setup selectors. `--apply` and `--dry-run` are
 Default MCPs are Serena, CodeGraph and Context7. Optional browser MCPs require explicit `--tools playwright-mcp,devtools`. Agent-browser is the default CLI/skill browser, not an automatically registered MCP. Native files: Claude `.mcp.json`, Codex `.codex/config.toml`, OpenCode `opencode.jsonc` or `opencode.json`.
 
 Use the repository root for `connect`, `disconnect` and `mcp-config`. A nested path inside Git is rejected rather than silently promoted. Config applies to the registered root; a shared root registration cannot dynamically represent every nested opt-out. The MCP gate is checked when the server starts. Restart it after changing the switch; already running connections are not revoked. Global instructions remain discoverable when disabled.
+
+### Worktrees (Orca and `git worktree`)
+
+- **`connect` from a worktree** registers that worktree's root, not the main checkout.
+- **A copied or committed `.mcp.json`** stores the checkout where it was connected. At startup the launcher looks at its working directory: if it is another worktree of the same repository (same common Git directory), it serves that worktree and says so on stderr. A directory outside the repository keeps the registered path. This relies on the client starting the MCP in the project directory, which was not verified in real clients.
+- **An untracked `.agent-workflow.json` does not reach worktrees.** A new worktree only contains tracked files, so a `disable` in the main checkout does not apply there and the worker sees "enabled". Commit the file, or run `agent-workflow disable --project WORKTREE_PATH` in each worktree.
+- **Deleting a connected worktree** leaves an orphaned receipt, and `uninstall --global` stops and names the missing project. `agent-workflow disconnect --prune --dry-run` lists receipts whose project no longer exists, and `disconnect --prune` forgets them without touching other checkouts. `doctor` lists them under `connections`.
 
 Connection receipts preserve the exact original config path. If OpenCode config precedence changes, disconnect first and reconnect. If you used `--clients claude,codex`, use the same set for disconnect. Empty/duplicate clients, invalid containers, missing/edited managed blocks and changed owned entries fail before mutation.
 

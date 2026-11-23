@@ -13,7 +13,7 @@ import {serveMcp,MCP_TOOLS,DEFAULT_MCP_TOOLS} from '../lib/mcp-launch.mjs';
 import {spawnSync} from 'node:child_process';
 import {locations,PACKAGE} from '../lib/install.mjs';
 import {findSymbols} from '../lib/symbols.mjs';
-import {connect,connectionRoot} from '../lib/connect.mjs';
+import {connect,connectionRoot,pruneConnections} from '../lib/connect.mjs';
 
 const HELP=`Agent Workflow 0.3.0 — global by default, project opt-out
 
@@ -35,6 +35,7 @@ agent-workflow symbols --project PATH --file relative/module.mjs [--name SYMBOL]
 agent-workflow mcp-config --project PATH [--tools serena,codegraph]
 agent-workflow connect --project PATH [--tools serena,codegraph] [--clients claude,codex,opencode] [--dry-run]
 agent-workflow disconnect --project PATH [--clients claude,codex,opencode] [--dry-run]
+agent-workflow disconnect --prune [--dry-run]   (forget receipts whose project no longer exists)
 agent-workflow mcp --tool MODULE --project PATH
 agent-workflow uninstall --global [--dry-run]
 
@@ -46,7 +47,7 @@ claude-lean is opt-in: without --mcp-file, no MCP servers are available in
 that Claude session. It does not alter your normal Claude configuration.
 `;
 try{
-  const {values,positionals}=parseArgs({allowPositionals:true,options:{global:{type:'boolean'},clients:{type:'string'},'user-root':{type:'string'},project:{type:'string'},'dry-run':{type:'boolean'},json:{type:'boolean'},tool:{type:'string'},file:{type:'string'},name:{type:'string'},tools:{type:'string'},profile:{type:'string'},'mcp-file':{type:'string'},all:{type:'boolean'},list:{type:'boolean'},interactive:{type:'boolean'},apply:{type:'boolean'},help:{type:'boolean'},version:{type:'boolean'}}});
+  const {values,positionals}=parseArgs({allowPositionals:true,options:{global:{type:'boolean'},clients:{type:'string'},'user-root':{type:'string'},project:{type:'string'},'dry-run':{type:'boolean'},json:{type:'boolean'},tool:{type:'string'},file:{type:'string'},name:{type:'string'},tools:{type:'string'},profile:{type:'string'},'mcp-file':{type:'string'},all:{type:'boolean'},list:{type:'boolean'},interactive:{type:'boolean'},prune:{type:'boolean'},apply:{type:'boolean'},help:{type:'boolean'},version:{type:'boolean'}}});
   const cmd=positionals[0];if(values.version){console.log('0.3.0');process.exit(0);}if(values.help||!cmd){console.log(HELP);process.exit(0);}
   if(positionals.length>1&&cmd!=='exec'&&cmd!=='claude-lean')throw Error('Unexpected positional arguments');
   const userRoot=values['user-root'],dryRun=values['dry-run']??false;let result;
@@ -81,6 +82,7 @@ try{
     const p=spawnSync(path,positionals.slice(1),{env:toolEnvironment(loc),cwd:values.project??process.cwd(),stdio:'inherit'});process.exit(p.status??1);
   }
   else if(cmd==='mcp'){await serveMcp({tool:values.tool,project:values.project,userRoot});process.exit(process.exitCode??0);}
+  else if(cmd==='disconnect'&&values.prune){if(values.project||values.clients)throw Error('--prune works on every receipt; do not combine it with --project or --clients');result=pruneConnections({userRoot,dryRun});}
   else if(cmd==='connect'||cmd==='disconnect')result=connect({project:values.project,userRoot,dryRun,remove:cmd==='disconnect',tools:values.tools?values.tools.split(','):DEFAULT_MCP_TOOLS,clients:values.clients?values.clients.split(','):CLIENTS});
   else if(cmd==='mcp-config'){
     if(!values.project)throw Error('Specify --project');const project=connectionRoot(values.project),ids=values.tools?values.tools.split(','):DEFAULT_MCP_TOOLS;

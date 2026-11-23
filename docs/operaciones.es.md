@@ -37,6 +37,7 @@ Sin `--apply` sólo se presenta el plan, aunque puede ejecutar probes de versió
 | `mcp-config --project RAIZ` | Mostrar sugerencias de configuración sin escribir archivos |
 | `connect --project RAIZ` | Registrar MCP del proyecto; `--dry-run` previsualiza |
 | `disconnect --project RAIZ` | Retirar las entradas propias; repetir el mismo `--clients` de la conexión |
+| `disconnect --prune` | Olvidar los recibos cuyo proyecto ya no existe (p. ej. un worktree borrado); `--dry-run` previsualiza |
 | `mcp --tool NOMBRE --project RUTA` | Lanzador stdio interno usado por los registros |
 | `uninstall --global` | Retirar integración y revertir cambios propios; conserva herramientas |
 | `--user-root RUTA` | Usar una raíz temporal de pruebas existente; no es un sandbox del sistema |
@@ -58,6 +59,13 @@ Usa la raíz Git para conectar, desconectar o imprimir configuración. No acepta
 Los archivos nativos son `.mcp.json`, `.codex/config.toml` y `opencode.jsonc`/`opencode.json`. Se conserva la ruta originalmente administrada. Si cambias el archivo de configuración que tiene prioridad en OpenCode, primero desconecta y luego conecta de nuevo. Los cambios en entradas propias se detienen para revisión.
 
 El opt-out se comprueba al arrancar el MCP; no revoca servidores ya abiertos. Reinícialos después de cambiarlo. Dentro de Git la búsqueda del interruptor termina en la raíz del repo. Fuera de Git busca en los directorios superiores hasta la raíz del sistema. El cliente puede seguir descubriendo las skills globales aunque el flujo esté desactivado.
+
+### Worktrees (Orca y `git worktree`)
+
+- **`connect` desde un worktree** registra la raíz de ese worktree, no la del clon principal.
+- **Un `.mcp.json` copiado o versionado** guarda la ruta del clon donde se conectó. Al arrancar, el lanzador mira el directorio actual: si es otro worktree del mismo repo (mismo directorio Git común), sirve ese worktree y lo avisa por stderr. Si el directorio no pertenece al repo, usa la ruta registrada. Esto depende de que el cliente arranque el MCP con el cwd del proyecto; no se comprobó en clientes reales.
+- **`.agent-workflow.json` sin trackear no llega a los worktrees.** Un worktree nuevo solo trae lo versionado, así que un `disable` hecho en el clon principal no aplica ahí: el worker recibe "enabled". Versiona el archivo, o ejecuta `agent-workflow disable --project RUTA_DEL_WORKTREE` en cada worktree.
+- **Si borras un worktree conectado**, su recibo queda huérfano y `uninstall --global` se detiene diciendo qué proyecto falta. `agent-workflow disconnect --prune --dry-run` muestra los recibos cuyo proyecto ya no existe y `disconnect --prune` los olvida. No toca otros clones. `doctor` también los lista en `connections`.
 
 ## Navegador
 
