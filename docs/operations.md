@@ -93,7 +93,7 @@ For validation history and current coverage, read [testing](testing.md) and the 
 
 ## Validation guard and module coverage
 
-OpenCode V2 registers a `shell.create.before` hook. When the effective project gate is enabled, recognized test/build commands combined with pipes, separators or conditionals are rejected before execution. Run the check directly and use the tool cwd field.
+OpenCode V2 registers a `shell.create.before` hook. Since 0.5.0 the same guard (one runtime, `shellGuard` in `gate.mjs` + `validation-guard.mjs`) runs before the shell tool of Qwen, Kimi and Command Code (`PreToolUse` hook, answered with `permissionDecision: deny`), Pi (extension `tool_call` → `block`) and MiMo (plugin `tool.execute.before` → `cancel`), and, with `--guard claude,codex`, Claude Code and Codex (`PreToolUse`, matcher `Bash`). When the effective project gate is enabled, recognized test/build commands combined with pipes, separators or conditionals are rejected before execution. Run the check directly and use the tool cwd field (Claude's Bash tool has none: run `cd` as its own call).
 
 Recognized validations include npm/pnpm/yarn/bun scripts, `npx`/`pnpm exec`/`bunx` runners, `uv run`/`poetry run`, pytest/jest/vitest, `node --test`, cargo/go/dotnet, gradle/`./gradlew` test tasks, `make [-C DIR] test|check|build` and `bash -c`/`sh -c` scripts (checked recursively). Three forms keep the failure status and are allowed:
 
