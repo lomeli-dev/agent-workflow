@@ -6,7 +6,7 @@
 4. `installation.json` under the account's `.local/share/agent-workflow` records original contents and installed hashes. Its folder and file are private. It can contain sensitive pre-existing settings; it is never a distributable artifact.
 5. A lock serializes our install operations. Preflight checks all paths before writes; each write checks for intervening changes. Partial failures roll back writes still matching our output. This is not an OS-wide lock against arbitrary external writers.
 6. `lib/gate.mjs` reads only bounded project configuration. Hooks use it without project code execution, network, model calls or transcript access. Invalid config disables this package's workflow.
-7. Native clients retain their own trust, precedence and permissions. Global applicability is behavioral; startup reminders do not intercept every tool. This package does not claim a security sandbox.
+7. Native clients retain their own trust, precedence and permissions. The one exception is explicit and opt-in: `trust --client codex` / `--trust-codex` approves only the Agent Workflow Codex hooks through `codex app-server`, the same requests the Codex `/hooks` screen sends; it never bypasses trust or touches other hooks. Global applicability is behavioral; startup reminders do not intercept every tool. This package does not claim a security sandbox.
 
 Project config is deliberately small: `{schemaVersion:1, enabled:boolean}`. No commands, scripts, executable installation recipes or credentials are loaded from it. The nearest config from cwd toward the repository root wins; outside repositories, directory ancestors can provide the switch. The CLI writes at the repository root. Nested overrides can be written explicitly by users.
 

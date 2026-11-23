@@ -8,6 +8,8 @@ import {pathToFileURL} from 'node:url';
 import {parse as parseToml} from 'smol-toml';
 import {install,uninstall,verify,locations,json,hooks,PACKAGE,ALL_CLIENTS,GUARD_OPT_IN} from '../lib/install.mjs';
 import {hash} from '../lib/files.mjs';
+// Tests never start a real Codex (verify/install would ask codex app-server for hook trust).
+process.env.AGENT_WORKFLOW_CODEX='none';
 
 function fixture(t){const p=mkdtempSync(join(tmpdir(),'aw-cguard-'));t.after(()=>rmSync(p,{recursive:true,force:true}));return p;}
 function put(root,name,body){const p=join(root,name);mkdirSync(dirname(p),{recursive:true});writeFileSync(p,body);return p;}

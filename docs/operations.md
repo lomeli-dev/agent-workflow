@@ -18,7 +18,8 @@ The tools are optional. Preview with `setup --list`, `setup --interactive`, `set
 
 | Command | Effect |
 | --- | --- |
-| `install --global`, `sync --global` | Deploy/update owned workflow files; `--clients claude,codex,opencode` selects clients |
+| `install --global`, `sync --global` | Deploy/update owned workflow files; `--clients claude,codex,opencode` selects clients; `--trust-codex` (opt-in) trusts the Agent Workflow Codex hooks right after writing `hooks.json` |
+| `trust --client codex [--dry-run]` | Trust only the Agent Workflow Codex hooks through `codex app-server`, same as approving them in `/hooks`; shows before/after |
 | `verify` | Check installation receipt, owned files, registrations and the Node/runtime the hooks call; `status: outdated` lists files that differ from this package (run `sync`); not native execution |
 | `doctor --json` | Check executable/version availability and repeat the `verify` checks under `installation`; not authentication or complete LSP/browser integration |
 | `status --project PATH --json` | Read effective project opt-out |
@@ -73,6 +74,12 @@ agent-workflow sync --global --dry-run
 agent-workflow sync --global
 agent-workflow verify
 ```
+
+### Codex hook trust
+
+Codex runs a hook only when `hooks.state."<key>".trusted_hash` in `~/.codex/config.toml` equals the hook's current hash; a sync that changes a hook command makes it stop running until it is approved again. `agent-workflow trust --client codex` (preview with `--dry-run`) does what `/hooks` does, through `codex app-server` (`hooks/list`, then `config/batchWrite` of `hooks.state`, written by Codex itself). It selects only hooks in the user `hooks.json` whose command is the Agent Workflow shim + store runtime; other hooks (Orca, warp, yours) and their trust are never touched, and `enabled` is never changed. If `codex` is missing or app-server fails, it exits 1 and changes nothing. `sync --global --trust-codex` runs the same step right after writing `hooks.json` (opt-in; a sync without it never writes trust).
+
+`verify`/`doctor` report `codexHookTrust` from `codex app-server` when Codex is available (`trustStatus`, `enabled`) and warn with `codex-hook-untrusted`, `codex-hook-modified` or `codex-hook-disabled`. Without Codex they read `config.toml`: a missing `enabled` means enabled; only a missing `trusted_hash` or `enabled = false` is reported, and whether a present hash still matches is not computed (`hashChecked: false`). `AGENT_WORKFLOW_CODEX=PATH` selects the executable; `AGENT_WORKFLOW_CODEX=none` forces the TOML reading.
 
 Installs from 0.3.0 and earlier call the absolute Node path directly; the first `sync` with 0.3.1 moves them to the shim. Project MCP registrations also record the Node and checkout path: disconnect and reconnect them after switching.
 

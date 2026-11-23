@@ -11,6 +11,8 @@ import {releaseAsset} from '../lib/modules.mjs';
 import {disabledReply,DEFAULT_MCP_TOOLS} from '../lib/mcp-launch.mjs';
 import {connect} from '../lib/connect.mjs';
 import {PACKAGE,json,uninstall} from '../lib/install.mjs';
+// Tests never start a real Codex (verify/install would ask codex app-server for hook trust).
+process.env.AGENT_WORKFLOW_CODEX='none';
 function fixture(t){const root=mkdtempSync(join(tmpdir(),'aw-module-test-'));t.after(()=>rmSync(root,{recursive:true,force:true}));return root;}
 test('selector handles all, numeric choices, names, duplicates and invalid input',()=>{
  assert.deepEqual(parseSelection('todo'),selectModules({all:true}));assert.deepEqual(parseSelection('1, serena,1'),['gopls','serena']);assert.deepEqual(parseSelection(''),[]);assert.throws(()=>parseSelection('999'),/Unknown/);assert.throws(()=>selectModules({all:true,tools:['serena']}),/Choose/);assert(!Object.keys(CATALOG).some(s=>/eslint|prettier|ruff|shellcheck|tmux/.test(s)));

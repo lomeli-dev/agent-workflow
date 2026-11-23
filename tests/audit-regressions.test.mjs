@@ -7,6 +7,8 @@ import {install,uninstall,locations,json,PACKAGE} from '../lib/install.mjs';
 import {connect} from '../lib/connect.mjs';
 import {hash} from '../lib/files.mjs';
 import {spawnSync} from 'node:child_process';
+// Tests never start a real Codex (verify/install would ask codex app-server for hook trust).
+process.env.AGENT_WORKFLOW_CODEX='none';
 function fixture(t){const p=mkdtempSync(join(tmpdir(),'aw-audit-'));t.after(()=>rmSync(p,{recursive:true,force:true}));return p;}
 function put(root,name,body){const p=join(root,name);mkdirSync(dirname(p),{recursive:true});writeFileSync(p,body);return p;}
 const read=p=>readFileSync(p,'utf8');

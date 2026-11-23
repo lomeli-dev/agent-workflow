@@ -7,6 +7,8 @@ import {spawnSync} from 'node:child_process';
 import {install,uninstall,verify,locations,json,hooks} from '../lib/install.mjs';
 import {installation} from '../lib/doctor.mjs';
 import {hash} from '../lib/files.mjs';
+// Tests never start a real Codex (verify/install would ask codex app-server for hook trust).
+process.env.AGENT_WORKFLOW_CODEX='none';
 function fixture(t){const p=mkdtempSync(join(tmpdir(),'aw-shim-'));t.after(()=>rmSync(p,{recursive:true,force:true}));return p;}
 const read=p=>readFileSync(p,'utf8');
 const hookCommand=root=>json(read(join(locations(root).claude,'settings.json'))).hooks.SessionStart.at(-1).hooks[0].command;

@@ -9,6 +9,8 @@ import {install,uninstall,verify,locations,json,PACKAGE} from '../lib/install.mj
 import {block,blockContent,hash,read,atomic,lock} from '../lib/files.mjs';
 import {status,hookResult} from '../lib/gate.mjs';
 import {setup} from '../lib/doctor.mjs';
+// Tests never start a real Codex (verify/install would ask codex app-server for hook trust).
+process.env.AGENT_WORKFLOW_CODEX='none';
 
 function fixture(t){const root=mkdtempSync(join(tmpdir(),'aw-test-'));t.after(()=>rmSync(root,{recursive:true,force:true}));return root;}
 function put(root,name,text){const p=join(root,name);mkdirSync(resolve(p,'..'),{recursive:true});writeFileSync(p,text);return p;}

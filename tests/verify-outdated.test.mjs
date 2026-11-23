@@ -6,6 +6,8 @@ import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {install,verify,locations,json,PACKAGE,VERSION} from '../lib/install.mjs';
 import {block,blockContent,hash} from '../lib/files.mjs';
+// Tests never start a real Codex (verify/install would ask codex app-server for hook trust).
+process.env.AGENT_WORKFLOW_CODEX='none';
 function fixture(t){const p=mkdtempSync(join(tmpdir(),'aw-outdated-'));t.after(()=>rmSync(p,{recursive:true,force:true}));return p;}
 const read=p=>readFileSync(p,'utf8');
 

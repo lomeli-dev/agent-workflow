@@ -35,7 +35,7 @@ agent-workflow verify
 
 **Guard de validación.** Antes de ejecutar shell, Qwen, Kimi, Command Code, Pi y MiMo (y OpenCode, como antes) bloquean un comando de test/build cuyo código de salida quedaría oculto por un pipe, un `;` o un `echo` posterior, y le dicen al modelo las tres formas permitidas. En Claude Code y Codex es opcional: `agent-workflow sync --global --clients ... --guard claude,codex` (`--guard none` lo quita; sin `--guard`, un `sync` conserva lo elegido). Codex pide aprobar una vez el hook nuevo `PreToolUse`. Los proyectos desactivados nunca se bloquean. Detalle y evidencia por cliente: [operaciones](docs/operaciones.es.md#protección-de-validación-y-archivos-de-módulos).
 
-Tras un `sync` que cambie los hooks, Codex no los ejecuta hasta que los vuelvas a aprobar con `/hooks`; `verify` avisa con `codex-hook-untrusted` o `codex-hook-not-enabled`. No se salta la confianza.
+Tras un `sync` que cambie los hooks, Codex no los ejecuta hasta que los vuelvas a aprobar: `agent-workflow trust --client codex` lo hace igual que `/hooks`, solo para los hooks de Agent Workflow (o pasa `--trust-codex` al `sync`); también puedes usar `/hooks` a mano. `verify` lee el estado de `codex app-server` si `codex` está disponible y avisa con `codex-hook-untrusted`, `codex-hook-modified` o `codex-hook-disabled`. No se salta la confianza.
 
 ### Sesión opcional de Claude con menos contexto MCP
 
@@ -167,6 +167,8 @@ Guía completa: [instalación, actualización, uso y recuperación](docs/operaci
 En carpetas sin Git, el opt-out busca también en los directorios antecesores hasta la raíz del sistema. Para `connect`, `disconnect` y `mcp-config` usa la raíz del repositorio; no se promociona una subcarpeta automáticamente. Si conectaste sólo algunos clientes, repite el mismo `--clients` al desconectar.
 
 [Prueba con agentes reales](docs/native-trial-2026-11-13.md): implementación, opt-out, roles, MCP y navegador, con sus resultados y límites.
+
+La versión 0.5.1 añade `agent-workflow trust --client codex` y `--trust-codex` (aprueban solo los hooks de Agent Workflow en Codex, como `/hooks`) y quita un falso aviso `codex-hook-not-enabled`; ver el [changelog](CHANGELOG.md).
 
 La versión 0.5.0 lleva el guard de validación a Qwen, Kimi, Command Code, Pi y MiMo, y lo deja opcional para Claude y Codex (`--guard`); ver el [changelog](CHANGELOG.md).
 
