@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "rulesync": "43.8.0",
   "files": {
-    ".agents/skills/aw-workflow/references/execution.md": "9789b983e9fa37ea93bf9fd0731cdc64252d7cfdb4d936bcff086289197b7f68",
+    ".agents/skills/aw-workflow/references/execution.md": "7aca49978334f37523939684969869d6f99cebbc3a846072a385973550a18c43",
     ".agents/skills/aw-workflow/references/parallel.md": "abadadebad8aca55b0c889e23a357900356b479f7d8c0667c7967c3c5cc116a9",
     ".agents/skills/aw-workflow/references/tools.md": "06800f103bc7fe4f2c40a2d104337b8f9298de1aa936e9ec2c26c28276de1242",
     ".agents/skills/aw-workflow/SKILL.md": "c37a101db815d57c6e8158d3508ac08c4ea59ffd531fd580006e27ea6e13675f",
     ".claude/agents/aw-reviewer.md": "6cbbc9fdfc6f8cf09506fc8b21c03db9ef9e0a396697f7e6d8687e82aea83165",
     ".claude/agents/aw-worker.md": "33893af82a922c56e07832002ee40348ff0fe94b889cc17ae693466b0dfd6b26",
     ".claude/commands/aw-start.md": "fb1a5683554172ca31823d82dc89ddd6452a5e40d0416e1f46bc4ab0f6cdc524",
-    ".claude/skills/aw-workflow/references/execution.md": "9789b983e9fa37ea93bf9fd0731cdc64252d7cfdb4d936bcff086289197b7f68",
+    ".claude/skills/aw-workflow/references/execution.md": "7aca49978334f37523939684969869d6f99cebbc3a846072a385973550a18c43",
     ".claude/skills/aw-workflow/references/parallel.md": "abadadebad8aca55b0c889e23a357900356b479f7d8c0667c7967c3c5cc116a9",
     ".claude/skills/aw-workflow/references/tools.md": "06800f103bc7fe4f2c40a2d104337b8f9298de1aa936e9ec2c26c28276de1242",
     ".claude/skills/aw-workflow/SKILL.md": "c37a101db815d57c6e8158d3508ac08c4ea59ffd531fd580006e27ea6e13675f",
@@ -18,11 +18,11 @@
     ".opencode/agents/aw-reviewer.md": "6d85a7f69c00ae47cdcedea762ac591748c970cbdbe7a83e5d1eff66b0a831b6",
     ".opencode/agents/aw-worker.md": "328697aee9d25502885245ca4fdf3b85892af61fd4a25897884df07bed8dd979",
     ".opencode/commands/aw-start.md": "fb1a5683554172ca31823d82dc89ddd6452a5e40d0416e1f46bc4ab0f6cdc524",
-    ".opencode/skills/aw-workflow/references/execution.md": "9789b983e9fa37ea93bf9fd0731cdc64252d7cfdb4d936bcff086289197b7f68",
+    ".opencode/skills/aw-workflow/references/execution.md": "7aca49978334f37523939684969869d6f99cebbc3a846072a385973550a18c43",
     ".opencode/skills/aw-workflow/references/parallel.md": "abadadebad8aca55b0c889e23a357900356b479f7d8c0667c7967c3c5cc116a9",
     ".opencode/skills/aw-workflow/references/tools.md": "06800f103bc7fe4f2c40a2d104337b8f9298de1aa936e9ec2c26c28276de1242",
     ".opencode/skills/aw-workflow/SKILL.md": "c37a101db815d57c6e8158d3508ac08c4ea59ffd531fd580006e27ea6e13675f",
-    "AGENTS.md": "491cf1d11e39efa91eb596637b7b0861a6cd5f97419200009de4545d5ad91246",
-    "CLAUDE.md": "491cf1d11e39efa91eb596637b7b0861a6cd5f97419200009de4545d5ad91246"
+    "AGENTS.md": "6897b4c61b42ec3e81f43fa55b3b4447a4037223bcd1c5ace22ffb4cc516a9e5",
+    "CLAUDE.md": "6897b4c61b42ec3e81f43fa55b3b4447a4037223bcd1c5ace22ffb4cc516a9e5"
   }
 }

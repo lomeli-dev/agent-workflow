@@ -115,6 +115,14 @@ Los modelos, effort, permisos y compactación del cliente no se cambian. La memo
 
 ## Protección de validación y archivos de módulos
 
-En OpenCode V2 el plugin intercepta el shell antes de ejecutar. Con el workflow activo rechaza validaciones reconocidas que incluyan pipes, separadores o condicionales; ejecuta el test solo y usa el directorio del propio tool. El opt-out se vuelve a consultar en cada llamada. Es un guard limitado, no un parser universal ni un sandbox de permisos.
+En OpenCode V2 el plugin intercepta el shell antes de ejecutar. Con el workflow activo rechaza validaciones reconocidas que incluyan pipes, separadores o condicionales; ejecuta el test solo y usa el directorio del propio tool.
+
+Reconoce como validación los scripts de npm/pnpm/yarn/bun, los runners vía `npx`/`pnpm exec`/`bunx`, `uv run`/`poetry run`, pytest/jest/vitest, `node --test`, cargo/go/dotnet, las tareas de test de gradle/`./gradlew`, `make [-C DIR] test|check|build` y los scripts de `bash -c`/`sh -c` (los revisa por dentro). Deja pasar tres formas que conservan el estado:
+
+- `set -o pipefail; CMD | tail` (también `set -euo pipefail`): el pipeline devuelve el primer fallo;
+- `CMD | tail; exit ${PIPESTATUS[0]}`: el índice debe apuntar a la validación;
+- `CMD > log 2>&1; echo "exit=$?"`: la salida completa queda en un archivo y se imprime el estado. Sin la redirección, `CMD; echo $?` sigue bloqueado.
+
+Cualquier cosa después de esas formas, las cadenas con `cd`, `&&`/`||` y los procesos en segundo plano siguen bloqueados. El opt-out se vuelve a consultar en cada llamada. Es un guard limitado, no un parser universal ni un sandbox de permisos.
 
 El MCP de CodeGraph incorpora `agent_workflow_symbols` para un archivo JS/TS explícito, incluyendo `.mjs`, `.cjs`, `.mts` y `.cts`. Usa TypeScript como requisito, devuelve nombres y posiciones originales y no ejecuta el módulo. Rechaza rutas fuera del proyecto, errores sintácticos y archivos mayores a 1 MiB. El resultado identifica su fuente y no afirma tener relaciones de grafo. El motor original de CodeGraph sigue teniendo su límite de extensiones.

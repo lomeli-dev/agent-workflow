@@ -93,6 +93,14 @@ For validation history and current coverage, read [testing](testing.md) and the 
 
 ## Validation guard and module coverage
 
-OpenCode V2 registers a `shell.create.before` hook. When the effective project gate is enabled, recognized test/build commands combined with pipes, separators or conditionals are rejected before execution. Run the check directly and use the tool cwd field. Ordinary reads and direct validations are unchanged. Recognition is deliberately bounded; it is not a general shell parser, permission filter or guarantee for arbitrary scripts/substitutions. Unsupported plugin APIs retain guidance only and report `validationGuard: false` in plugin storage.
+OpenCode V2 registers a `shell.create.before` hook. When the effective project gate is enabled, recognized test/build commands combined with pipes, separators or conditionals are rejected before execution. Run the check directly and use the tool cwd field.
+
+Recognized validations include npm/pnpm/yarn/bun scripts, `npx`/`pnpm exec`/`bunx` runners, `uv run`/`poetry run`, pytest/jest/vitest, `node --test`, cargo/go/dotnet, gradle/`./gradlew` test tasks, `make [-C DIR] test|check|build` and `bash -c`/`sh -c` scripts (checked recursively). Three forms keep the failure status and are allowed:
+
+- `set -o pipefail; CMD | tail` (also `set -euo pipefail`): the pipeline returns the first failure;
+- `CMD | tail; exit ${PIPESTATUS[0]}`: the index must point at the validation;
+- `CMD > log 2>&1; echo "exit=$?"`: full output goes to a file and the status is printed. Without the redirection, `CMD; echo $?` stays blocked.
+
+Anything after those forms, `cd` chains, `&&`/`||` and background jobs stay blocked. Ordinary reads and direct validations are unchanged. Recognition is deliberately bounded; it is not a general shell parser, permission filter or guarantee for arbitrary scripts/substitutions. Unsupported plugin APIs retain guidance only and report `validationGuard: false` in plugin storage.
 
 The CodeGraph adapter adds `agent_workflow_symbols` and coverage guidance. It reads only the explicit original project-relative JS/TS file (maximum 1 MiB), refuses path escapes and syntax errors, and returns named declarations with original locations. It never executes project modules. TypeScript is a setup prerequisite of CodeGraph. Results identify `source: typescript-parser` and `graphRelationships: false`; this does not patch the upstream relationship graph.
