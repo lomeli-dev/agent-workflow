@@ -19,8 +19,8 @@ The tools are optional. Preview with `setup --list`, `setup --interactive`, `set
 | Command | Effect |
 | --- | --- |
 | `install --global`, `sync --global` | Deploy/update owned workflow files; `--clients claude,codex,opencode` selects clients |
-| `verify` | Check installation receipt, owned files and registrations; not native execution |
-| `doctor --json` | Check executable/version availability; not authentication or complete LSP/browser integration |
+| `verify` | Check installation receipt, owned files, registrations and the Node/runtime the hooks call; not native execution |
+| `doctor --json` | Check executable/version availability and repeat the `verify` checks under `installation`; not authentication or complete LSP/browser integration |
 | `status --project PATH --json` | Read effective project opt-out |
 | `disable --project PATH`, `enable --project PATH` | Write the small project switch; `--dry-run` previews |
 | `setup --list` | Show the full catalog and profiles |
@@ -53,6 +53,20 @@ Downloading is a separate explicit action: `agent-workflow exec --tool agent-bro
 ## Updates and removal
 
 Fetch, inspect and fast-forward the intended source revision before reinstalling dependencies and running `sync`; see the exact sequence in the overview. Worktree divergence is not permission to reset. Rerun package checks and verify. A changed Node path or moved checkout may invalidate stored command paths; disconnect projects before moving and reconnect after installing at the new path.
+
+### After switching Node
+
+Hooks run through a stable shim, `<store>/bin/node`, which records the Node that ran the last `sync`. With nvm, `npm link` (or `npm install --global .`) is per Node version, so after `nvm use` to another version the `agent-workflow` command may not exist, and after deleting the recorded version the shim falls back to the `node` in PATH or, if there is none, exits 0 without context. `verify` and `doctor` report `hook-node-missing` (or `hook-runtime-missing`) with the repair:
+
+```sh
+cd /path/to/agent-workflow   # your checkout
+npm link                     # with the Node you want to keep
+agent-workflow sync --global --dry-run
+agent-workflow sync --global
+agent-workflow verify
+```
+
+Installs from 0.3.0 and earlier call the absolute Node path directly; the first `sync` with 0.3.1 moves them to the shim. Project MCP registrations also record the Node and checkout path: disconnect and reconnect them after switching.
 
 Before uninstalling, disconnect every registered project. The global uninstall refuses while connection receipts remain. Review `uninstall --global --dry-run`, then uninstall and remove the npm CLI. Retained optional tools are intentional; there is no automatic tool purge command. Do not recursively delete a shared cache or reused system executable. Existing project opt-out files are also retained.
 
