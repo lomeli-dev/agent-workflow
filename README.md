@@ -37,7 +37,7 @@ agent-workflow verify
 
 **Validation guard.** Before a shell command runs, Qwen, Kimi, Command Code, Pi and MiMo (and OpenCode, as before) block a test/build command whose exit status a pipe, `;` or following `echo` would hide, and tell the model the three allowed forms. For Claude Code and Codex it is opt-in: `agent-workflow sync --global --clients ... --guard claude,codex` (`--guard none` removes it; without `--guard` a sync keeps the current choice). Codex then asks to trust the new `PreToolUse` hook once. Opted-out projects are never blocked. Details and evidence per client: [compatibility](docs/compatibility.md#validation-guard-050).
 
-**Clients may require trusting new hooks or restarting a session.** Codex's native hook trust is not bypassed; after a `sync` that changes hooks, re-approve them in Codex with `/hooks` (`verify` warns with `codex-hook-untrusted`/`codex-hook-not-enabled`). `verify` proves files/registrations, not that a running client reloaded or executed them. See the compatibility document for evidence levels.
+**Clients may require trusting new hooks or restarting a session.** Codex's native hook trust is not bypassed; after a `sync` that changes hooks, re-approve them with `agent-workflow trust --client codex` (same as `/hooks`, Agent Workflow hooks only; or pass `--trust-codex` to the sync) or in Codex with `/hooks`. `verify` reads the state from `codex app-server` when Codex is available and warns with `codex-hook-untrusted`/`codex-hook-modified`/`codex-hook-disabled`. `verify` proves files/registrations, not that a running client reloaded or executed them. See the compatibility document for evidence levels.
 
 ## Disable for a project
 
@@ -156,6 +156,8 @@ node bin/agent-workflow.mjs uninstall --global --user-root /path/to/isolated-use
 No model or effort is forced, no MCP server is added by the global workflow install, and no automatic project-memory writer is started. The coordinator uses an existing memory-sesion installation if the project and user call for it. Workers return candidate lessons to that coordinator.
 
 [Native client behavioral trial](docs/native-trial-2026-11-13.md): real implementation, opt-out, roles, MCP and browser checks, including remaining limitations.
+
+Version 0.5.1 adds `agent-workflow trust --client codex` and `--trust-codex` (approve only the Agent Workflow Codex hooks, as `/hooks` does) and removes a false `codex-hook-not-enabled` warning; see the [changelog](CHANGELOG.md).
 
 Version 0.5.0 extends the validation guard to Qwen, Kimi, Command Code, Pi and MiMo, and makes it opt-in for Claude and Codex (`--guard`); see the [changelog](CHANGELOG.md).
 

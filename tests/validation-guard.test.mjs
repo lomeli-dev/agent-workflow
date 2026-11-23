@@ -2,6 +2,8 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {validationGuard} from '../lib/validation-guard.mjs';
 import {mkdtempSync,writeFileSync,rmSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';import {pathToFileURL} from 'node:url';
 import {install,locations} from '../lib/install.mjs';
+// Tests never start a real Codex (verify/install would ask codex app-server for hook trust).
+process.env.AGENT_WORKFLOW_CODEX='none';
 test('compound validation is blocked before execution, ordinary reads and direct validation remain',()=>{
  for(const c of ['npm test; echo EXIT:$?','npm test &','npm test # comment\necho done','npm test 2>&1 | tail -20','cd work && npm test','go test ./... || true','python3 -m pytest\necho done','env CI=1 pnpm run test:unit && cat result','(node --test); echo ok'])assert.equal(validationGuard(c).blocked,true,c);
  for(const c of ['npm test','npm test 2>&1','node --test tests/*.test.mjs','cat a b','npm install test && echo done','go list test | tail -1','echo "npm test; echo hi"','git status && git diff','npm test # comment','# comment\nnpm test','npm test;'])assert.equal(validationGuard(c).blocked,false,c);

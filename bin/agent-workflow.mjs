@@ -6,6 +6,7 @@ import {status,projectRoot} from '../lib/gate.mjs';
 import {atomic,noSymlinks,read} from '../lib/files.mjs';
 import {install,uninstall,verify,CLIENTS,ALL_CLIENTS,parseClients,parseGuard} from '../lib/install.mjs';
 import {doctor} from '../lib/doctor.mjs';
+import {trustCodex,installAndTrust} from '../lib/codex-trust.mjs';
 import {CATALOG,PROFILES} from '../lib/catalog.mjs';
 import {setupModules,findBin,toolEnvironment} from '../lib/modules.mjs';
 import {selectInteractive} from '../lib/selector.mjs';
@@ -17,8 +18,9 @@ import {connect,connectionRoot,pruneConnections} from '../lib/connect.mjs';
 
 const HELP=`Agent Workflow ${VERSION} — global by default, project opt-out
 
-agent-workflow install --global [--clients LIST|all] [--guard claude,codex|none] [--dry-run]
-agent-workflow sync --global [--clients LIST|all] [--guard claude,codex|none] [--dry-run]
+agent-workflow install --global [--clients LIST|all] [--guard claude,codex|none] [--trust-codex] [--dry-run]
+agent-workflow sync --global [--clients LIST|all] [--guard claude,codex|none] [--trust-codex] [--dry-run]
+agent-workflow trust --client codex [--dry-run]
 agent-workflow verify [--json]
 agent-workflow doctor [--json]
 agent-workflow status [--project PATH] [--json]
@@ -47,24 +49,35 @@ The validation guard (PreToolUse/tool hook that denies a test or build command
 whose exit status a pipe, ';' or echo would hide) is installed for qwen, kimi,
 commandcode, pi and mimo (OpenCode has it in its plugin). For claude and codex
 it is opt-in: --guard claude,codex adds it, --guard none removes it, and
-without --guard a sync keeps the current choice. Codex asks to trust the new
-hook (/hooks). Opted-out projects are never blocked.
+without --guard a sync keeps the current choice. Opted-out projects are never
+blocked.
+
+Codex runs a hook only after it is trusted (/hooks). trust --client codex does
+the same as approving in /hooks, through codex app-server, for the Agent
+Workflow hooks only (shim + store runtime command); other hooks and their trust
+are never touched. --trust-codex runs it right after install/sync writes
+hooks.json (opt-in). verify/doctor read the trust state from codex app-server
+when Codex is available, else from config.toml (AGENT_WORKFLOW_CODEX=PATH|none).
 
 --user-root PATH redirects every managed destination to an existing isolated
-user-root (for tests/previews). It never changes HOME. Hook trust is native to
-the client; this tool does not bypass it. No startup dependency installs.
+user-root (for tests/previews). It never changes HOME; a codex app-server it
+starts gets HOME and CODEX_HOME pointed at that user-root. Hook trust is native
+to the client; this tool never bypasses it (no --dangerously-bypass-hook-trust).
+No startup dependency installs.
 Project opt-out disables workflow behavior, not global file discovery.
 claude-lean is opt-in: without --mcp-file, no MCP servers are available in
 that Claude session. It does not alter your normal Claude configuration.
 `;
 try{
-  const {values,positionals}=parseArgs({allowPositionals:true,options:{global:{type:'boolean'},clients:{type:'string'},guard:{type:'string'},'user-root':{type:'string'},project:{type:'string'},'dry-run':{type:'boolean'},json:{type:'boolean'},tool:{type:'string'},file:{type:'string'},name:{type:'string'},tools:{type:'string'},profile:{type:'string'},'mcp-file':{type:'string'},all:{type:'boolean'},list:{type:'boolean'},interactive:{type:'boolean'},prune:{type:'boolean'},apply:{type:'boolean'},help:{type:'boolean'},version:{type:'boolean'}}});
+  const {values,positionals}=parseArgs({allowPositionals:true,options:{global:{type:'boolean'},clients:{type:'string'},guard:{type:'string'},client:{type:'string'},'trust-codex':{type:'boolean'},'user-root':{type:'string'},project:{type:'string'},'dry-run':{type:'boolean'},json:{type:'boolean'},tool:{type:'string'},file:{type:'string'},name:{type:'string'},tools:{type:'string'},profile:{type:'string'},'mcp-file':{type:'string'},all:{type:'boolean'},list:{type:'boolean'},interactive:{type:'boolean'},prune:{type:'boolean'},apply:{type:'boolean'},help:{type:'boolean'},version:{type:'boolean'}}});
   const cmd=positionals[0];if(values.version){console.log(VERSION);process.exit(0);}if(values.help||!cmd){console.log(HELP);process.exit(0);}
   if(positionals.length>1&&cmd!=='exec'&&cmd!=='claude-lean')throw Error('Unexpected positional arguments');
   const userRoot=values['user-root'],dryRun=values['dry-run']??false;let result;
   if(values.apply&&dryRun)throw Error('--apply and --dry-run cannot be combined');
   if(['install','sync','uninstall'].includes(cmd)&&!values.global)throw Error('Pass --global explicitly (or preview with --global --dry-run)');
-  if(cmd==='install'||cmd==='sync')result=install({userRoot,dryRun,clients:parseClients(values.clients),guard:parseGuard(values.guard)});
+  if(values['trust-codex']&&cmd!=='install'&&cmd!=='sync')throw Error('--trust-codex is only for install/sync');
+  if(cmd==='install'||cmd==='sync'){result=await installAndTrust({userRoot,dryRun,clients:parseClients(values.clients),guard:parseGuard(values.guard),trustCodex:values['trust-codex']??false});if(result.ok===false)process.exitCode=1;}
+  else if(cmd==='trust'){if(values.client!=='codex')throw Error('Use trust --client codex (the only client with hook trust handled here)');result=await trustCodex({userRoot,dryRun});if(result.ok===false)process.exitCode=1;}
   else if(cmd==='uninstall')result=uninstall({userRoot,dryRun});
   else if(cmd==='verify'){result=verify({userRoot});if(!result.ok)process.exitCode=1;}
   else if(cmd==='doctor')result=await doctor({userRoot});

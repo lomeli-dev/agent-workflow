@@ -7,6 +7,8 @@ import {spawnSync} from 'node:child_process';
 import {install,uninstall,locations,PACKAGE} from '../lib/install.mjs';
 import {connect,connectionReceipts,pruneConnections} from '../lib/connect.mjs';
 import {status,mcpProject,gitCommonDir} from '../lib/gate.mjs';
+// Tests never start a real Codex (verify/install would ask codex app-server for hook trust).
+process.env.AGENT_WORKFLOW_CODEX='none';
 const cli=join(PACKAGE,'bin/agent-workflow.mjs');
 function git(cwd,...args){const r=spawnSync('git',['-c','user.email=aw@test.invalid','-c','user.name=aw-test','-c','init.defaultBranch=main',...args],{cwd,encoding:'utf8'});assert.equal(r.status,0,r.stderr);return r.stdout.trim();}
 // main checkout with one commit plus a linked worktree, all inside a temporary directory.

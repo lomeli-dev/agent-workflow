@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.1
+
+- **`agent-workflow trust --client codex [--dry-run]`.** Trusts the Agent Workflow Codex hooks the way the Codex TUI `/hooks` does: it starts `codex app-server`, reads `hooks/list` (`currentHash`, `trustStatus`) and sends `config/batchWrite` with a `hooks.state` upsert of `trusted_hash`, so Codex writes its own `config.toml`. Only hooks of the user `hooks.json` whose command is exactly the Agent Workflow shim + store runtime are selected; other hooks (Orca, warp, yours) and their trust are untouched, and `enabled` is never changed. Shows the state before and after. If `codex` is missing or app-server fails, it exits 1 and changes nothing. No model request; `--dangerously-bypass-hook-trust` is never used.
+- **`install`/`sync --global --trust-codex`** (opt-in) runs that step right after writing `hooks.json`. Without the flag nothing changes. If trust fails, the sync stays applied and the command exits 1 with `codexTrust.error`.
+- **Fix: false `codex-hook-not-enabled`.** Codex treats a missing `enabled` as enabled; 0.5.0 warned whenever `enabled = true` was absent, even for trusted hooks Codex ran. `verify`/`doctor` now take `trustStatus` and `enabled` from `codex app-server` when Codex is available (`codexHookTrust.source`), warning with `codex-hook-untrusted`, `codex-hook-modified` (stale hash, now detected) or `codex-hook-disabled`. Without Codex they fall back to `config.toml` with the same rule (a missing `trusted_hash` or `enabled = false`); a stale hash is not detectable there (`hashChecked: false`). `AGENT_WORKFLOW_CODEX=PATH|none` selects the executable or forces the fallback.
+- With `--user-root`, the Codex child gets `HOME` and `CODEX_HOME` pointed at that root. Tests use a fake `codex` that speaks the protocol; a run with the real Codex 0.171.0 on an isolated root is recorded in the compatibility document.
+
 ## 0.5.0
 
 - **Validation guard in more clients.** The guard that OpenCode already had (`AW_VALIDATION_COMPOUND`) now blocks, before the shell runs, a test/build command whose exit status a pipe, `;`, `&&` or a following `echo` would hide, in Qwen Code, Kimi Code, Command Code, Pi and MiMo Code. One source of truth: every client calls `shellGuard` of the installed runtime (`gate.mjs` + `validation-guard.mjs`), which also honors the project opt-out on every call. The three status-keeping forms stay allowed (`set -o pipefail; CMD | tail`, `CMD | tail; exit ${PIPESTATUS[0]}`, `CMD > log 2>&1; echo "exit=$?"`).

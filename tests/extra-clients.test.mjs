@@ -8,6 +8,8 @@ import {pathToFileURL} from 'node:url';
 import {install,uninstall,verify,locations,json,PACKAGE,ALL_CLIENTS,EXTRA_CLIENTS,codexHookTrust} from '../lib/install.mjs';
 import {START} from '../lib/files.mjs';
 import {validationGuard} from '../lib/validation-guard.mjs';
+// Tests never start a real Codex (verify/install would ask codex app-server for hook trust).
+process.env.AGENT_WORKFLOW_CODEX='none';
 
 function fixture(t){const p=mkdtempSync(join(tmpdir(),'aw-extra-'));t.after(()=>rmSync(p,{recursive:true,force:true}));return p;}
 function put(root,name,body){const p=join(root,name);mkdirSync(dirname(p),{recursive:true});writeFileSync(p,body);return p;}
@@ -111,12 +113,14 @@ test('MiMo rule goes to its own AGENTS.md only when that does not hide Claude in
   assert(read(p).startsWith('MiMo rules\n'));assert(read(p).includes(START));uninstall({userRoot:own});assert.equal(read(p),'MiMo rules\n');
 });
 
-test('Codex hook approval is reported from config.toml without changing it',t=>{
+test('Without Codex, hook approval is read from config.toml (missing enabled = enabled) without changing it',t=>{
   const root=fixture(t);install({userRoot:root,clients:['codex']});const l=locations(root);
-  let v=verify({userRoot:root});assert.equal(v.ok,true);assert.deepEqual(v.warnings.map(w=>w.issue),['codex-hook-untrusted','codex-hook-untrusted','codex-hook-untrusted']);assert.match(v.warnings[0].fix,/\/hooks/);
-  const file=join(l.codex,'hooks.json'),toml=`[hooks.state."${file}:session_start:0:0"]\nenabled = true\ntrusted_hash = "sha256:aa"\n\n[hooks.state."${file}:subagent_start:0:0"]\ntrusted_hash = "sha256:bb"\n`;
+  let v=verify({userRoot:root});assert.equal(v.ok,true);assert.deepEqual(v.warnings.map(w=>w.issue),['codex-hook-untrusted','codex-hook-untrusted','codex-hook-untrusted']);assert.match(v.warnings[0].fix,/\/hooks/);assert.equal(v.codexHookTrust.source,'config.toml');assert.equal(v.codexHookTrust.hashChecked,false);
+  const file=join(l.codex,'hooks.json'),toml=`[hooks.state."${file}:session_start:0:0"]\nenabled = true\ntrusted_hash = "sha256:aa"\n\n[hooks.state."${file}:subagent_start:0:0"]\ntrusted_hash = "sha256:bb"\n\n[hooks.state."${file}:pre_compact:0:0"]\nenabled = false\n`;
   put(root,'.codex/config.toml',toml);
-  v=verify({userRoot:root});assert.deepEqual(v.warnings.map(w=>[w.event,w.issue]),[['SubagentStart','codex-hook-not-enabled'],['PreCompact','codex-hook-untrusted']]);
+  v=verify({userRoot:root});// SubagentStart has trusted_hash and no enabled: Codex runs it, so no warning (0.5.0 warned).
+  assert.deepEqual(v.warnings.map(w=>[w.event,w.issue]),[['PreCompact','codex-hook-untrusted'],['PreCompact','codex-hook-disabled']]);
+  assert.deepEqual(v.codexHookTrust.hooks.map(h=>h.trustStatus),['trusted-unverified','trusted-unverified','untrusted']);
   assert.equal(read(join(l.codex,'config.toml')),toml);
   const cmd=json(read(join(l.store,'installation.json'))).files.find(f=>f.kind==='hooks').command;assert.equal(codexHookTrust(l,cmd).length,2);
   const r=spawnSync(process.execPath,[cli,'doctor','--user-root',root,'--json'],{encoding:'utf8'});assert.equal(JSON.parse(r.stdout).installation.warnings.length,2);
