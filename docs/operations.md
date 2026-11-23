@@ -19,7 +19,7 @@ The tools are optional. Preview with `setup --list`, `setup --interactive`, `set
 | Command | Effect |
 | --- | --- |
 | `install --global`, `sync --global` | Deploy/update owned workflow files; `--clients claude,codex,opencode` selects clients |
-| `verify` | Check installation receipt, owned files, registrations and the Node/runtime the hooks call; not native execution |
+| `verify` | Check installation receipt, owned files, registrations and the Node/runtime the hooks call; `status: outdated` lists files that differ from this package (run `sync`); not native execution |
 | `doctor --json` | Check executable/version availability and repeat the `verify` checks under `installation`; not authentication or complete LSP/browser integration |
 | `status --project PATH --json` | Read effective project opt-out |
 | `disable --project PATH`, `enable --project PATH` | Write the small project switch; `--dry-run` previews |

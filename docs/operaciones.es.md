@@ -26,7 +26,7 @@ Sin `--apply` sólo se presenta el plan, aunque puede ejecutar probes de versió
 | Comando | Para qué sirve |
 | --- | --- |
 | `install --global` / `sync --global` | Instalar o actualizar los archivos propios; permite `--clients claude,codex,opencode` |
-| `verify` | Verificar archivos y registros propios, y el Node y runtime que llaman los hooks; no demuestra ejecución dentro del IDE |
+| `verify` | Verificar archivos y registros propios, y el Node y runtime que llaman los hooks; `status: outdated` lista lo que difiere de este paquete (toca `sync`); no demuestra ejecución dentro del IDE |
 | `doctor --json` | Comprobar ejecutables/versiones y repetir lo de `verify` en `installation`; no acredita autenticación ni integración completa |
 | `status --project RUTA --json` | Ver si este proyecto tiene activado el flujo |
 | `disable --project RUTA` / `enable --project RUTA` | Cambiar el interruptor del proyecto; admite `--dry-run` |
