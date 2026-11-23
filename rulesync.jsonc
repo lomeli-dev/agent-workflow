@@ -1,5 +1,5 @@
 {
-  "targets": ["claudecode", "codexcli", "opencode"],
+  "targets": ["claudecode", "codexcli", "opencode", "qwencode", "kimi-code", "antigravity-cli", "commandcode", "pi", "mimocode"],
   "features": ["rules", "skills", "subagents", "commands"],
   "global": false,
   "delete": false

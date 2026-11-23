@@ -4,7 +4,7 @@ import {join,resolve} from 'node:path';
 import {parseArgs} from 'node:util';
 import {status,projectRoot} from '../lib/gate.mjs';
 import {atomic,noSymlinks,read} from '../lib/files.mjs';
-import {install,uninstall,verify,CLIENTS} from '../lib/install.mjs';
+import {install,uninstall,verify,CLIENTS,ALL_CLIENTS,parseClients} from '../lib/install.mjs';
 import {doctor} from '../lib/doctor.mjs';
 import {CATALOG,PROFILES} from '../lib/catalog.mjs';
 import {setupModules,findBin,toolEnvironment} from '../lib/modules.mjs';
@@ -17,8 +17,8 @@ import {connect,connectionRoot,pruneConnections} from '../lib/connect.mjs';
 
 const HELP=`Agent Workflow ${VERSION} — global by default, project opt-out
 
-agent-workflow install --global [--clients claude,codex,opencode] [--dry-run]
-agent-workflow sync --global [--clients claude,codex,opencode] [--dry-run]
+agent-workflow install --global [--clients LIST|all] [--dry-run]
+agent-workflow sync --global [--clients LIST|all] [--dry-run]
 agent-workflow verify [--json]
 agent-workflow doctor [--json]
 agent-workflow status [--project PATH] [--json]
@@ -39,6 +39,10 @@ agent-workflow disconnect --prune [--dry-run]   (forget receipts whose project n
 agent-workflow mcp --tool MODULE --project PATH
 agent-workflow uninstall --global [--dry-run]
 
+--clients defaults to claude,codex,opencode. Extra clients: qwen, kimi, agy,
+commandcode, pi, mimo; 'all' selects every client. A sync can
+add clients to an installation; dropping one needs uninstall first.
+
 --user-root PATH redirects every managed destination to an existing isolated
 user-root (for tests/previews). It never changes HOME. Hook trust is native to
 the client; this tool does not bypass it. No startup dependency installs.
@@ -53,7 +57,7 @@ try{
   const userRoot=values['user-root'],dryRun=values['dry-run']??false;let result;
   if(values.apply&&dryRun)throw Error('--apply and --dry-run cannot be combined');
   if(['install','sync','uninstall'].includes(cmd)&&!values.global)throw Error('Pass --global explicitly (or preview with --global --dry-run)');
-  if(cmd==='install'||cmd==='sync')result=install({userRoot,dryRun,clients:values.clients?values.clients.split(','):CLIENTS});
+  if(cmd==='install'||cmd==='sync')result=install({userRoot,dryRun,clients:parseClients(values.clients)});
   else if(cmd==='uninstall')result=uninstall({userRoot,dryRun});
   else if(cmd==='verify'){result=verify({userRoot});if(!result.ok)process.exitCode=1;}
   else if(cmd==='doctor')result=await doctor({userRoot});

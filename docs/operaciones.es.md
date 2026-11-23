@@ -25,8 +25,8 @@ Sin `--apply` sólo se presenta el plan, aunque puede ejecutar probes de versió
 
 | Comando | Para qué sirve |
 | --- | --- |
-| `install --global` / `sync --global` | Instalar o actualizar los archivos propios; permite `--clients claude,codex,opencode` |
-| `verify` | Verificar archivos y registros propios, y el Node y runtime que llaman los hooks; `status: outdated` lista lo que difiere de este paquete (toca `sync`); no demuestra ejecución dentro del IDE |
+| `install --global` / `sync --global` | Instalar o actualizar los archivos propios; `--clients` acepta una lista o `all` (por defecto claude,codex,opencode). Un `sync` puede añadir clientes |
+| `verify` | Verificar archivos y registros propios (con `warnings` si Codex no tiene aprobados los hooks y `notices` de condiciones nativas), y el Node y runtime que llaman los hooks; `status: outdated` lista lo que difiere de este paquete (toca `sync`); no demuestra ejecución dentro del IDE |
 | `doctor --json` | Comprobar ejecutables/versiones y repetir lo de `verify` en `installation`; no acredita autenticación ni integración completa |
 | `status --project RUTA --json` | Ver si este proyecto tiene activado el flujo |
 | `disable --project RUTA` / `enable --project RUTA` | Cambiar el interruptor del proyecto; admite `--dry-run` |
@@ -43,6 +43,50 @@ Sin `--apply` sólo se presenta el plan, aunque puede ejecutar probes de versió
 | `--user-root RUTA` | Usar una raíz temporal de pruebas existente; no es un sandbox del sistema |
 
 No combines `--all` con otros selectores, ni `--apply` con `--dry-run`.
+
+## Clientes adicionales
+
+```sh
+agent-workflow sync --global --clients all --dry-run
+agent-workflow sync --global --clients all
+agent-workflow verify
+```
+
+`all` equivale a `claude,codex,opencode,qwen,kimi,agy,commandcode,pi,mimo`. Sobre una instalación de los tres clientes de siempre, este `sync` añade los nuevos sin desinstalar. Para quitar alguno: `uninstall --global` y volver a instalar con la lista nueva. `connect`/`disconnect` (MCP por proyecto) siguen siendo solo para claude, codex y opencode. ZCode y Cursor quedaron fuera por decisión del dueño.
+
+| Cliente | Regla | Skill | Roles | aw-start | Hook |
+| --- | --- | --- | --- | --- | --- |
+| qwen | `~/.qwen/QWEN.md` | `~/.agents/skills` | `~/.qwen/agents` | `/aw-start` | SessionStart, SubagentStart y PreCompact en `~/.qwen/settings.json` |
+| kimi | `~/.kimi-code/AGENTS.md` | `~/.agents/skills` | `~/.kimi-code/agents` | skill `aw-start` | no (Kimi descarta la salida de SessionStart) |
+| agy | `~/.gemini/GEMINI.md` | `~/.gemini/config/skills` | `~/.gemini/config/agents` | skill `aw-start` | SessionStart en `~/.gemini/config/hooks.json` (grupo `agent-workflow`) |
+| commandcode | `~/.commandcode/AGENTS.md` | `~/.agents/skills` | `~/.commandcode/agents` | `/aw-start` | SessionStart en `~/.commandcode/settings.json` |
+| pi | `~/.pi/agent/AGENTS.md` | `~/.agents/skills` | (Pi no tiene subagentes) | prompt `/aw-start` | extensión `~/.pi/agent/extensions/agent-workflow.js` |
+| mimo | `~/.config/mimocode/AGENTS.md` o, si MiMo lee `~/.claude/CLAUDE.md`, el bloque de Claude | `~/.agents/skills` | `~/.config/mimocode/agents` | `/aw-start` | plugin `~/.config/mimocode/plugins/agent-workflow.js` |
+
+**MiMo y `CLAUDE.md`.** MiMo carga solo el primero que exista de `~/.config/mimocode/AGENTS.md` y `~/.claude/CLAUDE.md`. Si no tienes el primero, crearlo haría que MiMo dejara de leer tus reglas de Claude, así que el instalador no lo crea: MiMo recibe el bloque por `CLAUDE.md` (instala también el cliente `claude`). Si ya tienes `~/.config/mimocode/AGENTS.md`, el bloque va ahí. `install` y `verify` lo dicen en `notices`.
+
+**Codex tras un `sync`.** Si cambia el comando de un hook, Codex deja de ejecutarlo hasta que lo apruebes otra vez: abre Codex, `/hooks`, revisa y confía los de Agent Workflow (SessionStart, SubagentStart, PreCompact). `verify` y `doctor` avisan con `codex-hook-untrusted` o `codex-hook-not-enabled` en `warnings` (no cambian `ok`). No uses `--dangerously-bypass-hook-trust` salvo en una prueba puntual. Command Code también puede pedir confiar los hooks por proyecto.
+
+**agy colgado en modo headless.** Si `agy -p` espera hasta el timeout, mira su log (`~/.gemini/antigravity-cli/log/cli-*.log`): `MCP: 2 server(s) still connecting ... context7_api, huggingface`. Esos dos tienen `"disabled": true` en `~/.gemini/config/mcp_config.json` y aun así agy 1.5.15 los espera. Para pruebas, `--gemini_dir RUTA/.gemini` usa otra carpeta de config sin perder la sesión. Para el uso diario, la solución es quitar esas dos entradas de `mcp_config.json` (decisión tuya; Agent Workflow no lo toca).
+
+### Probar cada cliente
+
+Desde un proyecto de prueba cuyo `npm test` falle con un código conocido (por ejemplo `process.exit(7)`), con el modelo y esfuerzo por defecto del cliente:
+
+- P1 (visibilidad): «Without running anything: what global or session instructions do you have about 'Agent Workflow' or 'aw-workflow'? Quote the literal text if you have it; otherwise answer NONE.»
+- P2 (comportamiento): «Run this project's tests and tell me whether they pass and with which exit code.»
+- P3: `agent-workflow disable --project .` y repetir P1. El texto del hook («Agent Workflow is enabled here…») debe desaparecer; la regla y el skill siguen visibles.
+
+| Cliente | Comando headless |
+| --- | --- |
+| qwen | `qwen "PROMPT" -o stream-json --approval-mode yolo` |
+| kimi | `kimi -p "PROMPT" --output-format stream-json` (no combina `-p` con `--auto`) |
+| agy | `agy -p "PROMPT" --output-format stream-json --print-timeout 200s` (con el cuelgue de MCP de arriba, añade `--gemini_dir` a una copia sin esos MCP) |
+| commandcode | `commandcode -p "PROMPT" --output-format json --trust --skip-onboarding --no-session --yolo` (sin `--yolo` no ejecuta shell en `-p`) |
+| pi | `pi -p --mode json --no-session "PROMPT"` |
+| mimo | `mimo run --format json --dangerously-skip-permissions --dir . "PROMPT"` |
+
+Una pregunta abierta como P1 no es concluyente por sí sola: en MiMo el modelo respondió «solo el skill» y, preguntado por una palabra testigo del mismo archivo, la citó. Si una respuesta dice NONE, confirma con un texto exacto del bloque. Comprobaciones sin modelo: `agy agents`, `mimo agent list`, `mimo debug skill`, `commandcode skills list`. Ojo: `mimo debug config` imprime la configuración resuelta con claves de MCP en claro; no la pegues en logs.
 
 ## Conectar y desactivar por proyecto
 
@@ -117,7 +161,7 @@ Los modelos, effort, permisos y compactación del cliente no se cambian. La memo
 
 En OpenCode V2 el plugin intercepta el shell antes de ejecutar. Con el workflow activo rechaza validaciones reconocidas que incluyan pipes, separadores o condicionales; ejecuta el test solo y usa el directorio del propio tool.
 
-Reconoce como validación los scripts de npm/pnpm/yarn/bun, los runners vía `npx`/`pnpm exec`/`bunx`, `uv run`/`poetry run`, pytest/jest/vitest, `node --test`, cargo/go/dotnet, las tareas de test de gradle/`./gradlew`, `make [-C DIR] test|check|build` y los scripts de `bash -c`/`sh -c` (los revisa por dentro). Deja pasar tres formas que conservan el estado:
+Reconoce como validación los scripts de npm/pnpm/yarn/bun, los runners vía `npx`/`pnpm exec`/`bunx`, `uv run`/`poetry run`, pytest/jest/vitest, `node --test`, `node <archivo de test>` (`test.js`, `tests/…`, `*.spec.ts`), el comando de un script `test`/`check`/`build` de un solo comando del `package.json` del directorio (lo lee, no lo ejecuta), cargo/go/dotnet, las tareas de test de gradle/`./gradlew`, `make [-C DIR] test|check|build` y los scripts de `bash -c`/`sh -c` (los revisa por dentro). Deja pasar tres formas que conservan el estado:
 
 - `set -o pipefail; CMD | tail` (también `set -euo pipefail`): el pipeline devuelve el primer fallo;
 - `CMD | tail; exit ${PIPESTATUS[0]}`: el índice debe apuntar a la validación;

@@ -1,6 +1,6 @@
 # Agent Workflow
 
-Global workflow guidance for Claude Code, Codex CLI and OpenCode V2, with project opt-out, Rulesync generation and a reversible installer.
+Global workflow guidance for Claude Code, Codex CLI and OpenCode V2 (default), plus Qwen Code, Kimi Code, Antigravity CLI, Command Code, Pi and MiMo Code on request, with project opt-out, Rulesync generation and a reversible installer.
 
 [Español](README.es.md) · [Architecture](docs/architecture.md) · [Compatibility and limits](docs/compatibility.md) · [Testing](docs/testing.md) · [Complete operations guide](docs/operations.md) · [Audit](docs/audit-2026-11-13.md)
 
@@ -21,11 +21,21 @@ agent-workflow install --global
 agent-workflow verify
 ```
 
-The first install registers the CLI. The second deploys managed client files. `--clients claude,codex` restricts targets. All three are the default. No `sudo`, global permission changes, model requests or dependency installs occur in startup hooks. macOS and Linux paths are supported; Windows is not a tested target.
+The first install registers the CLI. The second deploys managed client files. `--clients claude,codex` restricts targets; claude, codex and opencode are the default. No `sudo`, global permission changes, model requests or dependency installs occur in startup hooks. macOS and Linux paths are supported; Windows is not a tested target.
 
 Rulesync is pinned to 43.8.0 and generates into isolated staging, never directly into the real home. The installer maps only this package's outputs to user scope, appends owned instruction blocks and merges its hooks/plugin entry. Unrelated settings/hooks are preserved. Existing symlink destinations or conflicting files cause a refusal instead of an overwrite.
 
-**Clients may require trusting new hooks or restarting a session.** Codex's native hook trust is not bypassed. `verify` proves files/registrations, not that a running client reloaded or executed them. See the compatibility document for evidence levels.
+### More clients
+
+```sh
+agent-workflow sync --global --clients all --dry-run
+agent-workflow sync --global --clients all
+agent-workflow verify
+```
+
+`all` adds `qwen`, `kimi`, `agy`, `commandcode`, `pi` and `mimo` to the default three; a comma list picks some. A sync can add clients to an existing installation; dropping one needs `uninstall` first. Each client gets what it supports natively: rule block, the shared `~/.agents/skills/aw-workflow` skill (agy gets its own copy), roles, `aw-start` and a session hook. Kimi gets no hook (it discards SessionStart output). Antigravity was verified with a real headless session; see the compatibility document for how to run it without the MCP hang. The [compatibility document](docs/compatibility.md#extra-clients-040) has the per-client table, the MiMo `CLAUDE.md` precedence, and what was verified natively.
+
+**Clients may require trusting new hooks or restarting a session.** Codex's native hook trust is not bypassed; after a `sync` that changes hooks, re-approve them in Codex with `/hooks` (`verify` warns with `codex-hook-untrusted`/`codex-hook-not-enabled`). `verify` proves files/registrations, not that a running client reloaded or executed them. See the compatibility document for evidence levels.
 
 ## Disable for a project
 
@@ -128,7 +138,7 @@ agent-workflow uninstall --global
 npm uninstall --global @lomeli-dev/agent-workflow
 ```
 
-Updates/uninstall refuse changed owned files or hook definitions. Preserve/reconcile your edit before proceeding. Other additions outside owned blocks/entries are retained. The private ownership manifest keeps original config locally for reversal; it may contain private user settings and is never committed or uploaded. Optional downloaded tools and empty directories are retained on uninstall to avoid deleting shared resources. A changing client set currently requires uninstall/reinstall.
+Updates/uninstall refuse changed owned files or hook definitions. Preserve/reconcile your edit before proceeding. Other additions outside owned blocks/entries are retained. The private ownership manifest keeps original config locally for reversal; it may contain private user settings and is never committed or uploaded. Optional downloaded tools and empty directories are retained on uninstall to avoid deleting shared resources. Adding clients is a `sync --clients ...`; removing clients requires uninstall/reinstall.
 
 ## Development
 
@@ -144,6 +154,8 @@ node bin/agent-workflow.mjs uninstall --global --user-root /path/to/isolated-use
 No model or effort is forced, no MCP server is added by the global workflow install, and no automatic project-memory writer is started. The coordinator uses an existing memory-sesion installation if the project and user call for it. Workers return candidate lessons to that coordinator.
 
 [Native client behavioral trial](docs/native-trial-2026-11-13.md): real implementation, opt-out, roles, MCP and browser checks, including remaining limitations.
+
+Version 0.4.0 adds six opt-in clients, warns about unapproved Codex hooks, extends the OpenCode guard to `node <test file>` and the project test script, and fixes an uninstall failure on compact JSON; see the [changelog](CHANGELOG.md).
 
 Version 0.3.1 makes `uninstall` keep edits made after a `sync`, runs hooks through a stable Node shim, reports outdated installs in `verify`, handles worktrees (`disconnect --prune`) and aligns the OpenCode guard with the rule; see the [changelog](CHANGELOG.md).
 

@@ -1,6 +1,7 @@
 ---
 name: aw-workflow
 description: Organize a substantial coding task into bounded discovery, coherent edits, focused validation and integration. Use when the user requests this workflow, coordinated implementation, or fewer repeated tool steps; skip trivial independent edits.
+targets: [claudecode, codexcli, opencode]
 ---
 
 # Efficient implementation

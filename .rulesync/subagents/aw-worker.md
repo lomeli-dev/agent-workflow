@@ -1,7 +1,7 @@
 ---
 name: aw-worker
 description: Implement a bounded assigned change and its focused tests without writing shared memory or unrelated files.
-targets: [claudecode, codexcli, opencode]
+targets: [claudecode, codexcli, opencode, qwencode, kimi-code, antigravity-cli, commandcode, mimocode]
 opencode: {mode: subagent}
 ---
 
