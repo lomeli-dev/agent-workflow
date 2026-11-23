@@ -28,6 +28,10 @@ test('verify reports an installation made by an older package as outdated until 
  install({userRoot:root});assert.equal(verify({userRoot:root}).status,'ok');
 });
 
+test('the copied OpenCode plugin reports the package version',()=>{
+ assert(read(join(PACKAGE,'lib/opencode-plugin.mjs')).includes(`version:'${VERSION}'`));
+});
+
 test('a shim recording another Node that still exists is not outdated',t=>{
  const root=fixture(t),other=join(root,'other-node');writeFileSync(other,'#!/bin/sh\n');chmodSync(other,0o755);
  install({userRoot:root,nodePath:other});const v=verify({userRoot:root});assert.equal(v.ok,true,JSON.stringify(v));assert.deepEqual(v.outdated,[]);

@@ -154,4 +154,6 @@ En carpetas sin Git, el opt-out busca también en los directorios antecesores ha
 
 [Prueba con agentes reales](docs/native-trial-2026-11-13.md): implementación, opt-out, roles, MCP y navegador, con sus resultados y límites.
 
+La versión 0.3.1 hace que `uninstall` conserve lo editado después de un `sync`, ejecuta los hooks con un shim de Node estable, avisa en `verify` de una instalación desactualizada, contempla los worktrees (`disconnect --prune`) y alinea el guard de OpenCode con la regla; ver el [changelog](CHANGELOG.md).
+
 La versión 0.2.3 añade un bloqueo nativo de validaciones compuestas en OpenCode y una búsqueda alternativa de símbolos JS/TS. [Correcciones comprobadas](docs/repairs-2026-11-13.md). Al elegir CodeGraph se comprueba o instala también TypeScript como requisito; esto no añade navegadores.

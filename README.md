@@ -145,4 +145,6 @@ No model or effort is forced, no MCP server is added by the global workflow inst
 
 [Native client behavioral trial](docs/native-trial-2026-11-13.md): real implementation, opt-out, roles, MCP and browser checks, including remaining limitations.
 
+Version 0.3.1 makes `uninstall` keep edits made after a `sync`, runs hooks through a stable Node shim, reports outdated installs in `verify`, handles worktrees (`disconnect --prune`) and aligns the OpenCode guard with the rule; see the [changelog](CHANGELOG.md).
+
 Version 0.2.3 adds a native OpenCode compound-validation guard and an explicit JS/TS module-symbol fallback. See [verified repairs](docs/repairs-2026-11-13.md). CodeGraph setup also checks/installs the selected TypeScript prerequisite; no browser is added by that dependency.
