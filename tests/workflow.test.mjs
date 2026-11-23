@@ -6,7 +6,7 @@ import {join,resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {install,uninstall,verify,locations,json,PACKAGE} from '../lib/install.mjs';
-import {block,read,atomic,lock} from '../lib/files.mjs';
+import {block,blockContent,hash,read,atomic,lock} from '../lib/files.mjs';
 import {status,hookResult} from '../lib/gate.mjs';
 import {setup} from '../lib/doctor.mjs';
 
@@ -108,6 +108,31 @@ test('setup never runs unsupported or arbitrary package commands',async t=>{
 test('malformed managed blocks are never silently rewritten',()=>{
  assert.throws(()=>block('<!-- agent-workflow:begin -->\nbad','new'),/Malformed/);
  assert.equal(block('personal',null),'personal');
+});
+
+test('uninstall after sync keeps edits made outside owned parts, also in files created by install',t=>{
+ const root=fixture(t),l=locations(root);
+ const settings=put(root,'.claude/settings.json','{"model":"user-choice"}\n');
+ install({userRoot:root});
+ const claude=join(l.claude,'CLAUDE.md'),codex=join(l.codex,'AGENTS.md'),oc=join(l.opencode,'opencode.jsonc');
+ writeFileSync(claude,'Rule written before the block\n\n'+read(claude)+'\nRule written after the block\n');
+ const s=json(read(settings));s.addedLater={keep:true};writeFileSync(settings,JSON.stringify(s,null,2)+'\n');
+ writeFileSync(oc,read(oc).replace('{','{\n  "theme": "user-theme",'));
+ assert.equal(install({userRoot:root}).changedFiles,0);
+ uninstall({userRoot:root});
+ assert.equal(read(claude),'Rule written before the block\n\nRule written after the block\n');
+ assert.deepEqual(json(read(settings)),{model:'user-choice',addedLater:{keep:true}});
+ assert.deepEqual(json(read(oc)),{theme:'user-theme'});
+ assert.equal(read(codex),null);
+});
+
+test('uninstall after a sync that rewrote the block still restores untouched files exactly',t=>{
+ const root=fixture(t),l=locations(root);put(root,'.codex/AGENTS.md','Personal rules');const rules=join(l.codex,'AGENTS.md');
+ install({userRoot:root});const p=join(l.store,'installation.json'),m=json(read(p));
+ const entry=m.files.find(f=>f.path===rules);const older=block('Personal rules','Older rule text');
+ writeFileSync(rules,older);entry.afterHash=hash(older);entry.blockHash=hash(blockContent(older));writeFileSync(p,JSON.stringify(m));
+ install({userRoot:root});assert(read(rules).includes('Agent Workflow applicability'));
+ uninstall({userRoot:root});assert.equal(read(rules),'Personal rules');
 });
 
 test('client selection stays explicit and invalid clients do not install',t=>{
