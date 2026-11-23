@@ -19,8 +19,8 @@ const cli=join(PACKAGE,'bin/agent-workflow.mjs');
 function project(root){const p=join(root,'project');put(p,'package.json',JSON.stringify({scripts:{test:'node test.js'}}));put(p,'test.js','process.exit(7);\n');return p;}
 const disable=p=>put(p,'.agent-workflow.json','{"schemaVersion":1,"enabled":false}');
 
-const BLOCKED=['npm test | tail','npm test; echo $?','node test.js; echo','npm test 2>&1 | tail -20; echo "exit=$?"'];
-const ALLOWED=['npm test','node test.js','set -o pipefail; npm test | tail','npm test | tail; exit ${PIPESTATUS[0]}','npm test > log 2>&1; echo "exit=$?"','ls | wc -l','git status; echo done'];
+const BLOCKED=['npm test | tail','npm test; echo $?','node test.js; echo','npm test 2>&1 | tail -20; echo "exit=$?"','npm test | tail; exit ${PIPESTATUS[0]}'];
+const ALLOWED=['npm test','node test.js','set -o pipefail; npm test | tail','cd . && npm test','npm test > log 2>&1; echo "exit=$?"','ls | wc -l','git status; echo done'];
 // PreToolUse input as each client sends it (tool name, input fields, cwd field or not).
 const INPUTS={
   claude:(cwd,command)=>({hook_event_name:'PreToolUse',cwd,tool_name:'Bash',tool_input:{command}}),
@@ -42,7 +42,7 @@ test('installed PreToolUse runtime denies status-hiding validations in every hoo
       const out=runHook(l,client,input(p,c),p);
       assert.equal(out.hookSpecificOutput?.permissionDecision,'deny',client+': '+c);
       assert.equal(out.hookSpecificOutput.hookEventName,'PreToolUse');
-      assert.match(out.hookSpecificOutput.permissionDecisionReason,/AW_VALIDATION_COMPOUND.*set -o pipefail; CMD \| tail.*PIPESTATUS.*echo "exit=\$\?"/s);
+      assert.match(out.hookSpecificOutput.permissionDecisionReason,/AW_VALIDATION_COMPOUND.*set -o pipefail; CMD \| tail.*echo "exit=\$\?".*not `exit \$\{PIPESTATUS\[0\]\}`: zsh/s);
     }
     for(const c of ALLOWED)assert.deepEqual(runHook(l,client,input(p,c),p),{},client+': '+c);
     // Another tool, or no command, is never judged.
@@ -58,7 +58,7 @@ test('installed PreToolUse runtime denies status-hiding validations in every hoo
   for(const [client,input] of Object.entries(INPUTS))for(const c of BLOCKED)assert.deepEqual(runHook(l,client,input(p,c),p),{},'opt-out '+client+': '+c);
 });
 
-test('hook clients get a PreToolUse entry for their shell tool next to user hooks; Claude and Codex only with --guard',t=>{
+test('hook clients get a PreToolUse entry for their shell tool next to user hooks; Codex only with --guard or --trust-codex',t=>{
   const root=fixture(t),l=locations(root);
   const orca='{"matcher":".*","hooks":[{"type":"command","command":"orca-cc"}]}';
   const cc=put(root,'.commandcode/settings.json',`{"hooks":{"PreToolUse":[${orca}]}}\n`);
@@ -69,7 +69,9 @@ test('hook clients get a PreToolUse entry for their shell tool next to user hook
   const c=json(read(cc));assert.deepEqual(c.hooks.PreToolUse[0],JSON.parse(orca));assert.equal(c.hooks.PreToolUse[1].matcher,'^SHELL$');assert.match(c.hooks.PreToolUse[1].hooks[0].command,/'--client' 'commandcode'$/);
   const k=read(kc);assert(k.startsWith(kimiToml));const kt=parseToml(k);
   assert.deepEqual(kt.hooks.map(h=>[h.event,h.matcher??null]),[['PreToolUse',null],['PreToolUse','^Bash$']]);assert.match(kt.hooks[1].command,/'--client' 'kimi'$/);assert.equal(kt.default_model,'k2');
-  for(const f of [join(l.claude,'settings.json'),join(l.codex,'hooks.json')])assert.equal(json(read(f)).hooks.PreToolUse,undefined,f);
+  // 0.6.0: the Claude guard is on by default; Codex needs --guard codex or --trust-codex.
+  assert.equal(json(read(join(l.claude,'settings.json'))).hooks.PreToolUse[0].matcher,'Bash');assert.equal(json(read(join(l.codex,'hooks.json'))).hooks.PreToolUse,undefined);
+  assert.deepEqual(json(read(join(l.store,'installation.json'))).guard,['claude']);
   // The pi extension and the MiMo plugin carry the guard in their own file.
   assert.match(read(join(l.pi,'extensions/agent-workflow.js')),/tool_call/);assert.match(read(join(l.mimo,'plugins/agent-workflow.js')),/tool\.execute\.before/);
   assert.equal(verify({userRoot:root}).ok,true,JSON.stringify(verify({userRoot:root}).issues));

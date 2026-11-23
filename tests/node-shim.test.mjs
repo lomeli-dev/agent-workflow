@@ -36,7 +36,8 @@ test('verify and doctor report a removed hook Node with the repair; the shim deg
 });
 
 test('sync migrates a legacy absolute-Node hook command and verify flags it while broken',t=>{
- const root=fixture(t),l=locations(root);install({userRoot:root,clients:['claude']});
+ // Legacy installs had no PreToolUse guard.
+ const root=fixture(t),l=locations(root);install({userRoot:root,clients:['claude'],guard:[]});
  const settings=join(l.claude,'settings.json'),state=join(l.store,'installation.json'),m=json(read(state));
  const entry=m.files.find(f=>f.kind==='hooks'),legacy=`'${join(root,'old-node/bin/node')}' '${join(l.store,'runtime/hook.mjs')}'`;
  const text=hooks(hooks(read(settings),entry.command,true),legacy);writeFileSync(settings,text);entry.command=legacy;entry.afterHash=hash(text);writeFileSync(state,JSON.stringify(m));

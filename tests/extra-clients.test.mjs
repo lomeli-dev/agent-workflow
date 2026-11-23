@@ -141,7 +141,7 @@ test('CLI selects clients explicitly with a list or all',t=>{
   const all=spawnSync(process.execPath,[cli,'install','--global','--clients','all','--dry-run','--user-root',root],{encoding:'utf8'});assert.equal(all.status,0,all.stderr);
   const out=JSON.parse(all.stdout);assert.deepEqual(out.clients,ALL_CLIENTS);assert(out.changes.some(c=>c.path===join(locations(root).qwen,'QWEN.md')));assert(!existsSync(join(root,'.qwen')));
   const bad=spawnSync(process.execPath,[cli,'install','--global','--clients','claude,nope','--user-root',root],{encoding:'utf8'});assert.equal(bad.status,1);assert.match(bad.stderr,/Use --clients/);
-  assert.deepEqual(EXTRA_CLIENTS,['qwen','kimi','agy','commandcode','pi','mimo']);
+  assert.deepEqual(EXTRA_CLIENTS,['qwen','kimi','agy','commandcode','pi','mimo','dsh']);
 });
 
 test('guard recognizes node test files and the project test script, without lookalikes',t=>{

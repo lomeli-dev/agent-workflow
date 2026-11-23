@@ -42,15 +42,19 @@ agent-workflow mcp --tool MODULE --project PATH
 agent-workflow uninstall --global [--dry-run]
 
 --clients defaults to claude,codex,opencode. Extra clients: qwen, kimi, agy,
-commandcode, pi, mimo; 'all' selects every client. A sync can
+commandcode, pi, mimo, dsh (DeepSeek Harness); 'all' selects every client. A sync can
 add clients to an installation; dropping one needs uninstall first.
 
 The validation guard (PreToolUse/tool hook that denies a test or build command
 whose exit status a pipe, ';' or echo would hide) is installed for qwen, kimi,
-commandcode, pi and mimo (OpenCode has it in its plugin). For claude and codex
-it is opt-in: --guard claude,codex adds it, --guard none removes it, and
-without --guard a sync keeps the current choice. Opted-out projects are never
-blocked.
+agy, commandcode, pi, mimo and dsh (OpenCode has it in its plugin). For claude
+and codex it is chosen with --guard: claude: on by default; codex: on by default
+only with --trust-codex (it needs approval). --guard claude,codex|none sets the
+choice explicitly; without --guard a sync keeps the recorded choice. Opted-out
+projects are never blocked.
+
+dsh hooks run through the @deepseek-ai/dsh-hooks-claude-code bridge of each
+profile; profiles without it get a notice with the dsh plugin add command.
 
 Codex runs a hook only after it is trusted (/hooks). trust --client codex does
 the same as approving in /hooks, through codex app-server, for the Agent
