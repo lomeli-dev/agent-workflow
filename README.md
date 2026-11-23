@@ -33,7 +33,9 @@ agent-workflow sync --global --clients all
 agent-workflow verify
 ```
 
-`all` adds `qwen`, `kimi`, `agy`, `commandcode`, `pi` and `mimo` to the default three; a comma list picks some. A sync can add clients to an existing installation; dropping one needs `uninstall` first. Each client gets what it supports natively: rule block, the shared `~/.agents/skills/aw-workflow` skill (agy gets its own copy), roles, `aw-start` and a session hook. Kimi gets no hook (it discards SessionStart output). Antigravity was verified with a real headless session; see the compatibility document for how to run it without the MCP hang. The [compatibility document](docs/compatibility.md#extra-clients-040) has the per-client table, the MiMo `CLAUDE.md` precedence, and what was verified natively.
+`all` adds `qwen`, `kimi`, `agy`, `commandcode`, `pi` and `mimo` to the default three; a comma list picks some. A sync can add clients to an existing installation; dropping one needs `uninstall` first. Each client gets what it supports natively: rule block, the shared `~/.agents/skills/aw-workflow` skill (agy gets its own copy), roles, `aw-start` and a session hook. Kimi gets no session hook (it discards SessionStart output). Antigravity was verified with a real headless session; see the compatibility document for how to run it without the MCP hang. The [compatibility document](docs/compatibility.md#extra-clients-040) has the per-client table, the MiMo `CLAUDE.md` precedence, and what was verified natively.
+
+**Validation guard.** Before a shell command runs, Qwen, Kimi, Command Code, Pi and MiMo (and OpenCode, as before) block a test/build command whose exit status a pipe, `;` or following `echo` would hide, and tell the model the three allowed forms. For Claude Code and Codex it is opt-in: `agent-workflow sync --global --clients ... --guard claude,codex` (`--guard none` removes it; without `--guard` a sync keeps the current choice). Codex then asks to trust the new `PreToolUse` hook once. Opted-out projects are never blocked. Details and evidence per client: [compatibility](docs/compatibility.md#validation-guard-050).
 
 **Clients may require trusting new hooks or restarting a session.** Codex's native hook trust is not bypassed; after a `sync` that changes hooks, re-approve them in Codex with `/hooks` (`verify` warns with `codex-hook-untrusted`/`codex-hook-not-enabled`). `verify` proves files/registrations, not that a running client reloaded or executed them. See the compatibility document for evidence levels.
 
@@ -154,6 +156,8 @@ node bin/agent-workflow.mjs uninstall --global --user-root /path/to/isolated-use
 No model or effort is forced, no MCP server is added by the global workflow install, and no automatic project-memory writer is started. The coordinator uses an existing memory-sesion installation if the project and user call for it. Workers return candidate lessons to that coordinator.
 
 [Native client behavioral trial](docs/native-trial-2026-11-13.md): real implementation, opt-out, roles, MCP and browser checks, including remaining limitations.
+
+Version 0.5.0 extends the validation guard to Qwen, Kimi, Command Code, Pi and MiMo, and makes it opt-in for Claude and Codex (`--guard`); see the [changelog](CHANGELOG.md).
 
 Version 0.4.0 adds six opt-in clients, warns about unapproved Codex hooks, extends the OpenCode guard to `node <test file>` and the project test script, and fixes an uninstall failure on compact JSON; see the [changelog](CHANGELOG.md).
 

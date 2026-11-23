@@ -31,7 +31,9 @@ agent-workflow sync --global --clients all
 agent-workflow verify
 ```
 
-`all` suma `qwen`, `kimi`, `agy`, `commandcode`, `pi` y `mimo` a los tres de siempre; una lista con comas elige algunos. Un `sync` puede añadir clientes a una instalación existente; quitar uno exige `uninstall` antes. Cada cliente recibe lo que soporta de forma nativa: bloque de reglas, el skill compartido `~/.agents/skills/aw-workflow` (agy lleva su propia copia), roles, `aw-start` y un hook de sesión. Kimi no lleva hook (descarta la salida de SessionStart). Antigravity se verificó con una sesión headless real; en operaciones está cómo correrlo sin el cuelgue de MCP. La tabla por cliente, la precedencia de `CLAUDE.md` en MiMo y lo verificado en cada cliente están en [compatibilidad](docs/compatibility.md#extra-clients-040) y en [operaciones](docs/operaciones.es.md#clientes-adicionales).
+`all` suma `qwen`, `kimi`, `agy`, `commandcode`, `pi` y `mimo` a los tres de siempre; una lista con comas elige algunos. Un `sync` puede añadir clientes a una instalación existente; quitar uno exige `uninstall` antes. Cada cliente recibe lo que soporta de forma nativa: bloque de reglas, el skill compartido `~/.agents/skills/aw-workflow` (agy lleva su propia copia), roles, `aw-start` y un hook de sesión. Kimi no lleva hook de sesión (descarta la salida de SessionStart). Antigravity se verificó con una sesión headless real; en operaciones está cómo correrlo sin el cuelgue de MCP. La tabla por cliente, la precedencia de `CLAUDE.md` en MiMo y lo verificado en cada cliente están en [compatibilidad](docs/compatibility.md#extra-clients-040) y en [operaciones](docs/operaciones.es.md#clientes-adicionales).
+
+**Guard de validación.** Antes de ejecutar shell, Qwen, Kimi, Command Code, Pi y MiMo (y OpenCode, como antes) bloquean un comando de test/build cuyo código de salida quedaría oculto por un pipe, un `;` o un `echo` posterior, y le dicen al modelo las tres formas permitidas. En Claude Code y Codex es opcional: `agent-workflow sync --global --clients ... --guard claude,codex` (`--guard none` lo quita; sin `--guard`, un `sync` conserva lo elegido). Codex pide aprobar una vez el hook nuevo `PreToolUse`. Los proyectos desactivados nunca se bloquean. Detalle y evidencia por cliente: [operaciones](docs/operaciones.es.md#protección-de-validación-y-archivos-de-módulos).
 
 Tras un `sync` que cambie los hooks, Codex no los ejecuta hasta que los vuelvas a aprobar con `/hooks`; `verify` avisa con `codex-hook-untrusted` o `codex-hook-not-enabled`. No se salta la confianza.
 
@@ -165,6 +167,8 @@ Guía completa: [instalación, actualización, uso y recuperación](docs/operaci
 En carpetas sin Git, el opt-out busca también en los directorios antecesores hasta la raíz del sistema. Para `connect`, `disconnect` y `mcp-config` usa la raíz del repositorio; no se promociona una subcarpeta automáticamente. Si conectaste sólo algunos clientes, repite el mismo `--clients` al desconectar.
 
 [Prueba con agentes reales](docs/native-trial-2026-11-13.md): implementación, opt-out, roles, MCP y navegador, con sus resultados y límites.
+
+La versión 0.5.0 lleva el guard de validación a Qwen, Kimi, Command Code, Pi y MiMo, y lo deja opcional para Claude y Codex (`--guard`); ver el [changelog](CHANGELOG.md).
 
 La versión 0.4.0 añade seis clientes opcionales, avisa de hooks de Codex sin aprobar, amplía el guard de OpenCode a `node <archivo de test>` y al script de test del proyecto, y corrige un fallo de `uninstall` con JSON compacto; ver el [changelog](CHANGELOG.md).
 

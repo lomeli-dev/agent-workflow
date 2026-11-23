@@ -4,7 +4,7 @@ import {join,resolve} from 'node:path';
 import {parseArgs} from 'node:util';
 import {status,projectRoot} from '../lib/gate.mjs';
 import {atomic,noSymlinks,read} from '../lib/files.mjs';
-import {install,uninstall,verify,CLIENTS,ALL_CLIENTS,parseClients} from '../lib/install.mjs';
+import {install,uninstall,verify,CLIENTS,ALL_CLIENTS,parseClients,parseGuard} from '../lib/install.mjs';
 import {doctor} from '../lib/doctor.mjs';
 import {CATALOG,PROFILES} from '../lib/catalog.mjs';
 import {setupModules,findBin,toolEnvironment} from '../lib/modules.mjs';
@@ -17,8 +17,8 @@ import {connect,connectionRoot,pruneConnections} from '../lib/connect.mjs';
 
 const HELP=`Agent Workflow ${VERSION} — global by default, project opt-out
 
-agent-workflow install --global [--clients LIST|all] [--dry-run]
-agent-workflow sync --global [--clients LIST|all] [--dry-run]
+agent-workflow install --global [--clients LIST|all] [--guard claude,codex|none] [--dry-run]
+agent-workflow sync --global [--clients LIST|all] [--guard claude,codex|none] [--dry-run]
 agent-workflow verify [--json]
 agent-workflow doctor [--json]
 agent-workflow status [--project PATH] [--json]
@@ -43,6 +43,13 @@ agent-workflow uninstall --global [--dry-run]
 commandcode, pi, mimo; 'all' selects every client. A sync can
 add clients to an installation; dropping one needs uninstall first.
 
+The validation guard (PreToolUse/tool hook that denies a test or build command
+whose exit status a pipe, ';' or echo would hide) is installed for qwen, kimi,
+commandcode, pi and mimo (OpenCode has it in its plugin). For claude and codex
+it is opt-in: --guard claude,codex adds it, --guard none removes it, and
+without --guard a sync keeps the current choice. Codex asks to trust the new
+hook (/hooks). Opted-out projects are never blocked.
+
 --user-root PATH redirects every managed destination to an existing isolated
 user-root (for tests/previews). It never changes HOME. Hook trust is native to
 the client; this tool does not bypass it. No startup dependency installs.
@@ -51,13 +58,13 @@ claude-lean is opt-in: without --mcp-file, no MCP servers are available in
 that Claude session. It does not alter your normal Claude configuration.
 `;
 try{
-  const {values,positionals}=parseArgs({allowPositionals:true,options:{global:{type:'boolean'},clients:{type:'string'},'user-root':{type:'string'},project:{type:'string'},'dry-run':{type:'boolean'},json:{type:'boolean'},tool:{type:'string'},file:{type:'string'},name:{type:'string'},tools:{type:'string'},profile:{type:'string'},'mcp-file':{type:'string'},all:{type:'boolean'},list:{type:'boolean'},interactive:{type:'boolean'},prune:{type:'boolean'},apply:{type:'boolean'},help:{type:'boolean'},version:{type:'boolean'}}});
+  const {values,positionals}=parseArgs({allowPositionals:true,options:{global:{type:'boolean'},clients:{type:'string'},guard:{type:'string'},'user-root':{type:'string'},project:{type:'string'},'dry-run':{type:'boolean'},json:{type:'boolean'},tool:{type:'string'},file:{type:'string'},name:{type:'string'},tools:{type:'string'},profile:{type:'string'},'mcp-file':{type:'string'},all:{type:'boolean'},list:{type:'boolean'},interactive:{type:'boolean'},prune:{type:'boolean'},apply:{type:'boolean'},help:{type:'boolean'},version:{type:'boolean'}}});
   const cmd=positionals[0];if(values.version){console.log(VERSION);process.exit(0);}if(values.help||!cmd){console.log(HELP);process.exit(0);}
   if(positionals.length>1&&cmd!=='exec'&&cmd!=='claude-lean')throw Error('Unexpected positional arguments');
   const userRoot=values['user-root'],dryRun=values['dry-run']??false;let result;
   if(values.apply&&dryRun)throw Error('--apply and --dry-run cannot be combined');
   if(['install','sync','uninstall'].includes(cmd)&&!values.global)throw Error('Pass --global explicitly (or preview with --global --dry-run)');
-  if(cmd==='install'||cmd==='sync')result=install({userRoot,dryRun,clients:parseClients(values.clients)});
+  if(cmd==='install'||cmd==='sync')result=install({userRoot,dryRun,clients:parseClients(values.clients),guard:parseGuard(values.guard)});
   else if(cmd==='uninstall')result=uninstall({userRoot,dryRun});
   else if(cmd==='verify'){result=verify({userRoot});if(!result.ok)process.exitCode=1;}
   else if(cmd==='doctor')result=await doctor({userRoot});
