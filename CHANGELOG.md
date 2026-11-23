@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.1
+
+- **Uninstall keeps your edits.** After a `sync`, `uninstall` restored the snapshot taken at the first install and wiped later edits to `CLAUDE.md`, `AGENTS.md`, `settings.json`, `hooks.json` and `opencode.jsonc` (deleting files that did not exist before). It now removes only the owned block, hooks and plugin entry; the snapshot is reused only when the file is otherwise untouched.
+- **Stable hook Node.** Hooks call a generated shim, `<store>/bin/node`, instead of an nvm-versioned Node. `verify` and `doctor` report `hook-node-missing`/`hook-runtime-missing` with the `npm link` + `sync` repair; the first `sync` migrates older installs. See "After switching Node" in the operations guide.
+- **`verify` detects outdated installs**: `status: "outdated"` lists files that differ from what this package would install, with installed and package versions.
+- **Worktrees.** The MCP launcher serves the worktree it starts in when it belongs to the registered repository. New `disconnect --prune` forgets receipts of deleted projects; `uninstall` names what to run. Documented that an untracked `.agent-workflow.json` does not reach worktrees.
+- **OpenCode guard matches the rule.** Allows `set -o pipefail; CMD | tail`, `CMD | tail; exit ${PIPESTATUS[0]}` and `CMD > log 2>&1; echo "exit=$?"`; recognizes `npx`/`pnpm exec`, `uv run`, gradle, `make -C` and `bash -c` validations. The rule text names the same forms.
+- `aw-reviewer` asks each client to deny edits (Claude, Codex, OpenCode); `doctor` no longer probes the personal `opencode2` alias.
+
 ## 0.3.0
 
 - Add opt-in `claude-lean` sessions with an empty or explicitly selected MCP configuration, without changing normal client settings.

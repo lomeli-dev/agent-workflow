@@ -26,8 +26,8 @@ Sin `--apply` sólo se presenta el plan, aunque puede ejecutar probes de versió
 | Comando | Para qué sirve |
 | --- | --- |
 | `install --global` / `sync --global` | Instalar o actualizar los archivos propios; permite `--clients claude,codex,opencode` |
-| `verify` | Verificar archivos y registros propios; no demuestra ejecución dentro del IDE |
-| `doctor --json` | Comprobar ejecutables/versiones; no acredita autenticación ni integración completa |
+| `verify` | Verificar archivos y registros propios, y el Node y runtime que llaman los hooks; `status: outdated` lista lo que difiere de este paquete (toca `sync`); no demuestra ejecución dentro del IDE |
+| `doctor --json` | Comprobar ejecutables/versiones y repetir lo de `verify` en `installation`; no acredita autenticación ni integración completa |
 | `status --project RUTA --json` | Ver si este proyecto tiene activado el flujo |
 | `disable --project RUTA` / `enable --project RUTA` | Cambiar el interruptor del proyecto; admite `--dry-run` |
 | `setup --list` | Mostrar catálogo y perfiles |
@@ -37,6 +37,7 @@ Sin `--apply` sólo se presenta el plan, aunque puede ejecutar probes de versió
 | `mcp-config --project RAIZ` | Mostrar sugerencias de configuración sin escribir archivos |
 | `connect --project RAIZ` | Registrar MCP del proyecto; `--dry-run` previsualiza |
 | `disconnect --project RAIZ` | Retirar las entradas propias; repetir el mismo `--clients` de la conexión |
+| `disconnect --prune` | Olvidar los recibos cuyo proyecto ya no existe (p. ej. un worktree borrado); `--dry-run` previsualiza |
 | `mcp --tool NOMBRE --project RUTA` | Lanzador stdio interno usado por los registros |
 | `uninstall --global` | Retirar integración y revertir cambios propios; conserva herramientas |
 | `--user-root RUTA` | Usar una raíz temporal de pruebas existente; no es un sandbox del sistema |
@@ -59,6 +60,13 @@ Los archivos nativos son `.mcp.json`, `.codex/config.toml` y `opencode.jsonc`/`o
 
 El opt-out se comprueba al arrancar el MCP; no revoca servidores ya abiertos. Reinícialos después de cambiarlo. Dentro de Git la búsqueda del interruptor termina en la raíz del repo. Fuera de Git busca en los directorios superiores hasta la raíz del sistema. El cliente puede seguir descubriendo las skills globales aunque el flujo esté desactivado.
 
+### Worktrees (Orca y `git worktree`)
+
+- **`connect` desde un worktree** registra la raíz de ese worktree, no la del clon principal.
+- **Un `.mcp.json` copiado o versionado** guarda la ruta del clon donde se conectó. Al arrancar, el lanzador mira el directorio actual: si es otro worktree del mismo repo (mismo directorio Git común), sirve ese worktree y lo avisa por stderr. Si el directorio no pertenece al repo, usa la ruta registrada. Esto depende de que el cliente arranque el MCP con el cwd del proyecto; no se comprobó en clientes reales.
+- **`.agent-workflow.json` sin trackear no llega a los worktrees.** Un worktree nuevo solo trae lo versionado, así que un `disable` hecho en el clon principal no aplica ahí: el worker recibe "enabled". Versiona el archivo, o ejecuta `agent-workflow disable --project RUTA_DEL_WORKTREE` en cada worktree.
+- **Si borras un worktree conectado**, su recibo queda huérfano y `uninstall --global` se detiene diciendo qué proyecto falta. `agent-workflow disconnect --prune --dry-run` muestra los recibos cuyo proyecto ya no existe y `disconnect --prune` los olvida. No toca otros clones. `doctor` también los lista en `connections`.
+
 ## Navegador
 
 Primero lee la guía de la versión instalada:
@@ -77,6 +85,20 @@ Antes de actualizar, conserva tu trabajo, haz `git fetch`, revisa los cambios y 
 
 Una instalación npm desde una ruta local puede depender del checkout. No lo muevas sin planear la reinstalación. Si cambia la ruta del paquete o de Node, desconecta los proyectos antes y vuelve a conectarlos después.
 
+### Tras cambiar de Node
+
+Los hooks se ejecutan con un shim estable, `<store>/bin/node`, que guarda el Node con el que se hizo el último `sync`. Con nvm, `npm link` (o `npm install --global .`) va por versión de Node. Por eso, al hacer `nvm use` a otra versión puede desaparecer el comando `agent-workflow`. Y si borras la versión guardada, el shim usa el `node` del PATH; si no hay ninguno, sale con 0 y no da contexto. `verify` y `doctor` avisan con `hook-node-missing` (o `hook-runtime-missing`) y dan el arreglo:
+
+```sh
+cd /ruta/a/agent-workflow   # tu clon
+npm link                    # con el Node que vas a conservar
+agent-workflow sync --global --dry-run
+agent-workflow sync --global
+agent-workflow verify
+```
+
+Las instalaciones de 0.3.0 o anteriores llaman al Node por ruta absoluta. El primer `sync` con 0.3.1 las pasa al shim. Los registros MCP de proyecto también guardan el Node y la ruta del clon: desconéctalos y vuelve a conectarlos después del cambio.
+
 Para retirar: desconecta todos los proyectos, ejecuta `uninstall --global --dry-run`, `uninstall --global` y después desinstala el paquete npm. Si quedan registros de proyectos, el desinstalador se detiene. No borra herramientas descargadas, caches compartidas, ejecutables reutilizados ni los interruptores de proyecto. No existe un comando de purga automática de herramientas.
 
 ## Errores y datos privados
@@ -93,6 +115,14 @@ Los modelos, effort, permisos y compactación del cliente no se cambian. La memo
 
 ## Protección de validación y archivos de módulos
 
-En OpenCode V2 el plugin intercepta el shell antes de ejecutar. Con el workflow activo rechaza validaciones reconocidas que incluyan pipes, separadores o condicionales; ejecuta el test solo y usa el directorio del propio tool. El opt-out se vuelve a consultar en cada llamada. Es un guard limitado, no un parser universal ni un sandbox de permisos.
+En OpenCode V2 el plugin intercepta el shell antes de ejecutar. Con el workflow activo rechaza validaciones reconocidas que incluyan pipes, separadores o condicionales; ejecuta el test solo y usa el directorio del propio tool.
+
+Reconoce como validación los scripts de npm/pnpm/yarn/bun, los runners vía `npx`/`pnpm exec`/`bunx`, `uv run`/`poetry run`, pytest/jest/vitest, `node --test`, cargo/go/dotnet, las tareas de test de gradle/`./gradlew`, `make [-C DIR] test|check|build` y los scripts de `bash -c`/`sh -c` (los revisa por dentro). Deja pasar tres formas que conservan el estado:
+
+- `set -o pipefail; CMD | tail` (también `set -euo pipefail`): el pipeline devuelve el primer fallo;
+- `CMD | tail; exit ${PIPESTATUS[0]}`: el índice debe apuntar a la validación;
+- `CMD > log 2>&1; echo "exit=$?"`: la salida completa queda en un archivo y se imprime el estado. Sin la redirección, `CMD; echo $?` sigue bloqueado.
+
+Cualquier cosa después de esas formas, las cadenas con `cd`, `&&`/`||` y los procesos en segundo plano siguen bloqueados. El opt-out se vuelve a consultar en cada llamada. Es un guard limitado, no un parser universal ni un sandbox de permisos.
 
 El MCP de CodeGraph incorpora `agent_workflow_symbols` para un archivo JS/TS explícito, incluyendo `.mjs`, `.cjs`, `.mts` y `.cts`. Usa TypeScript como requisito, devuelve nombres y posiciones originales y no ejecuta el módulo. Rechaza rutas fuera del proyecto, errores sintácticos y archivos mayores a 1 MiB. El resultado identifica su fuente y no afirma tener relaciones de grafo. El motor original de CodeGraph sigue teniendo su límite de extensiones.

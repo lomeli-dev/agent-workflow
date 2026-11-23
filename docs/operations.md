@@ -19,8 +19,8 @@ The tools are optional. Preview with `setup --list`, `setup --interactive`, `set
 | Command | Effect |
 | --- | --- |
 | `install --global`, `sync --global` | Deploy/update owned workflow files; `--clients claude,codex,opencode` selects clients |
-| `verify` | Check installation receipt, owned files and registrations; not native execution |
-| `doctor --json` | Check executable/version availability; not authentication or complete LSP/browser integration |
+| `verify` | Check installation receipt, owned files, registrations and the Node/runtime the hooks call; `status: outdated` lists files that differ from this package (run `sync`); not native execution |
+| `doctor --json` | Check executable/version availability and repeat the `verify` checks under `installation`; not authentication or complete LSP/browser integration |
 | `status --project PATH --json` | Read effective project opt-out |
 | `disable --project PATH`, `enable --project PATH` | Write the small project switch; `--dry-run` previews |
 | `setup --list` | Show the full catalog and profiles |
@@ -30,6 +30,7 @@ The tools are optional. Preview with `setup --list`, `setup --interactive`, `set
 | `mcp-config --project ROOT` | Print native configuration suggestions only; writes nothing |
 | `connect --project ROOT` | Register selected project MCPs; `--dry-run` previews |
 | `disconnect --project ROOT` | Remove owned project registrations; use the same `--clients` set used to connect |
+| `disconnect --prune` | Forget receipts whose project no longer exists (for example a deleted worktree); `--dry-run` previews |
 | `mcp --tool NAME --project PATH` | Internal stdio launcher used by generated registrations |
 | `uninstall --global` | Remove workflow integration, restore owned changes; tools are retained |
 | `--user-root PATH` | Redirect managed destinations to an existing test-user directory; not a full OS sandbox |
@@ -42,6 +43,13 @@ Default MCPs are Serena, CodeGraph and Context7. Optional browser MCPs require e
 
 Use the repository root for `connect`, `disconnect` and `mcp-config`. A nested path inside Git is rejected rather than silently promoted. Config applies to the registered root; a shared root registration cannot dynamically represent every nested opt-out. The MCP gate is checked when the server starts. Restart it after changing the switch; already running connections are not revoked. Global instructions remain discoverable when disabled.
 
+### Worktrees (Orca and `git worktree`)
+
+- **`connect` from a worktree** registers that worktree's root, not the main checkout.
+- **A copied or committed `.mcp.json`** stores the checkout where it was connected. At startup the launcher looks at its working directory: if it is another worktree of the same repository (same common Git directory), it serves that worktree and says so on stderr. A directory outside the repository keeps the registered path. This relies on the client starting the MCP in the project directory, which was not verified in real clients.
+- **An untracked `.agent-workflow.json` does not reach worktrees.** A new worktree only contains tracked files, so a `disable` in the main checkout does not apply there and the worker sees "enabled". Commit the file, or run `agent-workflow disable --project WORKTREE_PATH` in each worktree.
+- **Deleting a connected worktree** leaves an orphaned receipt, and `uninstall --global` stops and names the missing project. `agent-workflow disconnect --prune --dry-run` lists receipts whose project no longer exists, and `disconnect --prune` forgets them without touching other checkouts. `doctor` lists them under `connections`.
+
 Connection receipts preserve the exact original config path. If OpenCode config precedence changes, disconnect first and reconnect. If you used `--clients claude,codex`, use the same set for disconnect. Empty/duplicate clients, invalid containers, missing/edited managed blocks and changed owned entries fail before mutation.
 
 ## Browser use
@@ -53,6 +61,20 @@ Downloading is a separate explicit action: `agent-workflow exec --tool agent-bro
 ## Updates and removal
 
 Fetch, inspect and fast-forward the intended source revision before reinstalling dependencies and running `sync`; see the exact sequence in the overview. Worktree divergence is not permission to reset. Rerun package checks and verify. A changed Node path or moved checkout may invalidate stored command paths; disconnect projects before moving and reconnect after installing at the new path.
+
+### After switching Node
+
+Hooks run through a stable shim, `<store>/bin/node`, which records the Node that ran the last `sync`. With nvm, `npm link` (or `npm install --global .`) is per Node version, so after `nvm use` to another version the `agent-workflow` command may not exist, and after deleting the recorded version the shim falls back to the `node` in PATH or, if there is none, exits 0 without context. `verify` and `doctor` report `hook-node-missing` (or `hook-runtime-missing`) with the repair:
+
+```sh
+cd /path/to/agent-workflow   # your checkout
+npm link                     # with the Node you want to keep
+agent-workflow sync --global --dry-run
+agent-workflow sync --global
+agent-workflow verify
+```
+
+Installs from 0.3.0 and earlier call the absolute Node path directly; the first `sync` with 0.3.1 moves them to the shim. Project MCP registrations also record the Node and checkout path: disconnect and reconnect them after switching.
 
 Before uninstalling, disconnect every registered project. The global uninstall refuses while connection receipts remain. Review `uninstall --global --dry-run`, then uninstall and remove the npm CLI. Retained optional tools are intentional; there is no automatic tool purge command. Do not recursively delete a shared cache or reused system executable. Existing project opt-out files are also retained.
 
@@ -71,6 +93,14 @@ For validation history and current coverage, read [testing](testing.md) and the 
 
 ## Validation guard and module coverage
 
-OpenCode V2 registers a `shell.create.before` hook. When the effective project gate is enabled, recognized test/build commands combined with pipes, separators or conditionals are rejected before execution. Run the check directly and use the tool cwd field. Ordinary reads and direct validations are unchanged. Recognition is deliberately bounded; it is not a general shell parser, permission filter or guarantee for arbitrary scripts/substitutions. Unsupported plugin APIs retain guidance only and report `validationGuard: false` in plugin storage.
+OpenCode V2 registers a `shell.create.before` hook. When the effective project gate is enabled, recognized test/build commands combined with pipes, separators or conditionals are rejected before execution. Run the check directly and use the tool cwd field.
+
+Recognized validations include npm/pnpm/yarn/bun scripts, `npx`/`pnpm exec`/`bunx` runners, `uv run`/`poetry run`, pytest/jest/vitest, `node --test`, cargo/go/dotnet, gradle/`./gradlew` test tasks, `make [-C DIR] test|check|build` and `bash -c`/`sh -c` scripts (checked recursively). Three forms keep the failure status and are allowed:
+
+- `set -o pipefail; CMD | tail` (also `set -euo pipefail`): the pipeline returns the first failure;
+- `CMD | tail; exit ${PIPESTATUS[0]}`: the index must point at the validation;
+- `CMD > log 2>&1; echo "exit=$?"`: full output goes to a file and the status is printed. Without the redirection, `CMD; echo $?` stays blocked.
+
+Anything after those forms, `cd` chains, `&&`/`||` and background jobs stay blocked. Ordinary reads and direct validations are unchanged. Recognition is deliberately bounded; it is not a general shell parser, permission filter or guarantee for arbitrary scripts/substitutions. Unsupported plugin APIs retain guidance only and report `validationGuard: false` in plugin storage.
 
 The CodeGraph adapter adds `agent_workflow_symbols` and coverage guidance. It reads only the explicit original project-relative JS/TS file (maximum 1 MiB), refuses path escapes and syntax errors, and returns named declarations with original locations. It never executes project modules. TypeScript is a setup prerequisite of CodeGraph. Results identify `source: typescript-parser` and `graphRelationships: false`; this does not patch the upstream relationship graph.
