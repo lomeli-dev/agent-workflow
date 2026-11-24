@@ -6,3 +6,10 @@ coverage/
 .env
 .env.*
 !.env.example
+
+# Local only (kept on disk, not published): session memory and agent prompts
+.memory/
+docs/prompts/
+
+# GitHub Pages build output (npm run site)
+_site/

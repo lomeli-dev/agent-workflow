@@ -2,7 +2,7 @@
 
 Global workflow guidance for Claude Code, Codex CLI and OpenCode V2 (default), plus Qwen Code, Kimi Code, Antigravity CLI, Command Code, Pi, MiMo Code and DeepSeek Harness (dsh) on request, with project opt-out, Rulesync generation and a reversible installer.
 
-[Español](README.es.md) · [Install everything in 5 minutes](#install-everything-in-5-minutes) · [Architecture](docs/architecture.md) · [Compatibility and limits](docs/compatibility.md) · [Testing](docs/testing.md) · [Complete operations guide](docs/operations.md) · [Audit](docs/audit-2026-11-13.md)
+[Español](README.es.md) · [Docs site](https://lomeli-dev.github.io/agent-workflow/en/) · [Install everything in 5 minutes](#install-everything-in-5-minutes) · [Architecture](docs/architecture.md) · [Compatibility and limits](docs/compatibility.md) · [Testing](docs/testing.md) · [Complete operations guide](docs/operations.md) · [Audit](docs/audit-2026-11-13.md)
 
 This is a workflow package, not an autonomous orchestrator or a promise of faster completion. It provides a short applicability rule, the `aw-workflow` skill, optional `aw-worker`/`aw-reviewer` roles, a start command where supported, startup/compaction reminders and dependency diagnostics. Existing project instructions and user-selected models remain in charge.
 
@@ -10,7 +10,7 @@ This is a workflow package, not an autonomous orchestrator or a promise of faste
 
 For a clean Mac that already has some of the clients installed. Each step is a command and what it does; details follow below and in the [operations guide](docs/operations.md).
 
-**1. Requirements.** Node.js 22.22.0+ (`node --version`), npm, Git with access to the private repository, and the clients you want to use installed and signed in (open each once). For dsh, boot a profile once (`dsh headless`) so `~/.dsh/profiles/headless` exists.
+**1. Requirements.** Node.js 22.22.0+ (`node --version`), npm, Git, and the clients you want to use installed and signed in (open each once). For dsh, boot a profile once (`dsh headless`) so `~/.dsh/profiles/headless` exists.
 
 **2. Clone and install the CLI.**
 
@@ -107,9 +107,9 @@ npm uninstall --global @lomeli-dev/agent-workflow
 
 Before uninstalling, back up your configurations (`~/.claude`, `~/.codex`, `~/.config/opencode`, `~/.gemini`, `~/.kimi-code`, `~/.dsh`…). `uninstall` removes only what it owns, including the agy permissions and the dsh packages added by `--dsh-plugins`, and stops if you edited something it owns. In the update sync the client list cannot be smaller than the installed one.
 
-## Install from the private repository
+## Install from the repository
 
-Requires Node.js 22.22.0+ and npm. Authenticate Git access to the private repository first; never paste tokens into these commands or project files.
+Requires Node.js 22.22.0+, npm and Git. Never paste tokens into these commands or project files.
 
 ```sh
 git clone https://github.com/lomeli-dev/agent-workflow.git
@@ -247,6 +247,8 @@ Updates/uninstall refuse changed owned files or hook definitions. Preserve/recon
 
 Edit `.rulesync`, not generated output. `npm run build` regenerates; `npm test` tests isolated installs, opt-out, preservation and failures; `npm run check` adds package/document checks. Rulesync build uses no model and never touches real client homes. `--user-root` redirects the install for safe previews/tests without overriding HOME.
 
+The [documentation site](https://lomeli-dev.github.io/agent-workflow/en/) is generated from these Markdown files, never copied: `npm run site` writes the Jekyll source to `.runtime/site-src` (pages, sections and links are mapped in `scripts/site.mjs`; layout in `site/`), and `.github/workflows/pages.yml` builds it with the official GitHub Pages actions, checks every internal link and anchor, and deploys on push to `main` (pull requests only build).
+
 ```sh
 mkdir -p /path/to/isolated-user
 node bin/agent-workflow.mjs install --global --user-root /path/to/isolated-user
@@ -257,6 +259,8 @@ node bin/agent-workflow.mjs uninstall --global --user-root /path/to/isolated-use
 No model or effort is forced, no MCP server is added by the global workflow install, and no automatic project-memory writer is started. The coordinator uses an existing memory-sesion installation if the project and user call for it. Workers return candidate lessons to that coordinator.
 
 [Native client behavioral trial](docs/native-trial-2026-11-13.md): real implementation, opt-out, roles, MCP and browser checks, including remaining limitations.
+
+Version 0.7.2 prepares the repository to be public: MIT license, the documentation site at <https://lomeli-dev.github.io/agent-workflow/> (built from these Markdown files) and no local session memory or agent prompts in the repository; see the [changelog](CHANGELOG.md).
 
 Version 0.7.1 fixes `dsh --profile web` breaking the next sync (dsh rewrites its `cordis.patch.yml`; the block is now compared by content and its rows are not folded) and makes a drift in one file stop aborting the sync of the others; see the [changelog](CHANGELOG.md).
 
@@ -275,3 +279,7 @@ Version 0.4.0 adds six opt-in clients, warns about unapproved Codex hooks, exten
 Version 0.3.1 makes `uninstall` keep edits made after a `sync`, runs hooks through a stable Node shim, reports outdated installs in `verify`, handles worktrees (`disconnect --prune`) and aligns the OpenCode guard with the rule; see the [changelog](CHANGELOG.md).
 
 Version 0.2.3 adds a native OpenCode compound-validation guard and an explicit JS/TS module-symbol fallback. See [verified repairs](docs/repairs-2026-11-13.md). CodeGraph setup also checks/installs the selected TypeScript prerequisite; no browser is added by that dependency.
+
+## License
+
+[MIT](LICENSE) © 2026 Miguel Lomeli. Documentation: <https://lomeli-dev.github.io/agent-workflow/en/>.

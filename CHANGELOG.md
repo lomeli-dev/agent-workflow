@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.2
+
+- **Ready to be public.** `.memory/` (session memory) and `docs/prompts/` (agent prompts) are no longer in the repository; they stay on the owner's disk and are in `.gitignore` (and `docs/prompts` is excluded from the npm package). Nothing in the package, tests or checks used them. No personal paths, host names or account data remain in the tracked files (`git grep` for home paths is empty); the published evidence already used synthetic projects and placeholders. Gitleaks over the whole history: no leaks. History was not rewritten.
+- **MIT license.** `LICENSE` (Copyright (c) 2026 Miguel Lomeli), `"license": "MIT"`, `homepage`, `repository` and `bugs` in `package.json`. The package stays `"private": true`: it is installed from the clone, not published to npm.
+- **Documentation site** at <https://lomeli-dev.github.io/agent-workflow/>, Spanish first with English beside it: home (what it is + "Install everything in 5 minutes"), client status, operations, compatibility, tools, testing, architecture, changelog and a link to Releases. `scripts/site.mjs` (`npm run site`, Node builtins only) generates the Jekyll source from README/docs/CHANGELOG at build time, maps repository links to site pages (or to GitHub for files that are not pages) and refuses broken ones; `scripts/site.mjs --check` verifies every internal link and heading id in the built HTML. `.github/workflows/pages.yml` builds with `actions/jekyll-build-pages` and deploys with `actions/configure-pages`, `upload-pages-artifact` and `deploy-pages` (pinned by commit), with `pages: write`/`id-token: write` only in the deploy job; pull requests build and check without deploying.
+- **Docs.** Requirements no longer ask for access to a private repository; both READMEs name the license and the site.
+
 ## 0.7.1
 
 - **Fix: `dsh --profile web` broke the next sync.** dsh's config editor (`dsh-config-editor`, `yaml` 2.9.1) rewrites `cordis.patch.yml` when a setting is saved. It folds every double-quoted `!!js` scalar at 80 columns and appends its own row (`ui-settings-general`) at the end of the list, which was inside our markers. 0.7.0 compared the block by bytes, so `verify` reported `managed-block-drift` and `sync` aborted for every client. Now:

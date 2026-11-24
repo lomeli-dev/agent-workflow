@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="{{ page.lang | default: site.lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if page.ref == 'home' %}{{ site.title }}{% else %}{{ page.title }} · {{ site.title }}{% endif %}</title>
+  <meta name="description" content="{{ site.description }}">
+  <link rel="stylesheet" href="{{ '/assets/site.css' | relative_url }}">
+  {% if page.alt_url %}<link rel="alternate" hreflang="{{ page.alt_lang }}" href="{{ page.alt_url | absolute_url }}">{% endif %}
+</head>
+<body>
+  <a class="skip" href="#content">{% if page.lang == 'en' %}Skip to content{% else %}Saltar al contenido{% endif %}</a>
+  <header class="top">
+    <div class="bar">
+      <a class="brand" href="{{ '/' | relative_url }}{% if page.lang == 'en' %}en/{% endif %}">Agent Workflow</a>
+      {% if page.alt_url %}<a class="lang" href="{{ page.alt_url | relative_url }}" hreflang="{{ page.alt_lang }}" lang="{{ page.alt_lang }}">{% if page.alt_lang == 'en' %}English{% else %}Español{% endif %}</a>{% endif %}
+    </div>
+    <nav aria-label="{% if page.lang == 'en' %}Documentation{% else %}Documentación{% endif %}">
+      {% for item in site.data.nav[page.lang] %}
+        {% if item.external %}
+          <a href="{{ item.url }}">{{ item.title }} ↗</a>
+        {% else %}
+          <a href="{{ item.url | relative_url }}"{% if item.url == page.url %} aria-current="page"{% endif %}{% if item.lang != page.lang %} hreflang="{{ item.lang }}"{% endif %}>{{ item.title }}</a>
+        {% endif %}
+      {% endfor %}
+    </nav>
+  </header>
+  <main id="content">
+    {{ content }}
+    {% if page.partial %}
+      <p class="more">{% if page.lang == 'en' %}This page is a section of{% else %}Esta página es una sección de{% endif %}
+        <a href="https://github.com/{{ site.repository }}/blob/main/{{ page.source }}"><code>{{ page.source }}</code></a>.</p>
+    {% endif %}
+  </main>
+  <footer>
+    <p>
+      {% if page.lang == 'en' %}Generated from{% else %}Generado desde{% endif %}
+      <a href="https://github.com/{{ site.repository }}/blob/main/{{ page.source }}"><code>{{ page.source }}</code></a>
+      {% if site.github.build_revision %}({{ site.github.build_revision | slice: 0, 7 }}){% endif %} ·
+      <a href="https://github.com/{{ site.repository }}">GitHub</a> ·
+      <a href="https://github.com/{{ site.repository }}/releases">Releases</a> ·
+      {% if page.lang == 'en' %}MIT license{% else %}Licencia MIT{% endif %}
+    </p>
+  </footer>
+</body>
+</html>

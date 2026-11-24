@@ -4,7 +4,7 @@
 
 ## Requirements and scope
 
-Node.js **22.22.0 or newer**, npm, Git and access to the private repository are required. Rulesync is pinned and installed as a package dependency; no separate global Rulesync is required. This release targets macOS/Linux. The optional Go LSP requires Go, Serena requires uv, and Rust LSP requires rustup with a toolchain. Missing prerequisites are reported rather than installing unrelated system runtimes. Browser operation needs a compatible existing browser or an explicitly requested download.
+Node.js **22.22.0 or newer**, npm and Git are required. Rulesync is pinned and installed as a package dependency; no separate global Rulesync is required. This release targets macOS/Linux. The optional Go LSP requires Go, Serena requires uv, and Rust LSP requires rustup with a toolchain. Missing prerequisites are reported rather than installing unrelated system runtimes. Browser operation needs a compatible existing browser or an explicitly requested download.
 
 The workflow installation is global per user. MCP registrations are project-local. Tool binaries are stored in the user's managed directory and are invoked via `exec`. Nothing is automatically installed when a session starts. No standalone formatter/linter or persistent task service is included. Dependencies can internally contain formatting libraries; this is not a promise that every transitive dependency is formatter-free.
 

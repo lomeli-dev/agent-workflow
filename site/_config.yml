@@ -1,0 +1,16 @@
+# GitHub Pages (Jekyll 3, github-pages gem through actions/jekyll-build-pages).
+# The pages themselves are generated from README/docs/CHANGELOG by scripts/site.mjs.
+title: Agent Workflow
+description: Reglas y procedimientos portables para agentes de código, con instalación global reversible y desactivación por proyecto.
+url: https://lomeli-dev.github.io
+baseurl: /agent-workflow
+lang: es
+repository: lomeli-dev/agent-workflow
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    disable: true
+highlighter: none

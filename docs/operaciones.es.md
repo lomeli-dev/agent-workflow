@@ -4,7 +4,7 @@
 
 ## Qué necesitas
 
-Node.js **22.22.0 o superior**, npm, Git y acceso al repositorio privado. Rulesync viene fijado como dependencia; no hace falta instalar otro global. Se soportan macOS/Linux. Para sus módulos respectivos necesitas Go, uv (Serena) o rustup con un toolchain. Si falta un requisito se informa; no se instala todo un entorno del sistema silenciosamente.
+Node.js **22.22.0 o superior**, npm y Git. Rulesync viene fijado como dependencia; no hace falta instalar otro global. Se soportan macOS/Linux. Para sus módulos respectivos necesitas Go, uv (Serena) o rustup con un toolchain. Si falta un requisito se informa; no se instala todo un entorno del sistema silenciosamente.
 
 La integración se instala por usuario. Los MCP se conectan por proyecto. Las herramientas opcionales se guardan en un directorio administrado; no se instalan al abrir una sesión. No añadimos linter, formateador independiente ni servicio de tareas persistentes. Algunas dependencias contienen bibliotecas de formato internamente; no las activamos sobre tu código.
 
