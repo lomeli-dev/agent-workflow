@@ -61,6 +61,8 @@ Downloading is a separate explicit action: `agent-workflow exec --tool agent-bro
 
 ## Updates and removal
 
+**A file that cannot be updated no longer stops a sync (0.7.1).** On an existing installation, `sync` skips a file whose owned part was edited, a colliding destination or an invalid config, and lists it under `skipped` with the error and the exact fix. It exits 1, keeps that file's recorded entry and still syncs every other file. dsh rewrites `cordis.patch.yml` itself when a setting is saved in `dsh web`; that is not drift as long as our rows are the same (see [compatibility](compatibility.md#dsh-rewrites-its-own-patch-file-071)).
+
 Fetch, inspect and fast-forward the intended source revision before reinstalling dependencies and running `sync`; see the exact sequence in the overview. Worktree divergence is not permission to reset. Rerun package checks and verify. A changed Node path or moved checkout may invalidate stored command paths; disconnect projects before moving and reconnect after installing at the new path.
 
 ### After switching Node

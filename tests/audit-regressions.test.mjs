@@ -28,7 +28,7 @@ test('global sync refuses alternate OpenCode path; uninstall cleans original pat
 });
 test('global sync refuses deleted managed rules',t=>{
  const home=fixture(t);install({userRoot:home});writeFileSync(join(home,'.codex/AGENTS.md'),'Personal text');
- assert.throws(()=>install({userRoot:home}),/block/);assert.equal(read(join(home,'.codex/AGENTS.md')),'Personal text');
+ {const r=install({userRoot:home});assert.equal(r.ok,false);assert(r.skipped.some(s=>/block/.test(s.error)&&s.fix),"sync reports the file and goes on");}assert.equal(read(join(home,'.codex/AGENTS.md')),'Personal text');
 });
 test('project disconnect uses owned OpenCode path despite new higher priority file',t=>{
  const home=fixture(t),root=fixture(t),args={project:root,userRoot:home,clients:['opencode'],tools:['serena']};

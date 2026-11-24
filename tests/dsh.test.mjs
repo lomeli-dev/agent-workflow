@@ -31,7 +31,7 @@ function dshHome(root,{headless=HEADER+MODEL,web=HEADER+'[]\n',plugin=['headless
 }
 // The managed block: an insert list with the hooks row (only with the bridge) and one
 // dsh-mcp-client row per MCP module.
-const patchOf=(text)=>/# agent-workflow:begin \(managed; do not edit\)\n- insert:\n {4}- id: agent-workflow-hooks\n {6}name: '@deepseek-ai\/dsh-hooks-claude-code'\n {6}config:\n {8}configPath: "([^"]+)"\n {4}- id: agent-workflow-mcp-serena\n[\s\S]*# agent-workflow:end/.exec(text);
+const patchOf=(text)=>/# agent-workflow:begin \(managed; do not edit\)\n- insert:\n {4}- id: agent-workflow-hooks\n {6}name: '@deepseek-ai\/dsh-hooks-claude-code'\n {6}config:\n {8}configPath: \|-\n {10}(.+)\n {4}- id: agent-workflow-mcp-serena\n[\s\S]*# agent-workflow:end/.exec(text);
 const mcpOnly=(text)=>/# agent-workflow:begin \(managed; do not edit\)\n- insert:\n {4}- id: agent-workflow-mcp-serena\n[\s\S]* {4}- id: agent-workflow-mcp-context7\n[\s\S]*# agent-workflow:end/.test(text)&&!text.includes('agent-workflow-hooks');
 
 test('dsh: rule, aw-start skill, owned hooks.json and an insert row in each profile with the bridge',t=>{
@@ -115,7 +115,7 @@ test('dsh: no profiles yet is a notice; unsupported YAML layouts are never edite
   const root=fixture(t),p=dshHome(root);install({userRoot:root,clients:['dsh']});
   writeFileSync(p.web,read(p.web).replace('agent-workflow-hooks','mine'));
   assert.deepEqual(verify({userRoot:root}).issues.map(i=>i.issue),['managed-block-drift']);
-  assert.throws(()=>install({userRoot:root,clients:['dsh']}),/Edited\/unowned managed block/);
+  {const before=read(p.web),r=install({userRoot:root,clients:['dsh']});assert.equal(r.ok,false);assert.equal(r.skipped.length,1);assert(r.skipped[0].path.endsWith('/.dsh/profiles/web/cordis.patch.yml'));assert.match(r.skipped[0].error,/Edited\/unowned managed block/);assert.match(r.skipped[0].fix,/agent-workflow:begin/);assert.equal(read(p.web),before,'not overwritten');assert.equal(verify({userRoot:root}).issues.length,1,'recorded entry kept');}
   assert.throws(()=>uninstall({userRoot:root}),/Edited managed block/);
 });
 

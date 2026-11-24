@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.1
+
+- **Fix: `dsh --profile web` broke the next sync.** dsh's config editor (`dsh-config-editor`, `yaml` 2.9.1) rewrites `cordis.patch.yml` when a setting is saved. It folds every double-quoted `!!js` scalar at 80 columns and appends its own row (`ui-settings-general`) at the end of the list, which was inside our markers. 0.7.0 compared the block by bytes, so `verify` reported `managed-block-drift` and `sync` aborted for every client. Now:
+  - The dsh rows are written as `!!js |-` literal blocks, which the editor keeps byte for byte.
+  - A block whose bytes changed is compared by content, parsed with `js-yaml` 4.3.2 (new pinned dependency, the version dsh's loader uses) and the same `!!js` tag. If our rows are the same, it is adopted: `verify` is ok with a notice, and `sync` records it (`dataHash`) and moves the rows dsh added inside the block right after it. `uninstall` keeps those rows.
+  - A real change to our rows is still drift.
+- **A drift in one file no longer aborts the sync.** On an existing installation, a file that cannot be updated is skipped and listed in `skipped` with its error and the exact fix (exit 1). Its manifest entry is kept and every other file is synced. A first install is still all-or-nothing.
+- **Docs.** The cause, the fix, why `cordis-plugin-include` is not used (it writes changes back to its file too) and isolated evidence with the real `dsh --profile web` are in the compatibility document. A short note is in both operations guides. The rewritten file from the owner's Mac is a test fixture, with only the hooks path replaced.
+
 ## 0.7.0
 
 - **`--all-in`.** `install`/`sync --global --all-in` = `--trust-codex` + `--dsh-plugins` + `--agy-allow`, each only when its client is in `--clients`; `connect --all-in` = `--approve` + `--exclude`. Every step is opt-in, recorded and reversed by `uninstall`/`disconnect`; a later sync or connect keeps what was recorded.

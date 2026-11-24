@@ -102,7 +102,8 @@ test('dsh profile rows are enabled only where .dsh/agent-workflow-mcp.json lists
   put(home,'.dsh/profiles/headless/cordis.yml','[]\n');put(home,'.dsh/profiles/headless/package.json','{}\n');
   install({userRoot:home,clients:['dsh']});
   const block=read(join(home,'.dsh/profiles/headless/cordis.patch.yml'));
-  const row=tool=>{const m=new RegExp(`- id: agent-workflow-mcp-${tool}\\n {6}name: '@deepseek-ai/dsh-mcp-client'\\n {6}disabled: !!js (".*")\\n {6}config:\\n {8}serverName: aw-${tool}\\n {8}transport: stdio\\n {8}command: !!js (".*")\\n {8}args: !!js (".*")`).exec(block);assert(m,tool);return m.slice(1).map(s=>JSON.parse(s));};
+  // `!!js |-` literal blocks: the expression is the next line, two spaces deeper (0.7.1).
+  const row=tool=>{const m=new RegExp(`- id: agent-workflow-mcp-${tool}\\n {6}name: '@deepseek-ai/dsh-mcp-client'\\n {6}disabled: !!js \\|-\\n {8}(.*)\\n {6}config:\\n {8}serverName: aw-${tool}\\n {8}transport: stdio\\n {8}command: !!js \\|-\\n {10}(.*)\\n {8}args: !!js \\|-\\n {10}(.*)`).exec(block);assert(m,tool);return m.slice(1);};
   const evalIn=(dir,expr)=>new Function('process','return ('+expr+')')({cwd:()=>dir,getBuiltinModule:n=>process.getBuiltinModule(n)});
   connect({project:root,userRoot:home,clients:['dsh'],tools:['codegraph']});
   const [disabled,command,args]=row('codegraph');

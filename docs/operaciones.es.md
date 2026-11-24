@@ -67,6 +67,15 @@ Una sola tabla con lo que funciona, lo que no y por qué, según las pruebas rea
 
 **dsh (0.6.1).** dsh no tiene capa de configuración de proyecto (solo bundles, el parche del perfil, el de `$DSH_HOME` y `--patch`). El `sync` mete en el bloque de cada perfil una fila `@deepseek-ai/dsh-mcp-client` por módulo, que solo se activa si el directorio donde arranca dsh tiene `.dsh/agent-workflow-mcp.json` (lo escribe `connect`) con ese servidor. Así `dsh headless` o `dsh web` en el repo cargan el MCP sin `--patch`. El archivo `.dsh/agent-workflow.cordis.yml` de 0.6.0 se retira en el siguiente `connect` si no se editó.
 
+**dsh reescribe su `cordis.patch.yml` (0.7.1).** Cuando guardas un ajuste en `dsh web`, su editor de configuración reescribe el archivo entero. Conserva comentarios y marcadores, pero parte a 80 columnas las expresiones `!!js` entre comillas y añade su fila al final de la lista (dentro de nuestro bloque si este era lo último). En 0.7.0 eso daba `managed-block-drift` y el `sync` de todos los clientes se detenía. Desde 0.7.1:
+
+- Las filas se escriben como bloques literales `!!js |-`, que dsh no parte.
+- El bloque se compara por contenido (con js-yaml, como lo lee dsh): si nuestras filas son las mismas, `verify` da `ok` con un aviso, y el `sync` lo registra y saca justo después del bloque las filas que dsh metió dentro.
+- Un cambio real dentro del bloque sigue siendo drift.
+- Un archivo que no se puede actualizar ya no aborta el `sync`: sale en `skipped` con el error y el arreglo exacto, y los demás archivos se sincronizan (código de salida 1).
+
+Detalle y evidencia en [compatibilidad](compatibility.md#dsh-rewrites-its-own-patch-file-071).
+
 ## Clientes adicionales
 
 ```sh

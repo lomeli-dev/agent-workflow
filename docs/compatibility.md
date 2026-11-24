@@ -103,6 +103,32 @@ Kimi Code 2.7.3 starts the project MCP servers and binds the agent profile in th
 
 Fix: `agent-workflow mcp` now starts a light front (`lib/mcp-front.mjs`: Node builtins and `gate.mjs` only) that answers `initialize` and the first `tools/list` from `<store>/mcp-cache/<tool>.json`, the real server's last answers for that package version and requested protocol version, and passes every message to the real server. Replies to requests it already answered refresh the cache; changed tools send `notifications/tools/list_changed`. Opted-out projects never use the cache. A warm cache answers in about 30 ms; `connect --approve` with Kimi warms it (any previous start of the server by another client also does, for its protocol version). Evidence: clone of the owner's repo, the three default servers, `KIMI_CODE_TRUST_WORKSPACE=1 kimi -p`: 5/5 runs called `mcp__aw-codegraph__agent_workflow_symbols` and got line 134, with all three servers discovered before `profile.bind` and 75 tools in the snapshot.
 
+## dsh rewrites its own patch file (0.7.1)
+
+**What happened (23 Nov 2026, owner's home, 0.7.0).** Running `dsh --profile web` rewrote `~/.dsh/profiles/web/cordis.patch.yml`. The writer is `@deepseek-ai/dsh-config-editor`: when a setting is saved (here `ui-settings-general.welcomeNoticeVersion`), it runs `yaml` 2.9.1 `parseDocument`, then `document.add(row)` (or `setIn` for an existing row), then `String(document)`. Comments and our markers survive, but every double-quoted `!!js` scalar is folded at 80 columns. The new row is appended at the end of the list, which put it inside our markers, because the block was the last thing in the file. The data was unchanged, but the byte hash did not match. `verify` reported `managed-block-drift`, and `sync` threw `Edited/unowned managed block`, which aborted the sync of every client.
+
+**0.7.1:**
+
+- **Rows that dsh does not fold.** `!!js` expressions (and `configPath`) are now written as `|-` literal blocks. `yaml` keeps literal blocks as they are when it re-serializes. Running the dsh editor's write path on a 0.7.1 file leaves every byte of our rows unchanged; the only difference is dsh's own row.
+- **Compared by content.** When the block's bytes differ from the record, it is split into its top-level items, and each item is parsed with `js-yaml` 4.3.2, the version dsh's loader uses, with the same `!!js` tag. Our item is the `insert:` list whose rows all have `agent-workflow-*` ids. If its data matches what was recorded, the block is still ours. The record is `dataHash`, new in 0.7.1; records from 0.6.1/0.7.0 are compared with the rows this version writes. Any other item inside the markers is dsh's or yours:
+  - `verify` stays `ok` and adds a notice.
+  - `sync` writes our block again and moves those items right after the end marker, where later dsh writes stay outside the block.
+  - `uninstall` leaves them where the block was.
+- **Real edits inside the block are still drift.** A row that really changed is still `managed-block-drift`.
+- **One file no longer stops the sync.** On an existing installation, a file that cannot be updated (edited owned part, collision, invalid config) is skipped. The result lists it under `skipped` with the error and the exact fix, and exits 1. Its recorded entry is kept, and every other file is still synced. A first install is still all-or-nothing.
+- **No `include` for now.** `@deepseek-ai/cordis-plugin-include` (1.1.0) could keep our rows in a file of our own, but it also writes tree changes back to its file ("writes updates back when the file is writable"). It would therefore not be safe from rewrites either, and it would add another loader layer to every profile, so it is not used.
+
+**Evidence (isolated `DSH_HOME` with copies of the owner's web and headless profiles, without credentials or sessions; the real `~/.dsh` was not touched):**
+
+- 0.7.1 was installed there. The real `dsh --profile web --no-open --host 127.0.0.1 --port 0` was started and stopped three times; it printed its URL, logged no errors, and `verify` stayed `ok` each time.
+- Fetching the page without a browser does not save a setting, so the editor's write path was applied with dsh's own `yaml` library (`parseDocument` → `add`/`setIn` → `String`):
+  - After the `add`, our rows were byte-identical and only the dsh row was added, inside the markers. `verify` was `ok` with the notice.
+  - `sync` moved the row out.
+  - A second dsh write (`setIn`) changed only that row, and `verify` was `ok` with no notice.
+  - `uninstall` left only the header comments and the dsh row.
+- `dsh --profile web --dump-config` in a connected project lists our rows as `!!js` expressions with the same text.
+- `tests/dsh-reformat.test.mjs` uses the real rewritten file as a fixture (`tests/fixtures/dsh-web-rewritten.cordis.patch.yml`; only the hooks path is replaced): adoption, adoption of a legacy record without `dataHash`, moving the row out, uninstall, a real edit, and a skipped file while the other files are synced.
+
 ## DeepSeek Harness (0.6.0)
 
 DeepSeek Harness 0.2.2-rc.5 (`dsh`, `@deepseek-ai/dsh`) composes each profile (`$DSH_HOME/profiles/<name>`, default `~/.dsh`) from bundle layers plus the user layer `cordis.patch.yml`; `cordis.yml` is never edited. What Agent Workflow installs with `--clients dsh` (or `all`):
