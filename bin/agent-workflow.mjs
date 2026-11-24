@@ -9,7 +9,8 @@ const {status,projectRoot}=await import('../lib/gate.mjs');
 const {atomic,noSymlinks,read}=await import('../lib/files.mjs');
 const {install,uninstall,verify,CLIENTS,ALL_CLIENTS,parseClients,parseGuard}=await import('../lib/install.mjs');
 const {doctor}=await import('../lib/doctor.mjs');
-const {trustCodex,installAndTrust}=await import('../lib/codex-trust.mjs');
+const {trustCodex}=await import('../lib/codex-trust.mjs');
+const {globalInstall,globalUninstall,allInOptions}=await import('../lib/global.mjs');
 const {CATALOG,PROFILES}=await import('../lib/catalog.mjs');
 const {setupModules,findBin,toolEnvironment}=await import('../lib/modules.mjs');
 const {selectInteractive}=await import('../lib/selector.mjs');
@@ -21,8 +22,8 @@ const {connect,connectionRoot,pruneConnections,parseConnectClients,CONNECT_CLIEN
 
 const HELP=`Agent Workflow ${VERSION} — global by default, project opt-out
 
-agent-workflow install --global [--clients LIST|all] [--guard claude,codex|none] [--trust-codex] [--dry-run]
-agent-workflow sync --global [--clients LIST|all] [--guard claude,codex|none] [--trust-codex] [--dry-run]
+agent-workflow install --global [--clients LIST|all] [--guard claude,codex|none] [--trust-codex] [--dsh-plugins] [--agy-allow] [--all-in] [--dry-run]
+agent-workflow sync --global [--clients LIST|all] [--guard claude,codex|none] [--trust-codex] [--dsh-plugins] [--agy-allow] [--all-in] [--dry-run]
 agent-workflow trust --client codex [--dry-run]
 agent-workflow verify [--json]
 agent-workflow doctor [--json]
@@ -38,7 +39,7 @@ agent-workflow exec --tool MODULE -- [tool arguments]
 agent-workflow claude-lean [--mcp-file PATH] -- [Claude arguments]
 agent-workflow symbols --project PATH --file relative/module.mjs [--name SYMBOL]
 agent-workflow mcp-config --project PATH [--tools serena,codegraph]
-agent-workflow connect --project PATH [--tools serena,codegraph,context7] [--clients LIST|all] [--approve] [--dry-run]
+agent-workflow connect --project PATH [--tools serena,codegraph,context7] [--clients LIST|all] [--approve] [--exclude] [--all-in] [--dry-run]
 agent-workflow disconnect --project PATH [--clients LIST|all] [--dry-run]
 agent-workflow disconnect --prune [--dry-run]   (forget receipts whose project no longer exists)
 agent-workflow mcp --tool MODULE --project PATH
@@ -59,14 +60,24 @@ projects are never blocked.
 connect writes project MCP entries (aw-serena, aw-codegraph, aw-context7) where each
 client reads them: .mcp.json (claude, commandcode, kimi), .codex/config.toml,
 opencode.json(c), .qwen/settings.json, .pi/mcp.json, mimocode.json(c), an agy
-workspace plugin (.agents/plugins/agent-workflow-mcp) and a dsh patch
-(.dsh/agent-workflow.cordis.yml, loaded with --patch). --approve (opt-in) also
+workspace plugin (.agents/plugins/agent-workflow-mcp) and .dsh/agent-workflow-mcp.json
+(read by the rows sync puts in each dsh profile). --approve (opt-in) also
 approves them the client's own way: Claude enabledMcpjsonServers in
-.claude/settings.local.json, qwen mcp approve. Keep local files out of commits
-with .git/info/exclude.
+.claude/settings.local.json, qwen mcp approve, Kimi launcher cache (Kimi folder
+trust stays yours). --exclude adds the untracked generated paths that nothing
+ignores yet to the repository's info/exclude (git rev-parse --git-path), in a
+managed block that disconnect removes. connect --all-in = --approve --exclude.
 
 dsh hooks run through the @deepseek-ai/dsh-hooks-claude-code bridge of each
-profile; profiles without it get a notice with the dsh plugin add command.
+profile, which needs its peer @deepseek-ai/dsh-hook-protocol. --dsh-plugins adds
+the missing ones with dsh plugin --profile P add -w <pkg>@<dsh --version> and
+records them; uninstall removes only those (dsh plugin ... remove -w). A package
+already present at another version is never replaced. The API key is not handled.
+--agy-allow adds owned permissions.allow entries mcp(agent-workflow-mcp_aw-<tool>/*)
+for serena, codegraph and context7 to ~/.gemini/antigravity-cli/settings.json
+(existing ones are adopted, never duplicated; uninstall removes them).
+install/sync --all-in = --trust-codex --dsh-plugins --agy-allow, each only when
+its client is in --clients. A sync keeps what earlier runs recorded.
 
 Codex runs a hook only after it is trusted (/hooks). trust --client codex does
 the same as approving in /hooks, through codex app-server, for the Agent
@@ -85,16 +96,21 @@ claude-lean is opt-in: without --mcp-file, no MCP servers are available in
 that Claude session. It does not alter your normal Claude configuration.
 `;
 try{
-  const {values,positionals}=parseArgs({allowPositionals:true,options:{global:{type:'boolean'},clients:{type:'string'},guard:{type:'string'},client:{type:'string'},'trust-codex':{type:'boolean'},'user-root':{type:'string'},project:{type:'string'},'dry-run':{type:'boolean'},json:{type:'boolean'},tool:{type:'string'},file:{type:'string'},name:{type:'string'},tools:{type:'string'},profile:{type:'string'},'mcp-file':{type:'string'},all:{type:'boolean'},list:{type:'boolean'},interactive:{type:'boolean'},prune:{type:'boolean'},approve:{type:'boolean'},apply:{type:'boolean'},help:{type:'boolean'},version:{type:'boolean'}}});
+  const {values,positionals}=parseArgs({allowPositionals:true,options:{global:{type:'boolean'},clients:{type:'string'},guard:{type:'string'},client:{type:'string'},'trust-codex':{type:'boolean'},'dsh-plugins':{type:'boolean'},'agy-allow':{type:'boolean'},'all-in':{type:'boolean'},exclude:{type:'boolean'},'user-root':{type:'string'},project:{type:'string'},'dry-run':{type:'boolean'},json:{type:'boolean'},tool:{type:'string'},file:{type:'string'},name:{type:'string'},tools:{type:'string'},profile:{type:'string'},'mcp-file':{type:'string'},all:{type:'boolean'},list:{type:'boolean'},interactive:{type:'boolean'},prune:{type:'boolean'},approve:{type:'boolean'},apply:{type:'boolean'},help:{type:'boolean'},version:{type:'boolean'}}});
   const cmd=positionals[0];if(values.version){console.log(VERSION);process.exit(0);}if(values.help||!cmd){console.log(HELP);process.exit(0);}
   if(positionals.length>1&&cmd!=='exec'&&cmd!=='claude-lean')throw Error('Unexpected positional arguments');
   const userRoot=values['user-root'],dryRun=values['dry-run']??false;let result;
   if(values.apply&&dryRun)throw Error('--apply and --dry-run cannot be combined');
   if(['install','sync','uninstall'].includes(cmd)&&!values.global)throw Error('Pass --global explicitly (or preview with --global --dry-run)');
-  if(values['trust-codex']&&cmd!=='install'&&cmd!=='sync')throw Error('--trust-codex is only for install/sync');
-  if(cmd==='install'||cmd==='sync'){result=await installAndTrust({userRoot,dryRun,clients:parseClients(values.clients),guard:parseGuard(values.guard),trustCodex:values['trust-codex']??false});if(result.ok===false)process.exitCode=1;}
+  for(const f of ['trust-codex','dsh-plugins','agy-allow'])if(values[f]&&cmd!=='install'&&cmd!=='sync')throw Error(`--${f} is only for install/sync`);
+  const allIn=values['all-in']??false;if(allIn&&!['install','sync','connect'].includes(cmd))throw Error('--all-in is only for install/sync --global and connect');
+  if(cmd==='install'||cmd==='sync'){
+    const clients=parseClients(values.clients);
+    result=await globalInstall({userRoot,dryRun,clients,guard:parseGuard(values.guard),...allInOptions({clients,allIn,trustCodex:values['trust-codex'],dshPlugins:values['dsh-plugins'],agyAllow:values['agy-allow']})});
+    if(result.ok===false)process.exitCode=1;
+  }
   else if(cmd==='trust'){if(values.client!=='codex')throw Error('Use trust --client codex (the only client with hook trust handled here)');result=await trustCodex({userRoot,dryRun});if(result.ok===false)process.exitCode=1;}
-  else if(cmd==='uninstall')result=uninstall({userRoot,dryRun});
+  else if(cmd==='uninstall'){result=globalUninstall({userRoot,dryRun});if(result.ok===false)process.exitCode=1;}
   else if(cmd==='verify'){result=verify({userRoot});if(!result.ok)process.exitCode=1;}
   else if(cmd==='doctor')result=await doctor({userRoot});
   else if(cmd==='setup'){
@@ -123,9 +139,12 @@ try{
   }
   else if(cmd==='mcp'){await serveMcp({tool:values.tool,project:values.project,userRoot});process.exit(process.exitCode??0);}
   else if(cmd==='disconnect'&&values.prune){if(values.project||values.clients)throw Error('--prune works on every receipt; do not combine it with --project or --clients');result=pruneConnections({userRoot,dryRun});}
-  else if(cmd==='connect'||cmd==='disconnect'){if(values.approve&&cmd!=='connect')throw Error('--approve is only for connect');result=connect({project:values.project,userRoot,dryRun,remove:cmd==='disconnect',approve:values.approve??false,tools:values.tools?values.tools.split(','):DEFAULT_MCP_TOOLS,clients:parseConnectClients(values.clients)});
+  else if(cmd==='connect'||cmd==='disconnect'){
+    for(const f of ['approve','exclude','all-in'])if(values[f]&&cmd!=='connect')throw Error(`--${f} is only for connect (disconnect removes what connect recorded)`);
+    const approve=(values.approve||allIn)??false;
+    result=connect({project:values.project,userRoot,dryRun,remove:cmd==='disconnect',approve,exclude:(values.exclude||allIn)??false,tools:values.tools?values.tools.split(','):DEFAULT_MCP_TOOLS,clients:parseConnectClients(values.clients)});
     // Kimi: answer its first start from the launcher cache (see lib/mcp-front.mjs).
-    if(result.connected&&values.approve&&parseConnectClients(values.clients).includes('kimi')){const {warm}=await import('../lib/mcp-front.mjs');result.kimiWarm=await warm({tools:result.tools,project:result.project,userRoot});}}
+    if(result.connected&&approve&&parseConnectClients(values.clients).includes('kimi')){const {warm}=await import('../lib/mcp-front.mjs');result.kimiWarm=await warm({tools:result.tools,project:result.project,userRoot});}}
   else if(cmd==='mcp-config'){
     if(!values.project)throw Error('Specify --project');const project=connectionRoot(values.project),ids=values.tools?values.tools.split(','):DEFAULT_MCP_TOOLS;
     const entries={};for(const id of ids){if(!MCP_TOOLS.includes(id))throw Error('Not an MCP module: '+id);entries['aw-'+id]={command:process.execPath,args:[join(PACKAGE,'bin/agent-workflow.mjs'),'mcp','--tool',id,'--project',project,...(userRoot?['--user-root',resolve(userRoot)]:[])]};}
