@@ -29,7 +29,10 @@ function dshHome(root,{headless=HEADER+MODEL,web=HEADER+'[]\n',plugin=['headless
   mkdirSync(join(root,'.dsh/profiles/node_modules/@deepseek-ai'),{recursive:true});
   return {headless:join(root,'.dsh/profiles/headless/cordis.patch.yml'),web:join(root,'.dsh/profiles/web/cordis.patch.yml')};
 }
-const patchOf=(text)=>/# agent-workflow:begin \(managed; do not edit\)\n- insert:\n {4}- id: agent-workflow-hooks\n {6}name: '@deepseek-ai\/dsh-hooks-claude-code'\n {6}config:\n {8}configPath: "([^"]+)"\n# agent-workflow:end/.exec(text);
+// The managed block: an insert list with the hooks row (only with the bridge) and one
+// dsh-mcp-client row per MCP module.
+const patchOf=(text)=>/# agent-workflow:begin \(managed; do not edit\)\n- insert:\n {4}- id: agent-workflow-hooks\n {6}name: '@deepseek-ai\/dsh-hooks-claude-code'\n {6}config:\n {8}configPath: "([^"]+)"\n {4}- id: agent-workflow-mcp-serena\n[\s\S]*# agent-workflow:end/.exec(text);
+const mcpOnly=(text)=>/# agent-workflow:begin \(managed; do not edit\)\n- insert:\n {4}- id: agent-workflow-mcp-serena\n[\s\S]* {4}- id: agent-workflow-mcp-context7\n[\s\S]*# agent-workflow:end/.test(text)&&!text.includes('agent-workflow-hooks');
 
 test('dsh: rule, aw-start skill, owned hooks.json and an insert row in each profile with the bridge',t=>{
   const root=fixture(t),p=dshHome(root),l=locations(root);
@@ -72,24 +75,25 @@ test('dsh: removing the block from an edited file that keeps no patch restores a
   assert.equal(read(p.web),'# my note\n'+HEADER+'[]\n');
 });
 
-test('dsh: a profile without the bridge gets a notice with the add command and no block',t=>{
+test('dsh: a profile without the bridge gets the MCP rows only and a notice with the add command',t=>{
   const root=fixture(t),p=dshHome(root,{plugin:['headless']});
   const r=install({userRoot:root,clients:['dsh']});
-  assert(patchOf(read(p.headless)));assert.equal(read(p.web),HEADER+'[]\n');
+  assert(patchOf(read(p.headless)));assert(mcpOnly(read(p.web)),read(p.web));
   assert.equal(r.notices.length,1);
   assert.match(r.notices[0],/profile web: @deepseek-ai\/dsh-hooks-claude-code missing.*dsh plugin --profile web add -w @deepseek-ai\/dsh-hooks-claude-code@0\.2\.2-rc\.5 @deepseek-ai\/dsh-hook-protocol@0\.2\.2-rc\.5/);
   // The bridge without its peer (what dsh 0.2.2-rc.5 leaves after adding only the bridge) does not
   // import: still no block, and the notice names the peer.
   bridge(root,'web',{protocol:null});
-  let n=install({userRoot:root,clients:['dsh']}).notices;assert.equal(read(p.web),HEADER+'[]\n');
+  let n=install({userRoot:root,clients:['dsh']}).notices;assert(mcpOnly(read(p.web)));
   assert.match(n[0],/profile web: @deepseek-ai\/dsh-hook-protocol@0\.2\.2-rc\.5 \(peer of .*found none.*add -w @deepseek-ai\/dsh-hooks-claude-code@0\.2\.2-rc\.5 @deepseek-ai\/dsh-hook-protocol@0\.2\.2-rc\.5/);
   bridge(root,'web',{protocol:'0.1.2-rc.1'});assert.match(install({userRoot:root,clients:['dsh']}).notices[0],/found 0\.1\.2-rc\.1/);
   // With both packages, a sync mounts it there too.
   bridge(root,'web');
   assert.equal(install({userRoot:root,clients:['dsh']}).notices,undefined);assert(patchOf(read(p.web)));
-  // Losing them again keeps the owned block tracked and says dsh will skip the entry.
+  // Losing them again: verify says dsh will skip the hooks entry until a sync drops it.
   rmSync(join(root,'.dsh/profiles/web/node_modules'),{recursive:true});
-  const v=verify({userRoot:root});assert.equal(v.ok,true);assert(v.notices.some(n=>/profile web: its cordis\.patch\.yml mounts .*dsh-hooks-claude-code is missing.*did not activate/.test(n)));
+  const v=verify({userRoot:root});assert.equal(v.status,'outdated');assert(v.notices.some(n=>/profile web: its cordis\.patch\.yml mounts .*dsh-hooks-claude-code is missing.*did not activate.*sync/.test(n)));
+  install({userRoot:root,clients:['dsh']});assert(mcpOnly(read(p.web)));assert.equal(verify({userRoot:root}).ok,true);
   uninstall({userRoot:root});assert.equal(read(p.web),HEADER+'[]\n');
 });
 
@@ -103,8 +107,10 @@ test('dsh: no profiles yet is a notice; unsupported YAML layouts are never edite
   assert.match(r.notices[0],/no profile in .*profiles yet, so no hooks/);assert.deepEqual(dshProfiles(locations(empty)),[]);
   for(const layout of ['[{id: x, disabled: true}]\n','patches:\n  - id: x\n','---\n- id: x\n']){
     const root=fixture(t),p=dshHome(root,{web:layout});
-    assert.throws(()=>install({userRoot:root,clients:['dsh']}),/Unsupported cordis\.patch\.yml layout/,layout);
-    assert.equal(read(p.web),layout);assert(!existsSync(join(root,'.dsh/AGENTS.md')));
+    const r2=install({userRoot:root,clients:['dsh']});
+    assert.equal(read(p.web),layout,'never edited');assert(patchOf(read(p.headless)),'other profiles still installed');
+    assert(r2.notices.some(n=>/profile web: cordis\.patch\.yml is not a block list/.test(n)),layout);
+    uninstall({userRoot:root});assert.equal(read(p.web),layout);
   }
   const root=fixture(t),p=dshHome(root);install({userRoot:root,clients:['dsh']});
   writeFileSync(p.web,read(p.web).replace('agent-workflow-hooks','mine'));

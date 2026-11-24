@@ -1,6 +1,6 @@
 {
   "name": "@lomeli-dev/agent-workflow",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": true,
   "type": "module",
   "description": "Portable agent workflows with Rulesync generation, reversible global installation and project opt-out",

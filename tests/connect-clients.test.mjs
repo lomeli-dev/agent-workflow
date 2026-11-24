@@ -36,7 +36,7 @@ test('connect --clients all writes every client format, is idempotent and discon
   assert(!existsSync(join(root,'mimocode.json')),'MiMo uses the file that exists');
   assert.equal(json(read(join(root,'.agents/plugins/agent-workflow-mcp/plugin.json'))).name,'agent-workflow-mcp');
   assert(launcher(json(read(join(root,'.agents/plugins/agent-workflow-mcp/mcp_config.json'))).mcpServers['aw-codegraph'],root));
-  const dsh=read(join(root,'.dsh/agent-workflow.cordis.yml'));assert.match(dsh,/^# Agent Workflow project MCP servers/);assert.match(dsh,/- insert:\n {4}- id: aw-serena\n {6}name: '@deepseek-ai\/dsh-mcp-client'\n {6}config:\n {8}serverName: aw-serena\n {8}transport: stdio\n/);
+  assert(launcher(json(read(join(root,'.dsh/agent-workflow-mcp.json'))).mcpServers['aw-codegraph'],root),'dsh reads it through the profile rows');
   assert.equal(parseToml(read(join(root,'.codex/config.toml'))).mcp_servers['aw-serena'].args.includes(root),true);
   assert(json(read(join(root,'opencode.jsonc'))).mcp.servers['aw-serena']);
   // One receipt; .mcp.json is shared by claude, commandcode and kimi.
@@ -53,15 +53,15 @@ test('connect --clients all writes every client format, is idempotent and discon
   assert.equal(read(join(root,'.mcp.json')),originals['.mcp.json']);assert.equal(read(join(root,'mimocode.jsonc')),originals['mimocode.jsonc']);
   assert.deepEqual(json(read(join(root,'.qwen/settings.json'))),{ui:{theme:'light'}});
   assert.deepEqual(json(read(join(root,'.pi/mcp.json'))),{mcpServers:{other:{command:'x'}}});
-  for(const p of ['.agents/plugins/agent-workflow-mcp/plugin.json','.agents/plugins/agent-workflow-mcp/mcp_config.json','.dsh/agent-workflow.cordis.yml','.codex/config.toml','opencode.jsonc','mimocode.json'])assert(!existsSync(join(root,p)),p);
+  for(const p of ['.agents/plugins/agent-workflow-mcp/plugin.json','.agents/plugins/agent-workflow-mcp/mcp_config.json','.dsh/agent-workflow-mcp.json','.codex/config.toml','opencode.jsonc','mimocode.json'])assert(!existsSync(join(root,p)),p);
   assert.equal(connectionReceipts(home).length,0);
 });
 
 test('connect refuses unowned or edited whole files and name collisions, without writing anything',t=>{
   const {home,root}=setup(t);
-  put(root,'.dsh/agent-workflow.cordis.yml','# mine\n');
-  assert.throws(()=>connect({project:root,userRoot:home,clients:['dsh']}),/Unowned project MCP file/);assert.equal(read(join(root,'.dsh/agent-workflow.cordis.yml')),'# mine\n');
-  rmSync(join(root,'.dsh'),{recursive:true});
+  put(root,'.agents/plugins/agent-workflow-mcp/plugin.json','{"name":"mine"}\n');
+  assert.throws(()=>connect({project:root,userRoot:home,clients:['agy']}),/Unowned project MCP file/);assert.equal(read(join(root,'.agents/plugins/agent-workflow-mcp/plugin.json')),'{"name":"mine"}\n');
+  rmSync(join(root,'.agents'),{recursive:true});
   put(root,'.pi/mcp.json','{"mcpServers":{"aw-serena":{"command":"other"}}}');
   assert.throws(()=>connect({project:root,userRoot:home,clients:['agy','pi']}),/collision: aw-serena/);assert(!existsSync(join(root,'.agents')));
   rmSync(join(root,'.pi'),{recursive:true});
@@ -111,7 +111,7 @@ test('a 0.5.x receipt (one file per client) still disconnects cleanly',t=>{
 test('CLI connect --clients all --dry-run lists every file; --approve only with connect; uninstall waits for disconnect',t=>{
   const {home,root}=setup(t);
   const r=spawnSync(process.execPath,[cli,'connect','--project',root,'--clients','all','--dry-run','--user-root',home],{encoding:'utf8'});assert.equal(r.status,0,r.stderr);
-  const files=JSON.parse(r.stdout).files;for(const p of ['.mcp.json','.qwen/settings.json','.pi/mcp.json','mimocode.json','.agents/plugins/agent-workflow-mcp/mcp_config.json','.dsh/agent-workflow.cordis.yml'])assert(files.includes(join(root,p)),p);
+  const files=JSON.parse(r.stdout).files;for(const p of ['.mcp.json','.qwen/settings.json','.pi/mcp.json','mimocode.json','.agents/plugins/agent-workflow-mcp/mcp_config.json','.dsh/agent-workflow-mcp.json'])assert(files.includes(join(root,p)),p);
   assert.equal(files.filter(f=>f===join(root,'.mcp.json')).length,1);
   const bad=spawnSync(process.execPath,[cli,'disconnect','--project',root,'--approve','--user-root',home],{encoding:'utf8'});assert.equal(bad.status,1);assert.match(bad.stderr,/--approve is only for connect/);
   install({userRoot:home,clients:['claude']});connect({project:root,userRoot:home,clients:['pi','mimo']});

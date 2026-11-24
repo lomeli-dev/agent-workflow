@@ -168,6 +168,8 @@ En carpetas sin Git, el opt-out busca también en los directorios antecesores ha
 
 [Prueba con agentes reales](docs/native-trial-2026-11-13.md): implementación, opt-out, roles, MCP y navegador, con sus resultados y límites.
 
+La versión 0.6.1 hace que el MCP de proyecto funcione en `kimi -p` (una caché del lanzador que responde antes de que Kimi congele su lista de herramientas) y en dsh sin `--patch`, y añade una tabla única de [estado por cliente](docs/operaciones.es.md#estado-por-cliente-061); ver el [changelog](CHANGELOG.md).
+
 La versión 0.6.0 añade el cliente DeepSeek Harness, el guard de Antigravity, MCP por proyecto en todos los clientes extra, el guard de Claude por defecto y una regla segura en zsh; ver el [changelog](CHANGELOG.md).
 
 La versión 0.5.1 añade `agent-workflow trust --client codex` y `--trust-codex` (aprueban solo los hooks de Agent Workflow en Codex, como `/hooks`) y quita un falso aviso `codex-hook-not-enabled`; ver el [changelog](CHANGELOG.md).

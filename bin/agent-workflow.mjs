@@ -1,20 +1,23 @@
 #!/usr/bin/env node
-import {readFileSync,existsSync} from 'node:fs';
-import {join,resolve} from 'node:path';
-import {parseArgs} from 'node:util';
-import {status,projectRoot} from '../lib/gate.mjs';
-import {atomic,noSymlinks,read} from '../lib/files.mjs';
-import {install,uninstall,verify,CLIENTS,ALL_CLIENTS,parseClients,parseGuard} from '../lib/install.mjs';
-import {doctor} from '../lib/doctor.mjs';
-import {trustCodex,installAndTrust} from '../lib/codex-trust.mjs';
-import {CATALOG,PROFILES} from '../lib/catalog.mjs';
-import {setupModules,findBin,toolEnvironment} from '../lib/modules.mjs';
-import {selectInteractive} from '../lib/selector.mjs';
-import {serveMcp,MCP_TOOLS,DEFAULT_MCP_TOOLS} from '../lib/mcp-launch.mjs';
-import {spawnSync} from 'node:child_process';
-import {locations,PACKAGE,VERSION} from '../lib/install.mjs';
-import {findSymbols} from '../lib/symbols.mjs';
-import {connect,connectionRoot,pruneConnections,parseConnectClients,CONNECT_CLIENTS} from '../lib/connect.mjs';
+// `mcp` goes through the light front (lib/mcp-front.mjs) before any other module is loaded, so a
+// client that freezes its tool list right after starting servers (Kimi) gets the cached answer.
+if(process.argv[2]==='mcp'&&process.env.AW_MCP_INNER!=='1'){const {front}=await import('../lib/mcp-front.mjs');await front();process.exit(process.exitCode??0);}
+const {readFileSync,existsSync}=await import('node:fs');
+const {join,resolve}=await import('node:path');
+const {parseArgs}=await import('node:util');
+const {status,projectRoot}=await import('../lib/gate.mjs');
+const {atomic,noSymlinks,read}=await import('../lib/files.mjs');
+const {install,uninstall,verify,CLIENTS,ALL_CLIENTS,parseClients,parseGuard}=await import('../lib/install.mjs');
+const {doctor}=await import('../lib/doctor.mjs');
+const {trustCodex,installAndTrust}=await import('../lib/codex-trust.mjs');
+const {CATALOG,PROFILES}=await import('../lib/catalog.mjs');
+const {setupModules,findBin,toolEnvironment}=await import('../lib/modules.mjs');
+const {selectInteractive}=await import('../lib/selector.mjs');
+const {serveMcp,MCP_TOOLS,DEFAULT_MCP_TOOLS}=await import('../lib/mcp-launch.mjs');
+const {spawnSync}=await import('node:child_process');
+const {locations,PACKAGE,VERSION}=await import('../lib/install.mjs');
+const {findSymbols}=await import('../lib/symbols.mjs');
+const {connect,connectionRoot,pruneConnections,parseConnectClients,CONNECT_CLIENTS}=await import('../lib/connect.mjs');
 
 const HELP=`Agent Workflow ${VERSION} — global by default, project opt-out
 
@@ -120,7 +123,9 @@ try{
   }
   else if(cmd==='mcp'){await serveMcp({tool:values.tool,project:values.project,userRoot});process.exit(process.exitCode??0);}
   else if(cmd==='disconnect'&&values.prune){if(values.project||values.clients)throw Error('--prune works on every receipt; do not combine it with --project or --clients');result=pruneConnections({userRoot,dryRun});}
-  else if(cmd==='connect'||cmd==='disconnect'){if(values.approve&&cmd!=='connect')throw Error('--approve is only for connect');result=connect({project:values.project,userRoot,dryRun,remove:cmd==='disconnect',approve:values.approve??false,tools:values.tools?values.tools.split(','):DEFAULT_MCP_TOOLS,clients:parseConnectClients(values.clients)});}
+  else if(cmd==='connect'||cmd==='disconnect'){if(values.approve&&cmd!=='connect')throw Error('--approve is only for connect');result=connect({project:values.project,userRoot,dryRun,remove:cmd==='disconnect',approve:values.approve??false,tools:values.tools?values.tools.split(','):DEFAULT_MCP_TOOLS,clients:parseConnectClients(values.clients)});
+    // Kimi: answer its first start from the launcher cache (see lib/mcp-front.mjs).
+    if(result.connected&&values.approve&&parseConnectClients(values.clients).includes('kimi')){const {warm}=await import('../lib/mcp-front.mjs');result.kimiWarm=await warm({tools:result.tools,project:result.project,userRoot});}}
   else if(cmd==='mcp-config'){
     if(!values.project)throw Error('Specify --project');const project=connectionRoot(values.project),ids=values.tools?values.tools.split(','):DEFAULT_MCP_TOOLS;
     const entries={};for(const id of ids){if(!MCP_TOOLS.includes(id))throw Error('Not an MCP module: '+id);entries['aw-'+id]={command:process.execPath,args:[join(PACKAGE,'bin/agent-workflow.mjs'),'mcp','--tool',id,'--project',project,...(userRoot?['--user-root',resolve(userRoot)]:[])]};}
