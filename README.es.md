@@ -1,6 +1,6 @@
 # Agent Workflow
 
-Paquete global de reglas y procedimientos para Claude Code, Codex CLI y OpenCode V2 (por defecto), y a petición para Qwen Code, Kimi Code, Antigravity CLI, Command Code, Pi y MiMo Code, con desactivación por proyecto, generación Rulesync y retirada reversible.
+Paquete global de reglas y procedimientos para Claude Code, Codex CLI y OpenCode V2 (por defecto), y a petición para Qwen Code, Kimi Code, Antigravity CLI, Command Code, Pi, MiMo Code y DeepSeek Harness (dsh), con desactivación por proyecto, generación Rulesync y retirada reversible.
 
 [English](README.md) · [Arquitectura](docs/architecture.md) · [Compatibilidad y límites](docs/compatibility.md) · [Pruebas](docs/pruebas.es.md)
 
@@ -31,9 +31,9 @@ agent-workflow sync --global --clients all
 agent-workflow verify
 ```
 
-`all` suma `qwen`, `kimi`, `agy`, `commandcode`, `pi` y `mimo` a los tres de siempre; una lista con comas elige algunos. Un `sync` puede añadir clientes a una instalación existente; quitar uno exige `uninstall` antes. Cada cliente recibe lo que soporta de forma nativa: bloque de reglas, el skill compartido `~/.agents/skills/aw-workflow` (agy lleva su propia copia), roles, `aw-start` y un hook de sesión. Kimi no lleva hook de sesión (descarta la salida de SessionStart). Antigravity se verificó con una sesión headless real; en operaciones está cómo correrlo sin el cuelgue de MCP. La tabla por cliente, la precedencia de `CLAUDE.md` en MiMo y lo verificado en cada cliente están en [compatibilidad](docs/compatibility.md#extra-clients-040) y en [operaciones](docs/operaciones.es.md#clientes-adicionales).
+`all` suma `qwen`, `kimi`, `agy`, `commandcode`, `pi`, `mimo` y `dsh` a los tres de siempre; una lista con comas elige algunos. Un `sync` puede añadir clientes a una instalación existente; quitar uno exige `uninstall` antes. Cada cliente recibe lo que soporta de forma nativa: bloque de reglas, el skill compartido `~/.agents/skills/aw-workflow` (agy lleva su propia copia), roles, `aw-start` y un hook de sesión. Kimi no lleva hook de sesión (descarta la salida de SessionStart). dsh recibe `~/.dsh/AGENTS.md`, el skill `aw-start` y hooks a través de su puente oficial `@deepseek-ai/dsh-hooks-claude-code`, montado en cada perfil que tenga el puente y su peer `@deepseek-ai/dsh-hook-protocol` (si falta, un aviso da el comando `dsh plugin --profile P add -w ...`). Antigravity se verificó con una sesión headless real; en operaciones está cómo correrlo sin el cuelgue de MCP. La tabla por cliente, la precedencia de `CLAUDE.md` en MiMo y lo verificado en cada cliente están en [compatibilidad](docs/compatibility.md#extra-clients-040) y en [operaciones](docs/operaciones.es.md#clientes-adicionales).
 
-**Guard de validación.** Antes de ejecutar shell, Qwen, Kimi, Command Code, Pi y MiMo (y OpenCode, como antes) bloquean un comando de test/build cuyo código de salida quedaría oculto por un pipe, un `;` o un `echo` posterior, y le dicen al modelo las tres formas permitidas. En Claude Code y Codex es opcional: `agent-workflow sync --global --clients ... --guard claude,codex` (`--guard none` lo quita; sin `--guard`, un `sync` conserva lo elegido). Codex pide aprobar una vez el hook nuevo `PreToolUse`. Los proyectos desactivados nunca se bloquean. Detalle y evidencia por cliente: [operaciones](docs/operaciones.es.md#protección-de-validación-y-archivos-de-módulos).
+**Guard de validación.** Antes de ejecutar shell, Qwen, Kimi, Antigravity, Command Code, Pi, MiMo, dsh y Claude Code (y OpenCode, como antes) bloquean un comando de test/build cuyo código de salida quedaría oculto por un pipe, un `;` o un `echo` posterior, y le dicen al modelo las formas permitidas (`set -o pipefail; CMD | tail`, `CMD > log 2>&1; echo "exit=$?"`, también tras `cd DIR &&`). Desde 0.6.0 el de Claude viene activo por defecto y el de Codex con `--trust-codex`; `--guard claude,codex|none` fija la elección y un `sync` conserva la registrada. Ya no se acepta `CMD | tail; exit ${PIPESTATUS[0]}`: zsh, el shell de Claude Code y Codex en macOS, no tiene `PIPESTATUS` y sale con 0. Los proyectos desactivados nunca se bloquean. Detalle y evidencia por cliente: [operaciones](docs/operaciones.es.md#protección-de-validación-y-archivos-de-módulos).
 
 Tras un `sync` que cambie los hooks, Codex no los ejecuta hasta que los vuelvas a aprobar: `agent-workflow trust --client codex` lo hace igual que `/hooks`, solo para los hooks de Agent Workflow (o pasa `--trust-codex` al `sync`); también puedes usar `/hooks` a mano. `verify` lee el estado de `codex app-server` si `codex` está disponible y avisa con `codex-hook-untrusted`, `codex-hook-modified` o `codex-hook-disabled`. No se salta la confianza.
 
@@ -111,7 +111,7 @@ agent-workflow disconnect --project /ruta/al/proyecto
 agent-workflow exec --tool ast-grep -- --version
 ```
 
-MCP disponibles: `serena`, `codegraph`, `playwright-mcp`, `devtools`, `context7`. Los tres clientes son el destino predeterminado; `--clients claude,codex` lo limita. Después recarga el cliente y acepta sus herramientas. Se conservan entradas ajenas y comentarios. Desconecta los proyectos antes de desinstalar.
+MCP disponibles: `serena`, `codegraph`, `playwright-mcp`, `devtools`, `context7`. Los tres clientes base son el destino predeterminado; `--clients claude,codex` lo limita y `--clients all` añade qwen, kimi, agy, commandcode, pi, mimo y dsh (archivos por cliente en [compatibilidad](docs/compatibility.md#project-mcp-060)). `--approve` (opcional) además los aprueba por la vía oficial del cliente cuando existe una no interactiva (Claude, Qwen); el resultado dice qué falta en los demás. Excluye de los commits lo que sea local con `.git/info/exclude`. Después recarga el cliente y acepta sus herramientas. Se conservan entradas ajenas y comentarios. Desconecta los proyectos antes de desinstalar.
 
 Instalar no demuestra que un cliente haya cargado el MCP ni configura automáticamente su integración LSP. Consulta [herramientas y evidencia](docs/tools.md).
 
@@ -167,6 +167,8 @@ Guía completa: [instalación, actualización, uso y recuperación](docs/operaci
 En carpetas sin Git, el opt-out busca también en los directorios antecesores hasta la raíz del sistema. Para `connect`, `disconnect` y `mcp-config` usa la raíz del repositorio; no se promociona una subcarpeta automáticamente. Si conectaste sólo algunos clientes, repite el mismo `--clients` al desconectar.
 
 [Prueba con agentes reales](docs/native-trial-2026-11-13.md): implementación, opt-out, roles, MCP y navegador, con sus resultados y límites.
+
+La versión 0.6.0 añade el cliente DeepSeek Harness, el guard de Antigravity, MCP por proyecto en todos los clientes extra, el guard de Claude por defecto y una regla segura en zsh; ver el [changelog](CHANGELOG.md).
 
 La versión 0.5.1 añade `agent-workflow trust --client codex` y `--trust-codex` (aprueban solo los hooks de Agent Workflow en Codex, como `/hooks`) y quita un falso aviso `codex-hook-not-enabled`; ver el [changelog](CHANGELOG.md).
 
