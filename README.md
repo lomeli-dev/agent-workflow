@@ -2,9 +2,110 @@
 
 Global workflow guidance for Claude Code, Codex CLI and OpenCode V2 (default), plus Qwen Code, Kimi Code, Antigravity CLI, Command Code, Pi, MiMo Code and DeepSeek Harness (dsh) on request, with project opt-out, Rulesync generation and a reversible installer.
 
-[Español](README.es.md) · [Architecture](docs/architecture.md) · [Compatibility and limits](docs/compatibility.md) · [Testing](docs/testing.md) · [Complete operations guide](docs/operations.md) · [Audit](docs/audit-2026-11-13.md)
+[Español](README.es.md) · [Install everything in 5 minutes](#install-everything-in-5-minutes) · [Architecture](docs/architecture.md) · [Compatibility and limits](docs/compatibility.md) · [Testing](docs/testing.md) · [Complete operations guide](docs/operations.md) · [Audit](docs/audit-2026-11-13.md)
 
 This is a workflow package, not an autonomous orchestrator or a promise of faster completion. It provides a short applicability rule, the `aw-workflow` skill, optional `aw-worker`/`aw-reviewer` roles, a start command where supported, startup/compaction reminders and dependency diagnostics. Existing project instructions and user-selected models remain in charge.
+
+## Install everything in 5 minutes
+
+For a clean Mac that already has some of the clients installed. Each step is a command and what it does; details follow below and in the [operations guide](docs/operations.md).
+
+**1. Requirements.** Node.js 22.22.0+ (`node --version`), npm, Git with access to the private repository, and the clients you want to use installed and signed in (open each once). For dsh, boot a profile once (`dsh headless`) so `~/.dsh/profiles/headless` exists.
+
+**2. Clone and install the CLI.**
+
+```sh
+git clone https://github.com/lomeli-dev/agent-workflow.git
+cd agent-workflow
+npm ci --ignore-scripts                    # pinned dependencies, no install scripts
+npm install --global . --ignore-scripts    # registers the agent-workflow command (links this folder)
+```
+
+For development, use `npm link` instead of the last line. Either way the command points at this clone: do not move or delete it.
+
+**3. Install into every client.**
+
+```sh
+agent-workflow sync --global --clients all --all-in --dry-run   # files it would change and steps it would run
+agent-workflow sync --global --clients all --all-in             # install
+agent-workflow verify                                           # check files, registrations and hooks
+```
+
+On a new installation `install --global` and `sync --global` do the same; `sync` also updates and adds clients. `--all-in` (0.7.0) combines three opt-in steps, each only when its client is in `--clients`:
+
+- `--trust-codex`: trusts only the Agent Workflow hooks in Codex, the same as approving them in `/hooks` (through `codex app-server`; other hooks are untouched).
+- `--dsh-plugins`: in each dsh profile that lacks the hooks bridge, runs `dsh plugin --profile <p> add -w @deepseek-ai/dsh-hooks-claude-code@<v> @deepseek-ai/dsh-hook-protocol@<v>` with the version from `dsh --version`, and records it so `uninstall` removes it. A package you already have at another version is never replaced.
+- `--agy-allow`: adds `mcp(agent-workflow-mcp_aw-serena/*)`, `mcp(agent-workflow-mcp_aw-codegraph/*)` and `mcp(agent-workflow-mcp_aw-context7/*)` to `permissions.allow` in `~/.gemini/antigravity-cli/settings.json`, without duplicating the ones you have.
+
+Validation guard after this step: always Qwen, Kimi, agy, Command Code, Pi, MiMo, dsh and OpenCode; Claude by default; Codex because `--all-in` includes `--trust-codex` (on a new installation only: if you installed without it, add `--guard claude,codex`). Later syncs keep that choice and what `--dsh-plugins` and `--agy-allow` recorded.
+
+**4. What stays manual.**
+
+- **dsh key.** dsh reads `DEEPSEEK_API_KEY`; Agent Workflow never touches it. Keep it in the macOS Keychain (the first line prompts without echo, so it stays out of your history) and pass it only to dsh with a function in `~/.zshrc`:
+
+  ```sh
+  security add-generic-password -a "$USER" -s deepseek-api-key -w
+  dsh() { DEEPSEEK_API_KEY="${DEEPSEEK_API_KEY:-$(security find-generic-password -s deepseek-api-key -w 2>/dev/null)}" command dsh "$@"; }
+  ```
+
+- **Kimi folder trust.** Kimi does not start project MCP servers in an untrusted folder. Choose "Trust this folder" the first time you open `kimi` in the project, or run `KIMI_CODE_TRUST_WORKSPACE=1 kimi -p "..."` (that process only). There is no official command that stores trust for one folder; `[workspace] require_trust = false` in `~/.kimi-code/config.toml` removes it for every folder, so the installer does not do it.
+- **agy hangs headless.** If `agy -p` waits until its timeout and its log (`~/.gemini/antigravity-cli/log/cli-*.log`) says `MCP: N server(s) still connecting`, those are servers with `"disabled": true` in `~/.gemini/config/mcp_config.json` that agy 1.5.15 still waits for: remove those entries (your call; Agent Workflow does not edit that file).
+- **Codex after another `sync`.** If a sync changes the hooks, repeat it with `--trust-codex` (or `--all-in`) or run `agent-workflow trust --client codex`. `verify` warns with `codex-hook-untrusted` or `codex-hook-modified`.
+- **Codex and Pi per project.** Codex loads `.codex/config.toml` only in a trusted project (accept when it asks); Pi reads `.pi/mcp.json` once the project is trusted or with `pi -a`.
+
+Without `--all-in`, the same by hand: `dsh plugin --profile <headless|web> add -w @deepseek-ai/dsh-hooks-claude-code@$(dsh --version) @deepseek-ai/dsh-hook-protocol@$(dsh --version)`, then `agent-workflow sync --global` (`-w` is pnpm's `--workspace-root`: each profile is a pnpm workspace root and pnpm refuses to add packages there without it); and in `~/.gemini/antigravity-cli/settings.json`, merged with what is there, `{"permissions": {"allow": ["mcp(agent-workflow-mcp_aw-serena/*)", "mcp(agent-workflow-mcp_aw-codegraph/*)", "mcp(agent-workflow-mcp_aw-context7/*)"]}}`.
+
+**5. Turn on Serena, CodeGraph and Context7 in a project.**
+
+```sh
+agent-workflow connect --project /path/to/root --clients all --all-in --dry-run   # files it would write and what it would exclude
+agent-workflow connect --project /path/to/root --clients all --all-in
+```
+
+Use the repository root and reload each client afterwards. `connect --all-in` is `--approve` (each client's official approval: Claude `enabledMcpjsonServers`, `qwen mcp approve`, and the cache Kimi needs) plus `--exclude` (adds the generated paths that are neither tracked nor already ignored to `$(git rev-parse --git-path info/exclude)`, in a managed block that `disconnect` removes). The paths are `.mcp.json`, `.codex/config.toml`, `opencode.jsonc` (or `opencode.json` if it exists), `.qwen/settings.json`, `.agents/plugins/agent-workflow-mcp/`, `.pi/mcp.json`, `mimocode.json` (or the variant that exists), `.dsh/agent-workflow-mcp.json` and `.claude/settings.local.json`. Lines you already have, even `.codex/` or without a leading `/`, are detected with `git check-ignore` and not duplicated.
+
+By hand (without `--exclude`), an equivalent one-liner that does not duplicate lines and works in worktrees:
+
+```sh
+cd /path/to/root && x="$(git rev-parse --git-path info/exclude)" && mkdir -p "$(dirname "$x")" && for p in /.mcp.json /.codex/config.toml /opencode.jsonc /.qwen/settings.json /.agents/plugins/agent-workflow-mcp/ /.pi/mcp.json /mimocode.json /.dsh/agent-workflow-mcp.json /.claude/settings.local.json; do grep -qxF "$p" "$x" 2>/dev/null || echo "$p" >> "$x"; done
+```
+
+If your team tracks any of those files, drop it from the list: `info/exclude` does not affect tracked files.
+
+**6. Check that it works.** In a new session of each client, inside a project:
+
+- Canary: "Without running anything: in your session instructions, what is the word right after "for substantial coding tasks load"? Answer with that word only." Expected: `aw-workflow`. Kimi, OpenCode and Command Code in `-p` have no session hook; ask about the rule instead: "Without running anything: in your global instructions, which word comes right after "Use" in the sentence that continues "for a substantial coding task that needs coordination"? Answer with that word only." (also `aw-workflow`).
+- Guard: create a project whose test fails with 7 and ask for the compound command.
+
+  ```sh
+  mkdir -p /tmp/aw-prueba && cd /tmp/aw-prueba && git init -q && npm init -y > /dev/null && npm pkg set scripts.test="node -e 'process.exit(7)'"
+  ```
+
+  "Run exactly this shell command in one tool call, without changing it: npm test; echo "exit=$?" . Then tell me whether the tests pass and with which exit code." Expected: an `AW_VALIDATION_COMPOUND` block, then `npm test` run directly (or an allowed form) with exit 7.
+
+What works in each client and what does not: [client status](docs/compatibility.md#client-status-061) (Spanish: [estado por cliente](docs/operaciones.es.md#estado-por-cliente-061)).
+
+**7. Update, disable and uninstall.**
+
+```sh
+# Update (from the clone)
+git pull --ff-only
+npm ci --ignore-scripts
+npm install --global . --ignore-scripts         # or npm link
+agent-workflow sync --global --clients all --all-in
+agent-workflow verify
+
+# Disable the workflow in a project (enable reverts it)
+agent-workflow disable --project /path/to/root
+
+# Uninstall: disconnect every connected project first
+agent-workflow disconnect --project /path/to/root --clients all
+agent-workflow uninstall --global --dry-run
+agent-workflow uninstall --global
+npm uninstall --global @lomeli-dev/agent-workflow
+```
+
+Before uninstalling, back up your configurations (`~/.claude`, `~/.codex`, `~/.config/opencode`, `~/.gemini`, `~/.kimi-code`, `~/.dsh`…). `uninstall` removes only what it owns, including the agy permissions and the dsh packages added by `--dsh-plugins`, and stops if you edited something it owns. In the update sync the client list cannot be smaller than the installed one.
 
 ## Install from the private repository
 
@@ -33,7 +134,7 @@ agent-workflow sync --global --clients all
 agent-workflow verify
 ```
 
-`all` adds `qwen`, `kimi`, `agy`, `commandcode`, `pi`, `mimo` and `dsh` to the default three; a comma list picks some. A sync can add clients to an existing installation; dropping one needs `uninstall` first. Each client gets what it supports natively: rule block, the shared `~/.agents/skills/aw-workflow` skill (agy gets its own copy), roles, `aw-start` and a session hook. Kimi gets no session hook (it discards SessionStart output). dsh gets `~/.dsh/AGENTS.md`, the `aw-start` skill and hooks through its official `@deepseek-ai/dsh-hooks-claude-code` bridge, mounted in each profile that has the bridge and its peer `@deepseek-ai/dsh-hook-protocol` (otherwise a notice prints the `dsh plugin --profile P add -w ...` command). Antigravity was verified with a real headless session; see the compatibility document for how to run it without the MCP hang. The [compatibility document](docs/compatibility.md#extra-clients-040) has the per-client table, the MiMo `CLAUDE.md` precedence, and what was verified natively.
+`all` adds `qwen`, `kimi`, `agy`, `commandcode`, `pi`, `mimo` and `dsh` to the default three; a comma list picks some. A sync can add clients to an existing installation; dropping one needs `uninstall` first. Each client gets what it supports natively: rule block, the shared `~/.agents/skills/aw-workflow` skill (agy gets its own copy), roles, `aw-start` and a session hook. Kimi gets no session hook (it discards SessionStart output). dsh gets `~/.dsh/AGENTS.md`, the `aw-start` skill and hooks through its official `@deepseek-ai/dsh-hooks-claude-code` bridge, mounted in each profile that has the bridge and its peer `@deepseek-ai/dsh-hook-protocol` (otherwise a notice prints the `dsh plugin --profile P add -w ...` command; since 0.7.0 `--dsh-plugins` or `--all-in` runs it and `uninstall` reverts it). Antigravity was verified with a real headless session; see the compatibility document for how to run it without the MCP hang. The [compatibility document](docs/compatibility.md#extra-clients-040) has the per-client table, the MiMo `CLAUDE.md` precedence, and what was verified natively.
 
 **Validation guard.** Before a shell command runs, Qwen, Kimi, Antigravity, Command Code, Pi, MiMo, dsh and Claude Code (and OpenCode, as before) block a test/build command whose exit status a pipe, `;` or following `echo` would hide, and tell the model the allowed forms (`set -o pipefail; CMD | tail`, `CMD > log 2>&1; echo "exit=$?"`, optionally after `cd DIR &&`). Since 0.6.0 the Claude guard is on by default and the Codex one comes with `--trust-codex`; `--guard claude,codex|none` sets the choice and a sync keeps the recorded one. `CMD | tail; exit ${PIPESTATUS[0]}` is no longer accepted: zsh, the macOS shell of Claude Code and Codex, has no `PIPESTATUS` and exits 0. Opted-out projects are never blocked. Details and evidence per client: [compatibility](docs/compatibility.md#validation-guard-050).
 
@@ -116,7 +217,7 @@ agent-workflow disconnect --project /path/to/project
 agent-workflow exec --tool ast-grep -- --version
 ```
 
-Installation is global; MCP registration is explicit and project-scoped. Pass the repository root: nested paths are rejected to prevent silently bypassing their opt-out. Use the same `--clients` set when disconnecting a subset connection. Default MCP connections are Serena, CodeGraph and Context7. Agent-browser is used through the CLI/skill, so it adds no default MCP tool inventory. Supported optional MCP names: `serena`, `codegraph`, `playwright-mcp`, `devtools`, `context7`. `--clients LIST|all` selects native config targets (claude, codex and opencode by default; `all` adds qwen, kimi, agy, commandcode, pi, mimo and dsh, see [project MCP](docs/compatibility.md#project-mcp-060)). `--approve` (opt-in) also approves the servers the client's own way where a non-interactive mechanism exists (Claude, Qwen); the result names what other clients still need. Keep local registrations out of commits with `.git/info/exclude`. Restart/reload and approve project tools in each client. Existing entries and comments are preserved; name collisions or edits to owned entries refuse rather than overwrite. Disconnect project registrations before uninstalling the package.
+Installation is global; MCP registration is explicit and project-scoped. Pass the repository root: nested paths are rejected to prevent silently bypassing their opt-out. Use the same `--clients` set when disconnecting a subset connection. Default MCP connections are Serena, CodeGraph and Context7. Agent-browser is used through the CLI/skill, so it adds no default MCP tool inventory. Supported optional MCP names: `serena`, `codegraph`, `playwright-mcp`, `devtools`, `context7`. `--clients LIST|all` selects native config targets (claude, codex and opencode by default; `all` adds qwen, kimi, agy, commandcode, pi, mimo and dsh, see [project MCP](docs/compatibility.md#project-mcp-060)). `--approve` (opt-in) also approves the servers the client's own way where a non-interactive mechanism exists (Claude, Qwen); the result names what other clients still need. `--exclude` (0.7.0) keeps the generated files out of commits with a managed block in `info/exclude` that `disconnect` removes; `--all-in` = `--approve --exclude`. Restart/reload and approve project tools in each client. Existing entries and comments are preserved; name collisions or edits to owned entries refuse rather than overwrite. Disconnect project registrations before uninstalling the package.
 
 `setup` alone does not register MCPs or enable native client LSP plugins. See [tool selection and evidence](docs/tools.md) for routing, prerequisites and integration limits.
 
@@ -156,6 +257,8 @@ node bin/agent-workflow.mjs uninstall --global --user-root /path/to/isolated-use
 No model or effort is forced, no MCP server is added by the global workflow install, and no automatic project-memory writer is started. The coordinator uses an existing memory-sesion installation if the project and user call for it. Workers return candidate lessons to that coordinator.
 
 [Native client behavioral trial](docs/native-trial-2026-11-13.md): real implementation, opt-out, roles, MCP and browser checks, including remaining limitations.
+
+Version 0.7.0 automates the steps that were manual: `--all-in` for `install`/`sync --global` (`--trust-codex`, `--dsh-plugins`, `--agy-allow`) and for `connect` (`--approve`, `--exclude`), all reversible; see [Install everything in 5 minutes](#install-everything-in-5-minutes) and the [changelog](CHANGELOG.md).
 
 Version 0.6.1 makes project MCP work in `kimi -p` (a launcher cache that answers before Kimi freezes its tool list) and in dsh without `--patch`, and adds a single [client status](docs/compatibility.md#client-status-061) table; see the [changelog](CHANGELOG.md).
 
