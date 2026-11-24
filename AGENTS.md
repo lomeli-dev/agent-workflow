@@ -1,6 +1,6 @@
 # Agent Workflow development
 
-This repository builds a portable workflow package; it is separate from Studio/Herdr. Read README.md and docs/architecture.md. The user authorized global installation on the current Mac and a private repository in lomeli-dev, not installation on other hosts.
+This repository builds a portable workflow package; it is separate from Studio/Herdr. Read README.md and docs/architecture.md. The user authorized global installation on the current Mac and the lomeli-dev/agent-workflow repository (public since 0.7.2, docs on GitHub Pages), not installation on other hosts.
 
 Edit canonical rules, skills, roles and commands in .rulesync. Generated client artifacts are built by npm run build. Do not manually modify generated content. Native settings and hooks are adapted by lib/install.mjs.
 
