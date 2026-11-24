@@ -52,16 +52,19 @@ agent-workflow sync --global --clients all
 agent-workflow verify
 ```
 
-`all` equivale a `claude,codex,opencode,qwen,kimi,agy,commandcode,pi,mimo`. Sobre una instalación de los tres clientes de siempre, este `sync` añade los nuevos sin desinstalar. Para quitar alguno: `uninstall --global` y volver a instalar con la lista nueva. `connect`/`disconnect` (MCP por proyecto) siguen siendo solo para claude, codex y opencode. ZCode y Cursor quedaron fuera por decisión del dueño.
+`all` equivale a `claude,codex,opencode,qwen,kimi,agy,commandcode,pi,mimo,dsh`. Sobre una instalación de los tres clientes de siempre, este `sync` añade los nuevos sin desinstalar. Para quitar alguno: `uninstall --global` y volver a instalar con la lista nueva. `connect`/`disconnect` (MCP por proyecto) siguen siendo solo para claude, codex y opencode. ZCode y Cursor quedaron fuera por decisión del dueño.
 
 | Cliente | Regla | Skill | Roles | aw-start | Hook | Guard de validación (0.5.0) |
 | --- | --- | --- | --- | --- | --- | --- |
-| qwen | `~/.qwen/QWEN.md` | `~/.agents/skills` | `~/.qwen/agents` | `/aw-start` | SessionStart, SubagentStart y PreCompact en `~/.qwen/settings.json` | `PreToolUse` (matcher `run_shell_command`) en el mismo archivo |
+| qwen | `~/.qwen/QWEN.md` | `~/.agents/skills` | `~/.qwen/agents` | `/aw-start` | SessionStart, SubagentStart y PreCompact en `~/.qwen/settings.json` (SubagentStart corre, pero Qwen 0.28.4 **no** pasa su texto al subagente; el subagente recibe la regla solo por el archivo global) | `PreToolUse` (matcher `run_shell_command`) en el mismo archivo |
 | kimi | `~/.kimi-code/AGENTS.md` | `~/.agents/skills` | `~/.kimi-code/agents` | skill `aw-start` | no (Kimi descarta la salida de SessionStart) | `PreToolUse` (matcher `^Bash$`) en un bloque administrado al final de `~/.kimi-code/config.toml` |
-| agy | `~/.gemini/GEMINI.md` | `~/.gemini/config/skills` | `~/.gemini/config/agents` | skill `aw-start` | SessionStart en `~/.gemini/config/hooks.json` (grupo `agent-workflow`) | no (fuera de esta versión) |
+| agy | `~/.gemini/GEMINI.md` | `~/.gemini/config/skills` | `~/.gemini/config/agents` | skill `aw-start` | SessionStart en `~/.gemini/config/hooks.json` (grupo `agent-workflow`) | `PreToolUse` (matcher `run_command`) en el mismo grupo (0.6.0); responde `{"decision":"deny","reason":…}` |
 | commandcode | `~/.commandcode/AGENTS.md` | `~/.agents/skills` | `~/.commandcode/agents` | `/aw-start` | SessionStart en `~/.commandcode/settings.json` | `PreToolUse` (matcher `^SHELL$`) al final, después de las entradas que ya hubiera (la `.*` de Orca no se toca ni se reordena) |
 | pi | `~/.pi/agent/AGENTS.md` | `~/.agents/skills` | (Pi no tiene subagentes) | prompt `/aw-start` | extensión `~/.pi/agent/extensions/agent-workflow.js` | la misma extensión: `tool_call` de `bash` → `{block: true, reason}` |
 | mimo | `~/.config/mimocode/AGENTS.md` o, si MiMo lee `~/.claude/CLAUDE.md`, el bloque de Claude | `~/.agents/skills` | `~/.config/mimocode/agents` | `/aw-start` | plugin `~/.config/mimocode/plugins/agent-workflow.js` | el mismo plugin: `tool.execute.before` de `bash`/`exec_command` → `cancel` |
+| dsh | `~/.dsh/AGENTS.md` | `~/.agents/skills` (dsh lo escanea) | no (los presets de dsh son filas de plugin, no archivos) | skill `~/.dsh/skills/aw-start` | SessionStart y SubagentStart vía el puente `@deepseek-ai/dsh-hooks-claude-code` (ver abajo) | `PreToolUse` (matcher `^bash$`) en el mismo `hooks.json` del puente |
+
+**DeepSeek Harness (dsh).** Los hooks pasan por el puente oficial `@deepseek-ai/dsh-hooks-claude-code`, que lee un `hooks.json` con formato Claude. Agent Workflow es dueño de `<store>/dsh/hooks.json` y añade al final del `cordis.patch.yml` de cada perfil (`~/.dsh/profiles/<p>/`; nunca `cordis.yml`) un bloque YAML administrado con una fila `insert` que monta el puente con `configPath` a ese archivo. Una fila suelta sin `id` la rechaza el loader de dsh; por eso es `insert`. Si el archivo era solo `[]`, el bloque ocupa su lugar y al desinstalar vuelve `[]`. El puente necesita su peer `@deepseek-ai/dsh-hook-protocol` de la misma versión, que el paquete `dsh` no trae y pnpm no instala: sin él la entrada no se activa ("1 entry did not activate"). El instalador solo monta el bloque en los perfiles que tienen los dos paquetes y, para los demás, avisa con el comando exacto, por ejemplo `dsh plugin --profile headless add -w @deepseek-ai/dsh-hooks-claude-code@0.2.2-rc.5 @deepseek-ai/dsh-hook-protocol@0.2.2-rc.5`; después, `agent-workflow sync --global`. No instala nada en los perfiles.
 
 **MiMo y `CLAUDE.md`.** MiMo carga solo el primero que exista de `~/.config/mimocode/AGENTS.md` y `~/.claude/CLAUDE.md`. Si no tienes el primero, crearlo haría que MiMo dejara de leer tus reglas de Claude, así que el instalador no lo crea: MiMo recibe el bloque por `CLAUDE.md` (instala también el cliente `claude`). Si ya tienes `~/.config/mimocode/AGENTS.md`, el bloque va ahí. `install` y `verify` lo dicen en `notices`.
 
@@ -104,11 +107,15 @@ Los MCP predeterminados son **Serena, CodeGraph y Context7**. Los de navegador s
 agent-workflow connect --project /ruta/raiz --clients claude,codex --dry-run
 agent-workflow connect --project /ruta/raiz --clients claude,codex
 agent-workflow disconnect --project /ruta/raiz --clients claude,codex
+
+# 0.6.0: todos los clientes y, opcional, aprobación por la vía del cliente
+agent-workflow connect --project /ruta/raiz --clients all --approve
+agent-workflow disconnect --project /ruta/raiz --clients all
 ```
 
 Usa la raíz Git para conectar, desconectar o imprimir configuración. No aceptamos una subcarpeta y la convertimos silenciosamente en raíz. El registro se aplica a esa raíz; no representa dinámicamente los opt-out de todas sus subcarpetas.
 
-Los archivos nativos son `.mcp.json`, `.codex/config.toml` y `opencode.jsonc`/`opencode.json`. Se conserva la ruta originalmente administrada. Si cambias el archivo de configuración que tiene prioridad en OpenCode, primero desconecta y luego conecta de nuevo. Los cambios en entradas propias se detienen para revisión.
+Los archivos nativos son `.mcp.json` (Claude, y desde 0.6.0 también Command Code y Kimi, que lo leen), `.codex/config.toml`, `opencode.jsonc`/`opencode.json`, `.qwen/settings.json`, `.pi/mcp.json`, `mimocode.json(c)`, el plugin de workspace de agy `.agents/plugins/agent-workflow-mcp/` y, para dsh, `.dsh/agent-workflow.cordis.yml` (se carga con `dsh --profile <p> --patch .dsh/agent-workflow.cordis.yml`). Qué aprueba cada cliente y cómo: [compatibilidad](compatibility.md#project-mcp-060). `--approve` usa solo mecanismos oficiales no interactivos (Claude: `enabledMcpjsonServers` en `.claude/settings.local.json`; Qwen: `qwen mcp approve`); el resultado de `connect` lista lo que falta en los demás (Kimi: `KIMI_CODE_TRUST_WORKSPACE=1` o confiar la carpeta; Pi: `pi -a` o confiar el proyecto; agy: la regla `mcp(agent-workflow-mcp_aw-<tool>/*)` en `~/.gemini/antigravity-cli/settings.json`; Codex: proyecto confiado). Si esos archivos son solo de tu máquina, añádelos a `.git/info/exclude` (no se comparte y no toca `.gitignore`). Se conserva la ruta originalmente administrada. Si cambias el archivo de configuración que tiene prioridad en OpenCode, primero desconecta y luego conecta de nuevo. Los cambios en entradas propias se detienen para revisión.
 
 El opt-out se comprueba al arrancar el MCP; no revoca servidores ya abiertos. Reinícialos después de cambiarlo. Dentro de Git la búsqueda del interruptor termina en la raíz del repo. Fuera de Git busca en los directorios superiores hasta la raíz del sistema. El cliente puede seguir descubriendo las skills globales aunque el flujo esté desactivado.
 
@@ -175,20 +182,22 @@ Desde 0.5.0 el mismo guard (una sola fuente: `shellGuard` de `gate.mjs` + `valid
 | Qwen, Command Code, Kimi | hook `PreToolUse` (`hook.mjs --client NOMBRE`) | `hookSpecificOutput.permissionDecision: "deny"` con el motivo |
 | Pi | extensión, `tool_call` | `{block: true, reason}` |
 | MiMo | plugin, `tool.execute.before` | `output.cancel = true` y `cancelReason` |
-| Claude Code, Codex | hook `PreToolUse`, matcher `Bash` | igual que Qwen; **solo con `--guard claude,codex`** |
+| Antigravity (agy) | hook `PreToolUse`, matcher `run_command` (0.6.0) | `{"decision":"deny","reason":…}` |
+| DeepSeek Harness (dsh) | hook `PreToolUse` del puente, matcher `^bash$` (0.6.0) | igual que Qwen |
+| Claude Code | hook `PreToolUse`, matcher `Bash` | igual que Qwen; **activo por defecto desde 0.6.0** (`--guard none` lo quita) |
+| Codex | hook `PreToolUse`, matcher `Bash` | igual que Qwen; con `--trust-codex` (o `--guard codex`) |
 
-**Por qué Claude y Codex son opcionales.** El Bash de Claude no tiene opción de directorio: `cd dir && npm test` queda bloqueado y el modelo tiene que hacer el `cd` en otra llamada. En Codex el hook nuevo hay que aprobarlo con `/hooks`. Aun así, en la prueba real Claude encadenó `cat package.json; npm test; echo "exit=$?"`; el guard lo bloqueó y Claude corrió `npm test` directo. Para activarlo: `agent-workflow sync --global --clients LISTA --guard claude,codex` (o uno solo). Para quitarlo: `--guard none`. Sin `--guard`, un `sync` conserva lo elegido.
+**Claude y Codex en 0.6.0.** En 0.5.x eran opcionales porque `cd dir && npm test` quedaba bloqueado (el Bash de Claude no tiene opción de directorio) y Codex pide aprobar cada hook nuevo. Desde 0.6.0 se permite un `cd DIR &&` al principio (el estado sigue visible: si el `cd` falla, la cadena termina con su error), y una batería de 50 comandos reales de agentes pasada por los hooks instalados de Claude y Codex dio 0 falsos positivos y 0 falsos negativos (`tests/fixtures/guard-battery.mjs`). Por eso el de Claude va activo por defecto y el de Codex llega con `--trust-codex`. Quedan bloqueados a propósito `npm run build && npm test` y `npm ci && npm test` (dos pasos: ejecútalos por separado). La elección queda en el manifiesto (`guard`); una instalación 0.5.x sin guard recibe el valor por defecto en el siguiente `sync`, y una que eligió `--guard` lo conserva.
 
 **Kimi.** Sus hooks viven en `~/.kimi-code/config.toml` (tablas `[[hooks]]`); no tiene un JSON aparte. El instalador añade un bloque entre `# agent-workflow:begin` y `# agent-workflow:end` al final del archivo y no toca el resto (tampoco el bloque de Orca). Si el TOML no es válido, no lo sobrescribe. Si Kimi reescribe el archivo y pierde los comentarios marcadores, `verify` lo marca y `uninstall` se niega: en ese caso quita a mano la entrada `[[hooks]]` de Agent Workflow.
 
 Con el workflow activo, en todos estos clientes se rechazan las validaciones reconocidas que incluyan pipes, separadores o condicionales; ejecuta el test solo y usa el directorio del propio tool.
 
-Reconoce como validación los scripts de npm/pnpm/yarn/bun, los runners vía `npx`/`pnpm exec`/`bunx`, `uv run`/`poetry run`, pytest/jest/vitest, `node --test`, `node <archivo de test>` (`test.js`, `tests/…`, `*.spec.ts`), el comando de un script `test`/`check`/`build` de un solo comando del `package.json` del directorio (lo lee, no lo ejecuta), cargo/go/dotnet, las tareas de test de gradle/`./gradlew`, `make [-C DIR] test|check|build` y los scripts de `bash -c`/`sh -c` (los revisa por dentro). Deja pasar tres formas que conservan el estado:
+Reconoce como validación los scripts de npm/pnpm/yarn/bun, los runners vía `npx`/`pnpm exec`/`bunx`, `uv run`/`poetry run`, pytest/jest/vitest, `node --test`, `node <archivo de test>` (`test.js`, `tests/…`, `*.spec.ts`), el comando de un script `test`/`check`/`build` de un solo comando del `package.json` del directorio (lo lee, no lo ejecuta), cargo/go/dotnet, las tareas de test de gradle/`./gradlew`, `make [-C DIR] test|check|build` y los scripts de `bash -c`/`sh -c` (los revisa por dentro). Deja pasar dos formas que conservan el estado (también tras `cd DIR &&`):
 
 - `set -o pipefail; CMD | tail` (también `set -euo pipefail`): el pipeline devuelve el primer fallo;
-- `CMD | tail; exit ${PIPESTATUS[0]}`: el índice debe apuntar a la validación;
 - `CMD > log 2>&1; echo "exit=$?"`: la salida completa queda en un archivo y se imprime el estado. Sin la redirección, `CMD; echo $?` sigue bloqueado.
 
-Cualquier cosa después de esas formas, las cadenas con `cd`, `&&`/`||` y los procesos en segundo plano siguen bloqueados. El opt-out se vuelve a consultar en cada llamada. Es un guard limitado, no un parser universal ni un sandbox de permisos.
+`CMD | tail; exit ${PIPESTATUS[0]}` ya no se acepta (0.6.0): `PIPESTATUS` solo existe en bash, y Claude Code y Codex ejecutan en zsh en macOS, donde esa forma sale con 0 y oculta el fallo (se vio en una prueba real de Claude). Cualquier cosa después de esas formas, `;` tras un `cd`, otros `&&`/`||` y los procesos en segundo plano siguen bloqueados. El opt-out se vuelve a consultar en cada llamada. Es un guard limitado, no un parser universal ni un sandbox de permisos.
 
 El MCP de CodeGraph incorpora `agent_workflow_symbols` para un archivo JS/TS explícito, incluyendo `.mjs`, `.cjs`, `.mts` y `.cts`. Usa TypeScript como requisito, devuelve nombres y posiciones originales y no ejecuta el módulo. Rechaza rutas fuera del proyecto, errores sintácticos y archivos mayores a 1 MiB. El resultado identifica su fuente y no afirma tener relaciones de grafo. El motor original de CodeGraph sigue teniendo su límite de extensiones.

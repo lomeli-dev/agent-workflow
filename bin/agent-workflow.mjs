@@ -14,7 +14,7 @@ import {serveMcp,MCP_TOOLS,DEFAULT_MCP_TOOLS} from '../lib/mcp-launch.mjs';
 import {spawnSync} from 'node:child_process';
 import {locations,PACKAGE,VERSION} from '../lib/install.mjs';
 import {findSymbols} from '../lib/symbols.mjs';
-import {connect,connectionRoot,pruneConnections} from '../lib/connect.mjs';
+import {connect,connectionRoot,pruneConnections,parseConnectClients,CONNECT_CLIENTS} from '../lib/connect.mjs';
 
 const HELP=`Agent Workflow ${VERSION} — global by default, project opt-out
 
@@ -35,22 +35,35 @@ agent-workflow exec --tool MODULE -- [tool arguments]
 agent-workflow claude-lean [--mcp-file PATH] -- [Claude arguments]
 agent-workflow symbols --project PATH --file relative/module.mjs [--name SYMBOL]
 agent-workflow mcp-config --project PATH [--tools serena,codegraph]
-agent-workflow connect --project PATH [--tools serena,codegraph] [--clients claude,codex,opencode] [--dry-run]
-agent-workflow disconnect --project PATH [--clients claude,codex,opencode] [--dry-run]
+agent-workflow connect --project PATH [--tools serena,codegraph,context7] [--clients LIST|all] [--approve] [--dry-run]
+agent-workflow disconnect --project PATH [--clients LIST|all] [--dry-run]
 agent-workflow disconnect --prune [--dry-run]   (forget receipts whose project no longer exists)
 agent-workflow mcp --tool MODULE --project PATH
 agent-workflow uninstall --global [--dry-run]
 
 --clients defaults to claude,codex,opencode. Extra clients: qwen, kimi, agy,
-commandcode, pi, mimo; 'all' selects every client. A sync can
+commandcode, pi, mimo, dsh (DeepSeek Harness); 'all' selects every client. A sync can
 add clients to an installation; dropping one needs uninstall first.
 
 The validation guard (PreToolUse/tool hook that denies a test or build command
 whose exit status a pipe, ';' or echo would hide) is installed for qwen, kimi,
-commandcode, pi and mimo (OpenCode has it in its plugin). For claude and codex
-it is opt-in: --guard claude,codex adds it, --guard none removes it, and
-without --guard a sync keeps the current choice. Opted-out projects are never
-blocked.
+agy, commandcode, pi, mimo and dsh (OpenCode has it in its plugin). For claude
+and codex it is chosen with --guard: claude: on by default; codex: on by default
+only with --trust-codex (it needs approval). --guard claude,codex|none sets the
+choice explicitly; without --guard a sync keeps the recorded choice. Opted-out
+projects are never blocked.
+
+connect writes project MCP entries (aw-serena, aw-codegraph, aw-context7) where each
+client reads them: .mcp.json (claude, commandcode, kimi), .codex/config.toml,
+opencode.json(c), .qwen/settings.json, .pi/mcp.json, mimocode.json(c), an agy
+workspace plugin (.agents/plugins/agent-workflow-mcp) and a dsh patch
+(.dsh/agent-workflow.cordis.yml, loaded with --patch). --approve (opt-in) also
+approves them the client's own way: Claude enabledMcpjsonServers in
+.claude/settings.local.json, qwen mcp approve. Keep local files out of commits
+with .git/info/exclude.
+
+dsh hooks run through the @deepseek-ai/dsh-hooks-claude-code bridge of each
+profile; profiles without it get a notice with the dsh plugin add command.
 
 Codex runs a hook only after it is trusted (/hooks). trust --client codex does
 the same as approving in /hooks, through codex app-server, for the Agent
@@ -69,7 +82,7 @@ claude-lean is opt-in: without --mcp-file, no MCP servers are available in
 that Claude session. It does not alter your normal Claude configuration.
 `;
 try{
-  const {values,positionals}=parseArgs({allowPositionals:true,options:{global:{type:'boolean'},clients:{type:'string'},guard:{type:'string'},client:{type:'string'},'trust-codex':{type:'boolean'},'user-root':{type:'string'},project:{type:'string'},'dry-run':{type:'boolean'},json:{type:'boolean'},tool:{type:'string'},file:{type:'string'},name:{type:'string'},tools:{type:'string'},profile:{type:'string'},'mcp-file':{type:'string'},all:{type:'boolean'},list:{type:'boolean'},interactive:{type:'boolean'},prune:{type:'boolean'},apply:{type:'boolean'},help:{type:'boolean'},version:{type:'boolean'}}});
+  const {values,positionals}=parseArgs({allowPositionals:true,options:{global:{type:'boolean'},clients:{type:'string'},guard:{type:'string'},client:{type:'string'},'trust-codex':{type:'boolean'},'user-root':{type:'string'},project:{type:'string'},'dry-run':{type:'boolean'},json:{type:'boolean'},tool:{type:'string'},file:{type:'string'},name:{type:'string'},tools:{type:'string'},profile:{type:'string'},'mcp-file':{type:'string'},all:{type:'boolean'},list:{type:'boolean'},interactive:{type:'boolean'},prune:{type:'boolean'},approve:{type:'boolean'},apply:{type:'boolean'},help:{type:'boolean'},version:{type:'boolean'}}});
   const cmd=positionals[0];if(values.version){console.log(VERSION);process.exit(0);}if(values.help||!cmd){console.log(HELP);process.exit(0);}
   if(positionals.length>1&&cmd!=='exec'&&cmd!=='claude-lean')throw Error('Unexpected positional arguments');
   const userRoot=values['user-root'],dryRun=values['dry-run']??false;let result;
@@ -107,7 +120,7 @@ try{
   }
   else if(cmd==='mcp'){await serveMcp({tool:values.tool,project:values.project,userRoot});process.exit(process.exitCode??0);}
   else if(cmd==='disconnect'&&values.prune){if(values.project||values.clients)throw Error('--prune works on every receipt; do not combine it with --project or --clients');result=pruneConnections({userRoot,dryRun});}
-  else if(cmd==='connect'||cmd==='disconnect')result=connect({project:values.project,userRoot,dryRun,remove:cmd==='disconnect',tools:values.tools?values.tools.split(','):DEFAULT_MCP_TOOLS,clients:values.clients?values.clients.split(','):CLIENTS});
+  else if(cmd==='connect'||cmd==='disconnect'){if(values.approve&&cmd!=='connect')throw Error('--approve is only for connect');result=connect({project:values.project,userRoot,dryRun,remove:cmd==='disconnect',approve:values.approve??false,tools:values.tools?values.tools.split(','):DEFAULT_MCP_TOOLS,clients:parseConnectClients(values.clients)});}
   else if(cmd==='mcp-config'){
     if(!values.project)throw Error('Specify --project');const project=connectionRoot(values.project),ids=values.tools?values.tools.split(','):DEFAULT_MCP_TOOLS;
     const entries={};for(const id of ids){if(!MCP_TOOLS.includes(id))throw Error('Not an MCP module: '+id);entries['aw-'+id]={command:process.execPath,args:[join(PACKAGE,'bin/agent-workflow.mjs'),'mcp','--tool',id,'--project',project,...(userRoot?['--user-root',resolve(userRoot)]:[])]};}
