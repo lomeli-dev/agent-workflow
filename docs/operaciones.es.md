@@ -44,6 +44,27 @@ Sin `--apply` sólo se presenta el plan, aunque puede ejecutar probes de versió
 
 No combines `--all` con otros selectores, ni `--apply` con `--dry-run`.
 
+## Estado por cliente (0.6.1)
+
+Una sola tabla con lo que funciona, lo que no y por qué, según las pruebas reales en el HOME del dueño (23 nov 2026; logs `060-*` e informe de pruebas pendientes de 0.5.1) y las comprobaciones aisladas de 0.6.1. Detalle y evidencia en [compatibilidad](compatibility.md#client-status-061).
+
+| Cliente | Regla | Hook (sesión / subagente) | Guard | MCP de proyecto | Revisor solo lectura | Lo que no funciona y por qué |
+| --- | --- | --- | --- | --- | --- | --- |
+| Claude Code | ✅ | ✅ / ✅ | ✅ activo por defecto (real: bloqueó y luego exit 7) | ✅ `.mcp.json` + `enabledMcpjsonServers` | ✅ sin Edit/Write/NotebookEdit | al revisor le queda Bash (ahí es solo instrucción) |
+| Codex CLI | ✅ | ✅ / ✅ | ✅ con `--trust-codex` (real: bloqueó y luego exit 7) | ✅ `.codex/config.toml`, proyecto confiado | ❌ ignora el sandbox del rol; usa `codex exec -s read-only` | en Codex 0.171 el subagente hereda el sandbox del padre |
+| OpenCode V2 | ✅ | — (el plugin solo es guard) | ✅ plugin | ✅ `opencode.json(c)` | ✅ edit/notebook_edit denegados | sin recordatorio de sesión por diseño |
+| Qwen Code 0.28.4 | ✅ | ✅ / ❌ | ✅ | ✅ `.qwen/settings.json` + `qwen mcp approve` | solo instrucción | Qwen corre SubagentStart pero no pasa su texto al subagente |
+| Kimi Code 2.7.3 | ✅ | — / — | ✅ (real: bloqueó; tras `disable` corrió, exit 7) | ✅ desde 0.6.1: `.mcp.json`, carpeta confiada o `KIMI_CODE_TRUST_WORKSPACE=1`, caché del lanzador caliente (`connect --approve`) | solo instrucción | Kimi descarta la salida de SessionStart; en 0.6.0 sus sesiones `-p` congelaban la lista de herramientas antes de que respondieran nuestros servidores |
+| Antigravity (agy) 1.5.15 | ✅ | ✅ / — | ✅ (real: bloqueó y luego exit 7) | ✅ plugin de workspace; en headless hace falta `mcp(agent-workflow-mcp_aw-<tool>/*)` | solo instrucción | la regla de permiso MCP es de usuario; no hay regla por proyecto |
+| Command Code 1.93 | ✅ | — en `-p` / — | ✅ | ✅ `.mcp.json` | solo instrucción | `-p` no corre SessionStart |
+| Pi 1.6 | ✅ | ✅ / — | ✅ | ✅ `.pi/mcp.json`, proyecto confiado o `pi -a` | — (sin subagentes) | — |
+| MiMo Code 0.1.16 | ✅ (su `AGENTS.md` o el de Claude) | ✅ / — | ✅ | ✅ `mimocode.json(c)` | ✅ desde 0.6.0 (`mode: all`, edit/notebook_edit denegados) | — |
+| DeepSeek Harness 0.2.2-rc.5 | ✅ | ✅ / ✅ (puente + peer) | ✅ (real: bloqueó y luego exit 7) | ✅ desde 0.6.1 sin `--patch` (filas del perfil que leen `.dsh/agent-workflow-mcp.json`) | — (los presets no son archivos) | los hooks necesitan `@deepseek-ai/dsh-hook-protocol` en el perfil; perfil web: los servidores conectan, uso por el modelo no probado |
+
+**Kimi (0.6.1).** Kimi 2.7.3 arma la lista de herramientas de toda la sesión `-p` al enlazar el perfil del agente, milisegundos después de arrancar los MCP; lo que llega después no entra. Por eso en el HOME real (0.6.0) no veía `aw-*` aunque había conectado los tres servidores. `agent-workflow mcp` ahora arranca un frente ligero que responde `initialize` y el primer `tools/list` desde una caché (`<store>/mcp-cache/<tool>.json`) y pasa todo al servidor real; con la caché caliente responde en ~30 ms. `connect --approve` con Kimi la calienta. No toca la confianza de la carpeta: sigue haciendo falta "Trust this folder" o `KIMI_CODE_TRUST_WORKSPACE=1`.
+
+**dsh (0.6.1).** dsh no tiene capa de configuración de proyecto (solo bundles, el parche del perfil, el de `$DSH_HOME` y `--patch`). El `sync` mete en el bloque de cada perfil una fila `@deepseek-ai/dsh-mcp-client` por módulo, que solo se activa si el directorio donde arranca dsh tiene `.dsh/agent-workflow-mcp.json` (lo escribe `connect`) con ese servidor. Así `dsh headless` o `dsh web` en el repo cargan el MCP sin `--patch`. El archivo `.dsh/agent-workflow.cordis.yml` de 0.6.0 se retira en el siguiente `connect` si no se editó.
+
 ## Clientes adicionales
 
 ```sh
@@ -115,7 +136,7 @@ agent-workflow disconnect --project /ruta/raiz --clients all
 
 Usa la raíz Git para conectar, desconectar o imprimir configuración. No aceptamos una subcarpeta y la convertimos silenciosamente en raíz. El registro se aplica a esa raíz; no representa dinámicamente los opt-out de todas sus subcarpetas.
 
-Los archivos nativos son `.mcp.json` (Claude, y desde 0.6.0 también Command Code y Kimi, que lo leen), `.codex/config.toml`, `opencode.jsonc`/`opencode.json`, `.qwen/settings.json`, `.pi/mcp.json`, `mimocode.json(c)`, el plugin de workspace de agy `.agents/plugins/agent-workflow-mcp/` y, para dsh, `.dsh/agent-workflow.cordis.yml` (se carga con `dsh --profile <p> --patch .dsh/agent-workflow.cordis.yml`). Qué aprueba cada cliente y cómo: [compatibilidad](compatibility.md#project-mcp-060). `--approve` usa solo mecanismos oficiales no interactivos (Claude: `enabledMcpjsonServers` en `.claude/settings.local.json`; Qwen: `qwen mcp approve`); el resultado de `connect` lista lo que falta en los demás (Kimi: `KIMI_CODE_TRUST_WORKSPACE=1` o confiar la carpeta; Pi: `pi -a` o confiar el proyecto; agy: la regla `mcp(agent-workflow-mcp_aw-<tool>/*)` en `~/.gemini/antigravity-cli/settings.json`; Codex: proyecto confiado). Si esos archivos son solo de tu máquina, añádelos a `.git/info/exclude` (no se comparte y no toca `.gitignore`). Se conserva la ruta originalmente administrada. Si cambias el archivo de configuración que tiene prioridad en OpenCode, primero desconecta y luego conecta de nuevo. Los cambios en entradas propias se detienen para revisión.
+Los archivos nativos son `.mcp.json` (Claude, y desde 0.6.0 también Command Code y Kimi, que lo leen), `.codex/config.toml`, `opencode.jsonc`/`opencode.json`, `.qwen/settings.json`, `.pi/mcp.json`, `mimocode.json(c)`, el plugin de workspace de agy `.agents/plugins/agent-workflow-mcp/` y, para dsh, `.dsh/agent-workflow-mcp.json` (desde 0.6.1 lo cargan solas las filas que el `sync` pone en cada perfil cuando dsh arranca en el proyecto; ya no hace falta `--patch`). Qué aprueba cada cliente y cómo: [compatibilidad](compatibility.md#project-mcp-060). `--approve` usa solo mecanismos oficiales no interactivos (Claude: `enabledMcpjsonServers` en `.claude/settings.local.json`; Qwen: `qwen mcp approve`); el resultado de `connect` lista lo que falta en los demás (Kimi: `KIMI_CODE_TRUST_WORKSPACE=1` o confiar la carpeta, y con `--approve` se calienta la caché del lanzador; Pi: `pi -a` o confiar el proyecto; agy: la regla `mcp(agent-workflow-mcp_aw-<tool>/*)` en `~/.gemini/antigravity-cli/settings.json`; Codex: proyecto confiado). Si esos archivos son solo de tu máquina, añádelos a `.git/info/exclude` (no se comparte y no toca `.gitignore`). Se conserva la ruta originalmente administrada. Si cambias el archivo de configuración que tiene prioridad en OpenCode, primero desconecta y luego conecta de nuevo. Los cambios en entradas propias se detienen para revisión.
 
 El opt-out se comprueba al arrancar el MCP; no revoca servidores ya abiertos. Reinícialos después de cambiarlo. Dentro de Git la búsqueda del interruptor termina en la raíz del repo. Fuera de Git busca en los directorios superiores hasta la raíz del sistema. El cliente puede seguir descubriendo las skills globales aunque el flujo esté desactivado.
 

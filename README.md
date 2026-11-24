@@ -157,6 +157,8 @@ No model or effort is forced, no MCP server is added by the global workflow inst
 
 [Native client behavioral trial](docs/native-trial-2026-11-13.md): real implementation, opt-out, roles, MCP and browser checks, including remaining limitations.
 
+Version 0.6.1 makes project MCP work in `kimi -p` (a launcher cache that answers before Kimi freezes its tool list) and in dsh without `--patch`, and adds a single [client status](docs/compatibility.md#client-status-061) table; see the [changelog](CHANGELOG.md).
+
 Version 0.6.0 adds the DeepSeek Harness client, the Antigravity guard, project MCP for every extra client, the Claude guard by default and a zsh-safe rule; see the [changelog](CHANGELOG.md).
 
 Version 0.5.1 adds `agent-workflow trust --client codex` and `--trust-codex` (approve only the Agent Workflow Codex hooks, as `/hooks` does) and removes a false `codex-hook-not-enabled` warning; see the [changelog](CHANGELOG.md).
