@@ -258,6 +258,8 @@ No model or effort is forced, no MCP server is added by the global workflow inst
 
 [Native client behavioral trial](docs/native-trial-2026-11-13.md): real implementation, opt-out, roles, MCP and browser checks, including remaining limitations.
 
+Version 0.7.1 fixes `dsh --profile web` breaking the next sync (dsh rewrites its `cordis.patch.yml`; the block is now compared by content and its rows are not folded) and makes a drift in one file stop aborting the sync of the others; see the [changelog](CHANGELOG.md).
+
 Version 0.7.0 automates the steps that were manual: `--all-in` for `install`/`sync --global` (`--trust-codex`, `--dsh-plugins`, `--agy-allow`) and for `connect` (`--approve`, `--exclude`), all reversible; see [Install everything in 5 minutes](#install-everything-in-5-minutes) and the [changelog](CHANGELOG.md).
 
 Version 0.6.1 makes project MCP work in `kimi -p` (a launcher cache that answers before Kimi freezes its tool list) and in dsh without `--patch`, and adds a single [client status](docs/compatibility.md#client-status-061) table; see the [changelog](CHANGELOG.md).

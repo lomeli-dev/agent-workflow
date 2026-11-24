@@ -51,7 +51,7 @@ test('refuses collisions before writing any target',t=>{
 
 test('edited owned file blocks overwrite and uninstall without partial deletion',t=>{
  const root=fixture(t);install({userRoot:root});const p=join(root,'.claude/skills/aw-workflow/SKILL.md');writeFileSync(p,read(p)+'\nLocal edit');
- assert.equal(verify({userRoot:root}).ok,false);assert.throws(()=>install({userRoot:root}),/edited/);assert.throws(()=>uninstall({userRoot:root}),/Edited owned/);assert(existsSync(join(root,'.codex/AGENTS.md')));
+ assert.equal(verify({userRoot:root}).ok,false);{const r=install({userRoot:root});assert.equal(r.ok,false);assert.equal(r.skipped.length,1);assert(r.skipped[0].path.endsWith('/.claude/skills/aw-workflow/SKILL.md'));assert.match(read(p),/Local edit/);}assert.throws(()=>uninstall({userRoot:root}),/Edited owned/);assert(existsSync(join(root,'.codex/AGENTS.md')));
 });
 
 test('symlink destinations are not followed',t=>{

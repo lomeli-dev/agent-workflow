@@ -269,6 +269,8 @@ En carpetas sin Git, el opt-out busca también en los directorios antecesores ha
 
 [Prueba con agentes reales](docs/native-trial-2026-11-13.md): implementación, opt-out, roles, MCP y navegador, con sus resultados y límites.
 
+La versión 0.7.1 corrige que `dsh --profile web` rompiera el siguiente `sync` (dsh reescribe su `cordis.patch.yml`; ahora se compara por contenido y las filas no se parten) y hace que un archivo con drift ya no aborte el `sync` de los demás; ver el [changelog](CHANGELOG.md).
+
 La versión 0.7.0 automatiza los pasos que eran manuales: `--all-in` en `install`/`sync --global` (`--trust-codex`, `--dsh-plugins`, `--agy-allow`) y en `connect` (`--approve`, `--exclude`), todos reversibles; ver [Instalar todo en 5 minutos](#instalar-todo-en-5-minutos) y el [changelog](CHANGELOG.md).
 
 La versión 0.6.1 hace que el MCP de proyecto funcione en `kimi -p` (una caché del lanzador que responde antes de que Kimi congele su lista de herramientas) y en dsh sin `--patch`, y añade una tabla única de [estado por cliente](docs/operaciones.es.md#estado-por-cliente-061); ver el [changelog](CHANGELOG.md).

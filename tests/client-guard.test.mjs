@@ -127,7 +127,7 @@ test('Kimi config.toml: invalid TOML is not overwritten, an edited block is drif
   writeFileSync(file,read(file)+'\n[extra]\nkey = 1\n');assert.equal(verify({userRoot:root}).ok,true);
   writeFileSync(file,read(file).replace('timeout = 3','timeout = 9'));
   assert.deepEqual(verify({userRoot:root}).issues.map(i=>i.issue),['managed-block-drift']);
-  assert.throws(()=>install({userRoot:root,clients:['kimi']}),/Edited\/unowned managed block/);
+  {const r=install({userRoot:root,clients:['kimi']});assert.equal(r.ok,false);assert.match(r.skipped[0].error,/Edited\/unowned managed block/);assert.match(read(file),/timeout = 9/,'not overwritten');}
   assert.throws(()=>uninstall({userRoot:root}),/Edited managed block/);
   writeFileSync(file,read(file).replace('timeout = 9','timeout = 3'));uninstall({userRoot:root});
   assert.equal(read(file),'theme = "dark"\n\n[extra]\nkey = 1\n');assert.equal(existsSync(join(l.store,'installation.json')),false);

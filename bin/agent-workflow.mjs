@@ -77,7 +77,11 @@ already present at another version is never replaced. The API key is not handled
 for serena, codegraph and context7 to ~/.gemini/antigravity-cli/settings.json
 (existing ones are adopted, never duplicated; uninstall removes them).
 install/sync --all-in = --trust-codex --dsh-plugins --agy-allow, each only when
-its client is in --clients. A sync keeps what earlier runs recorded.
+its client is in --clients. A sync keeps what earlier runs recorded. On an
+existing installation, a file that cannot be updated (edited owned part,
+collision) is skipped and listed under "skipped" with the fix (exit 1); the
+other files are still synced. dsh rewriting its cordis.patch.yml with the same
+rows is not drift.
 
 Codex runs a hook only after it is trusted (/hooks). trust --client codex does
 the same as approving in /hooks, through codex app-server, for the Agent

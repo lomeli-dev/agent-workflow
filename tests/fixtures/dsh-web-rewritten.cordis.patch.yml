@@ -1,0 +1,101 @@
+# Your patch layer for this dsh profile, applied after every bundle layer:
+# a top-level YAML array of loader patch entries (id-targeted config
+# overrides, disables, and insert lists; `!!js` expressions allowed).
+
+# agent-workflow:begin (managed; do not edit)
+- insert:
+    - id: agent-workflow-hooks
+      name: '@deepseek-ai/dsh-hooks-claude-code'
+      config:
+        configPath: "__HOOKS_JSON__"
+    - id: agent-workflow-mcp-serena
+      name: '@deepseek-ai/dsh-mcp-client'
+      disabled: !!js "!((n)=>{try{return
+        JSON.parse(process.getBuiltinModule('node:fs').readFileSync(process.cwd\
+        ()+'/.dsh/agent-workflow-mcp.json','utf8')).mcpServers[n]}catch{return
+        undefined}})(\"aw-serena\")"
+      config:
+        serverName: aw-serena
+        transport: stdio
+        command: !!js "(((n)=>{try{return
+          JSON.parse(process.getBuiltinModule('node:fs').readFileSync(process.c\
+          wd()+'/.dsh/agent-workflow-mcp.json','utf8')).mcpServers[n]}catch{ret\
+          urn undefined}})(\"aw-serena\")??{}).command??'false'"
+        args: !!js "(((n)=>{try{return
+          JSON.parse(process.getBuiltinModule('node:fs').readFileSync(process.c\
+          wd()+'/.dsh/agent-workflow-mcp.json','utf8')).mcpServers[n]}catch{ret\
+          urn undefined}})(\"aw-serena\")??{}).args??[]"
+    - id: agent-workflow-mcp-codegraph
+      name: '@deepseek-ai/dsh-mcp-client'
+      disabled: !!js "!((n)=>{try{return
+        JSON.parse(process.getBuiltinModule('node:fs').readFileSync(process.cwd\
+        ()+'/.dsh/agent-workflow-mcp.json','utf8')).mcpServers[n]}catch{return
+        undefined}})(\"aw-codegraph\")"
+      config:
+        serverName: aw-codegraph
+        transport: stdio
+        command: !!js "(((n)=>{try{return
+          JSON.parse(process.getBuiltinModule('node:fs').readFileSync(process.c\
+          wd()+'/.dsh/agent-workflow-mcp.json','utf8')).mcpServers[n]}catch{ret\
+          urn undefined}})(\"aw-codegraph\")??{}).command??'false'"
+        args: !!js "(((n)=>{try{return
+          JSON.parse(process.getBuiltinModule('node:fs').readFileSync(process.c\
+          wd()+'/.dsh/agent-workflow-mcp.json','utf8')).mcpServers[n]}catch{ret\
+          urn undefined}})(\"aw-codegraph\")??{}).args??[]"
+    - id: agent-workflow-mcp-playwright-mcp
+      name: '@deepseek-ai/dsh-mcp-client'
+      disabled: !!js "!((n)=>{try{return
+        JSON.parse(process.getBuiltinModule('node:fs').readFileSync(process.cwd\
+        ()+'/.dsh/agent-workflow-mcp.json','utf8')).mcpServers[n]}catch{return
+        undefined}})(\"aw-playwright-mcp\")"
+      config:
+        serverName: aw-playwright-mcp
+        transport: stdio
+        command: !!js "(((n)=>{try{return
+          JSON.parse(process.getBuiltinModule('node:fs').readFileSync(process.c\
+          wd()+'/.dsh/agent-workflow-mcp.json','utf8')).mcpServers[n]}catch{ret\
+          urn undefined}})(\"aw-playwright-mcp\")??{}).command??'false'"
+        args: !!js "(((n)=>{try{return
+          JSON.parse(process.getBuiltinModule('node:fs').readFileSync(process.c\
+          wd()+'/.dsh/agent-workflow-mcp.json','utf8')).mcpServers[n]}catch{ret\
+          urn undefined}})(\"aw-playwright-mcp\")??{}).args??[]"
+    - id: agent-workflow-mcp-devtools
+      name: '@deepseek-ai/dsh-mcp-client'
+      disabled: !!js "!((n)=>{try{return
+        JSON.parse(process.getBuiltinModule('node:fs').readFileSync(process.cwd\
+        ()+'/.dsh/agent-workflow-mcp.json','utf8')).mcpServers[n]}catch{return
+        undefined}})(\"aw-devtools\")"
+      config:
+        serverName: aw-devtools
+        transport: stdio
+        command: !!js "(((n)=>{try{return
+          JSON.parse(process.getBuiltinModule('node:fs').readFileSync(process.c\
+          wd()+'/.dsh/agent-workflow-mcp.json','utf8')).mcpServers[n]}catch{ret\
+          urn undefined}})(\"aw-devtools\")??{}).command??'false'"
+        args: !!js "(((n)=>{try{return
+          JSON.parse(process.getBuiltinModule('node:fs').readFileSync(process.c\
+          wd()+'/.dsh/agent-workflow-mcp.json','utf8')).mcpServers[n]}catch{ret\
+          urn undefined}})(\"aw-devtools\")??{}).args??[]"
+    - id: agent-workflow-mcp-context7
+      name: '@deepseek-ai/dsh-mcp-client'
+      disabled: !!js "!((n)=>{try{return
+        JSON.parse(process.getBuiltinModule('node:fs').readFileSync(process.cwd\
+        ()+'/.dsh/agent-workflow-mcp.json','utf8')).mcpServers[n]}catch{return
+        undefined}})(\"aw-context7\")"
+      config:
+        serverName: aw-context7
+        transport: stdio
+        command: !!js "(((n)=>{try{return
+          JSON.parse(process.getBuiltinModule('node:fs').readFileSync(process.c\
+          wd()+'/.dsh/agent-workflow-mcp.json','utf8')).mcpServers[n]}catch{ret\
+          urn undefined}})(\"aw-context7\")??{}).command??'false'"
+        args: !!js "(((n)=>{try{return
+          JSON.parse(process.getBuiltinModule('node:fs').readFileSync(process.c\
+          wd()+'/.dsh/agent-workflow-mcp.json','utf8')).mcpServers[n]}catch{ret\
+          urn undefined}})(\"aw-context7\")??{}).args??[]"
+- id: ui-settings-general
+  name: "@deepseek-ai/dsh-client-ui-settings-general"
+  config:
+    welcomeNoticeVersion: 2026-09-28.1
+
+# agent-workflow:end
